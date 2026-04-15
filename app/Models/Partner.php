@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Partner extends Model
+{
+    protected $fillable = [
+        'name',
+        'logo_url',
+        'website',
+        'description',
+        'type',
+        'is_featured',
+    ];
+
+    protected $casts = [
+        'is_featured' => 'boolean',
+    ];
+}

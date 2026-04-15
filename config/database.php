@@ -113,6 +113,11 @@ return [
             // 'encrypt' => env('DB_ENCRYPT', 'yes'),
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
+        'legacy_mongo' => [
+            'driver' => 'mongodb',
+            'dsn' => env('LEGACY_MONGO_URI'),
+            'database' => env('LEGACY_MONGO_DATABASE', 'insonlar'),
+        ],
 
     ],
 

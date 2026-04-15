@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:tns="http://uws.provider.com/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://uws.provider.com/">
+
+    <types>
+        <xsd:schema>
+            <xsd:import namespace="http://uws.provider.com/" schemaLocation="ProviderWebService.xsd"/>
+        </xsd:schema>
+    </types>
+
+    <message name="PerformTransactionRequest">
+        <part name="parameters" element="tns:PerformTransactionArguments"/>
+    </message>
+
+    <message name="PerformTransactionResponse">
+        <part name="result" element="tns:PerformTransactionResult"/>
+    </message>
+
+    <portType name="ProviderWebServicePortType">
+        <operation name="PerformTransaction">
+            <input message="tns:PerformTransactionRequest"/>
+            <output message="tns:PerformTransactionResponse"/>
+        </operation>
+    </portType>
+
+    <binding name="ProviderWebServiceBinding" type="tns:ProviderWebServicePortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <operation name="PerformTransaction">
+            <soap:operation soapAction=""/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
+
+    <service name="ProviderWebService">
+        <port name="ProviderWebServicePort" binding="tns:ProviderWebServiceBinding">
+            <soap:address location="https://mexrli.complex-solutions.uz/api/v1/billing/paynet"/>
+        </port>
+    </service>
+
+</definitions>
