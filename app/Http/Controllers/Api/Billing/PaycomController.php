@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\Billing\Paycom\PaycomService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class PaycomController extends Controller
@@ -32,10 +33,19 @@ class PaycomController extends Controller
             ], 200);
         }
 
-        \Illuminate\Support\Facades\Log::info('PAYCOM PAYLOAD', [
-            'payload' => $payload,
-            'raw' => $request->getContent(),
+        Log::info('PAYCOM REQUEST', [
+            'ip' => $request->ip(),
+            'method' => $payload['method'] ?? null,
+            'id' => $payload['id'] ?? null,
+            'has_params' => isset($payload['params']),
         ]);
+
+        if (app()->environment('local', 'staging')) {
+            Log::debug('PAYCOM RAW PAYLOAD', [
+                'payload' => $payload,
+                'raw' => $request->getContent(),
+            ]);
+        }
 
         try {
             $result = $this->service->handle($payload);
@@ -45,7 +55,14 @@ class PaycomController extends Controller
                 'result' => $result,
                 'id' => $payload['id'] ?? null,
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
+            Log::error('PAYCOM ERROR', [
+                'ip' => $request->ip(),
+                'method' => $payload['method'] ?? null,
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ]);
+
             return response()->json([
                 'error' => [
                     'code' => $e->getCode() ?: -32400,

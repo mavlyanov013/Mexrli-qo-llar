@@ -241,6 +241,14 @@ const messages = {
             submit: 'Submit Help Request',
         },
         transparencyPage: {
+            publishedReports: 'Published Reports',
+            downloadReport: 'Download Report',
+            noReports: 'No reports added yet',
+            reportTypes: {
+                quarterly: 'Quarterly',
+                yearly: 'Yearly',
+                audit: 'Audit'
+            },
             monthlyOverview: 'Monthly overview',
             received: 'Received',
             spent: 'Spent',
@@ -571,13 +579,13 @@ const messages = {
         },
 
         finalCta: {
-            titleLine1: 'You can be the reason',
-            titleLine2: 'someone survives today',
-            subtitle: 'Every second counts. Every donation matters. Join 1,200+ donors who are changing lives right now.',
-            verifiedCases: '100% verified cases',
-            financialTransparency: 'Full financial transparency',
-            realTimeTracking: 'Real-time tracking',
-            donateNow: 'Donate Now',
+            "titleLine1": "You can be the reason",
+            "titleLine2": "someone survives today",
+            "subtitle": "Every second counts. Every donation matters. Join 1,200+ donors who are changing lives right now.",
+            "verifiedCases": "100% verified cases",
+            "financialTransparency": "Full financial transparency",
+            "realTimeTracking": "Real-time tracking",
+            "donateNow": "Donate Now"
         },
 
         todayDonations: {
@@ -640,8 +648,9 @@ const messages = {
             stayUpdated: 'Stay Updated',
             stayUpdatedText: 'Join people receiving monthly impact reports.',
             emailPlaceholder: 'Your email address',
-            rights: '© 2026 Mehrli. All rights reserved.',
-            madeWithLove: 'Made with ❤ for children in need',
+            rights: '© Powered by COMPLEX SOLUTIONS LLC, Uzbekistan.',
+            madeWithLovePrefix: "Made with",
+            madeWithLoveSuffix: "for children in need",
             location: 'Tashkent, Uzbekistan',
             volunteers: 'Volunteers',
             partners: 'Partners',
@@ -880,6 +889,14 @@ const messages = {
             submit: 'Yordam so‘rovini yuborish',
         },
         transparencyPage: {
+            publishedReports: 'E’lon qilingan hisobotlar',
+            downloadReport: 'Hisobotni yuklab olish',
+            noReports: 'Hisobotlar hali qo‘shilmagan',
+            reportTypes: {
+                quarterly: 'Choraklik',
+                yearly: 'Yillik',
+                audit: 'Audit'
+            },
             monthlyOverview: 'Oylik ko‘rinish',
             received: 'Qabul qilingan',
             spent: 'Sarflangan',
@@ -1210,13 +1227,13 @@ const messages = {
         },
 
         finalCta: {
-            titleLine1: 'Bugun kimningdir',
-            titleLine2: 'hayotini saqlab qolish sababi bo‘lishingiz mumkin',
-            subtitle: 'Har bir soniya muhim. Har bir xayriya ahamiyatli. Hozir hayotlarni o‘zgartirayotgan 1,200+ donor safiga qo‘shiling.',
-            verifiedCases: '100% tasdiqlangan holatlar',
-            financialTransparency: 'To‘liq moliyaviy shaffoflik',
-            realTimeTracking: 'Real vaqt kuzatuvi',
-            donateNow: 'Hozir xayriya qiling',
+            "titleLine1": "Siz bugun kimningdir",
+            "titleLine2": "omon qolishiga sabab bo‘la olasiz",
+            "subtitle": "Har bir soniya muhim. Har bir xayriya qadrlidir. Hozir hayotlarni o‘zgartirayotgan 1,200+ donorlar safiga qo‘shiling.",
+            "verifiedCases": "100% tasdiqlangan holatlar",
+            "financialTransparency": "To‘liq moliyaviy shaffoflik",
+            "realTimeTracking": "Real vaqt kuzatuvi",
+            "donateNow": "Hozir xayriya qiling"
         },
 
         todayDonations: {
@@ -1279,8 +1296,9 @@ const messages = {
             stayUpdated: 'Yangiliklardan xabardor bo‘ling',
             stayUpdatedText: 'Har oylik ta’sir hisobotlarini oluvchi odamlarga qo‘shiling.',
             emailPlaceholder: 'Email manzilingiz',
-            rights: '© 2026 Mehrli. Barcha huquqlar himoyalangan.',
-            madeWithLove: '❤ bilan yordamga muhtoj bolalar uchun yaratildi',
+            rights: '© COMPLEX SOLUTIONS LLC tomonidan ishlab chiqilgan, O‘zbekiston.',
+            madeWithLovePrefix: "Mehr bilan yaratildi",
+            madeWithLoveSuffix: "muhtoj bolalar uchun",
             location: 'Toshkent, O‘zbekiston',
             volunteers: 'Ko‘ngillilar',
             partners: 'Hamkorlar',
@@ -1519,6 +1537,14 @@ const messages = {
             submit: 'Отправить заявку на помощь',
         },
         transparencyPage: {
+            publishedReports: 'Опубликованные отчёты',
+            downloadReport: 'Скачать отчёт',
+            noReports: 'Отчёты пока не добавлены',
+            reportTypes: {
+                quarterly: 'Квартальный',
+                yearly: 'Годовой',
+                audit: 'Аудит'
+            },
             monthlyOverview: 'Месячный обзор',
             received: 'Поступило',
             spent: 'Потрачено',
@@ -1849,13 +1875,13 @@ const messages = {
         },
 
         finalCta: {
-            titleLine1: 'Вы можете стать причиной того,',
-            titleLine2: 'что кто-то выживет сегодня',
-            subtitle: 'Важна каждая секунда. Важно каждое пожертвование. Присоединяйтесь к 1,200+ донорам, которые уже меняют жизни.',
-            verifiedCases: '100% проверенные случаи',
-            financialTransparency: 'Полная финансовая прозрачность',
-            realTimeTracking: 'Отслеживание в реальном времени',
-            donateNow: 'Пожертвовать сейчас',
+            "titleLine1": "Вы можете стать причиной,",
+            "titleLine2": "по которой кто-то выживет сегодня",
+            "subtitle": "Каждая секунда важна. Каждое пожертвование имеет значение. Присоединяйтесь к 1,200+ донорам, которые меняют жизни прямо сейчас.",
+            "verifiedCases": "100% проверенные случаи",
+            "financialTransparency": "Полная финансовая прозрачность",
+            "realTimeTracking": "Отслеживание в реальном времени",
+            "donateNow": "Пожертвовать сейчас"
         },
 
         todayDonations: {
@@ -1918,8 +1944,9 @@ const messages = {
             stayUpdated: 'Будьте в курсе',
             stayUpdatedText: 'Присоединяйтесь к тем, кто получает ежемесячные отчёты о помощи.',
             emailPlaceholder: 'Ваш email',
-            rights: '© 2026 Mehrli. Все права защищены.',
-            madeWithLove: 'С ❤ для детей, которым нужна помощь',
+            rights: '© Разработано компанией COMPLEX SOLUTIONS LLC, Узбекистан.',
+            madeWithLovePrefix: "Сделано с любовью",
+            madeWithLoveSuffix: "для детей, нуждающихся в помощи",
             location: 'Ташкент, Узбекистан',
             volunteers: 'Волонтёры',
             partners: 'Партнёры',

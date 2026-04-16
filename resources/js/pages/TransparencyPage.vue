@@ -1,7 +1,6 @@
 <template>
     <div class="pt-24 pb-20 min-h-screen bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
-            <!-- Header -->
             <div class="mb-10">
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
                     {{ t('transparencyPage.title') }}
@@ -11,17 +10,13 @@
                 </p>
             </div>
 
-            <!-- Stats -->
             <TodayStats :donations="donations" :t="t" />
 
-            <!-- 🔥 DIAGRAM (TO‘G‘RI JOY) -->
             <div class="mt-8">
                 <MonthlyOverviewChart :donations="donations" :t="t" />
             </div>
 
-            <!-- 🔥 PASTKI QISM -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-                <!-- LEFT: Payment History -->
                 <div class="lg:col-span-2">
                     <PaymentHistoryTable
                         :donations="donations"
@@ -30,7 +25,6 @@
                     />
                 </div>
 
-                <!-- RIGHT: Live Feed -->
                 <div>
                     <LiveDonationsFeed
                         :donations="recentDonations"
@@ -38,6 +32,13 @@
                         :t="t"
                     />
                 </div>
+            </div>
+
+            <div class="mt-8">
+                <PublishedReportsSection
+                    :reports="reports"
+                    :t="t"
+                />
             </div>
         </div>
     </div>
@@ -51,6 +52,7 @@ import TodayStats from '@/components/transparency/TodayStats.vue'
 import MonthlyOverviewChart from '@/components/transparency/MonthlyOverviewChart.vue'
 import PaymentHistoryTable from '@/components/transparency/PaymentHistoryTable.vue'
 import LiveDonationsFeed from '@/components/transparency/LiveDonationsFeed.vue'
+import PublishedReportsSection from '@/components/transparency/PublishedReportsSection.vue'
 
 import donationService from '@/services/donationService'
 import caseService from '@/services/caseService'
@@ -59,6 +61,37 @@ const { t } = useI18n()
 
 const donations = ref([])
 const cases = ref([])
+
+const reports = ref([
+    {
+        id: 1,
+        title: 'Финансовый отчёт — Q1 2026',
+        period: 'Январь–Март 2026',
+        typeKey: 'quarterly',
+        file_url: '#',
+    },
+    {
+        id: 2,
+        title: 'Финансовый отчёт — Q4 2025',
+        period: 'Октябрь–Декабрь 2025',
+        typeKey: 'quarterly',
+        file_url: '#',
+    },
+    {
+        id: 3,
+        title: 'Годовой отчёт 2025',
+        period: '2025',
+        typeKey: 'yearly',
+        file_url: '#',
+    },
+    {
+        id: 4,
+        title: 'Аудиторское заключение 2025',
+        period: '2025',
+        typeKey: 'audit',
+        file_url: '#',
+    },
+])
 
 const recentDonations = computed(() => {
     return [...donations.value]

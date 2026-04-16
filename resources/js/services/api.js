@@ -1,14 +1,13 @@
 import axios from 'axios'
 
 const api = axios.create({
-    baseURL: 'http://127.0.0.1:8000/api/v1',
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
     headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
     },
 })
 
-// 🔥 TOKEN AUTO QO‘SHISH
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token')
 
@@ -19,7 +18,6 @@ api.interceptors.request.use((config) => {
     return config
 })
 
-// 🔥 401 bo‘lsa logout
 api.interceptors.response.use(
     (response) => response,
     (error) => {

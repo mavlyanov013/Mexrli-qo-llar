@@ -6,12 +6,13 @@
                 :key="index"
                 class="bg-white rounded-2xl p-6 border border-gray-100"
             >
-                <div
-                    class="w-12 h-12 rounded-2xl flex items-center justify-center mb-4"
-                    :class="stat.color"
-                >
-                    <span class="text-xl font-bold">{{ stat.icon }}</span>
-                </div>
+                <IconBadge
+                    :icon="stat.icon"
+                    :tone="stat.tone"
+                    size="md"
+                    class="mb-4"
+                />
+
                 <p class="text-3xl font-bold text-gray-900">{{ stat.value }}</p>
                 <p class="text-sm text-gray-500 mt-1">{{ stat.label }}</p>
             </div>
@@ -21,6 +22,8 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { Wallet, Banknote, Users } from 'lucide-vue-next'
+import IconBadge from '../shared/IconBadge.vue'
 
 const props = defineProps({
     donations: {
@@ -69,20 +72,20 @@ const stats = computed(() => [
     {
         label: props.t('transparencyPage.onlineAmount'),
         value: `${todayStats.value.totalAmount.toLocaleString()} UZS`,
-        icon: '💰',
-        color: 'bg-green-50 text-[#4CAF50]',
+        icon: Wallet,
+        tone: 'green',
     },
     {
         label: props.t('transparencyPage.cashToday'),
         value: `${cashAmount.value.toLocaleString()} UZS`,
-        icon: '💵',
-        color: 'bg-yellow-50 text-yellow-600',
+        icon: Banknote,
+        tone: 'yellow',
     },
     {
         label: props.t('transparencyPage.activeDonorsToday'),
         value: todayStats.value.activeDonors,
-        icon: '👥',
-        color: 'bg-orange-50 text-[#FF9800]',
+        icon: Users,
+        tone: 'orange',
     },
 ])
 </script>

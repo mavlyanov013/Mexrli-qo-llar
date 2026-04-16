@@ -5,10 +5,12 @@
     >
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
             <div class="flex items-center justify-between h-16 md:h-20">
-                <RouterLink to="/" class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-[#2A7DE1] flex items-center justify-center">
-                        <span class="text-white">❤</span>
-                    </div>
+                <RouterLink to="/" class="flex items-center gap-3">
+                    <img
+                        src="/public/images/logo.png"
+                        alt="Mehrli Insonlar"
+                        class="w-11 h-11 object-contain rounded-xl"
+                    />
                     <span class="text-xl font-bold text-gray-900 tracking-tight">Mehrli</span>
                 </RouterLink>
 
@@ -48,7 +50,7 @@
 
                     <RouterLink to="/donate" class="hidden sm:block">
                         <button class="bg-[#FF9800] hover:bg-[#F57C00] text-white rounded-xl gap-1.5 px-5 py-2 font-semibold shadow-md shadow-orange-200/50 inline-flex items-center">
-                            ❤ {{ t('nav.donate') }}
+                            {{ t('nav.donate') }}
                         </button>
                     </RouterLink>
 
@@ -98,7 +100,7 @@
 
                 <RouterLink to="/donate" @click="open = false">
                     <button class="w-full mt-2 bg-[#FF9800] hover:bg-[#F57C00] text-white rounded-xl gap-1.5 font-semibold px-4 py-3 inline-flex items-center justify-center">
-                        ❤ {{ t('nav.donate') }}
+                        {{ t('nav.donate') }}
                     </button>
                 </RouterLink>
             </div>
@@ -128,7 +130,6 @@ const links = computed(() => [
     { label: t('nav.about'), to: '/about' },
     { label: t('nav.cases'), to: '/cases' },
     { label: t('nav.transparency'), to: '/transparency' },
-    { label: t('nav.volunteer'), to: '/volunteer'},
     { label: t('nav.news'), to: '/news' },
     { label: t('nav.faq'), to: '/faq' },
     { label: t('nav.contact'), to: '/contact' },

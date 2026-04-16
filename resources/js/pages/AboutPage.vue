@@ -12,9 +12,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
                 <div class="bg-white rounded-2xl p-8 border border-gray-100">
-                    <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-5 text-[#2A7DE1] text-2xl">
-                        ❤
-                    </div>
+                    <IconBadge :icon="Heart" tone="red" size="lg" class="mb-5" />
                     <h2 class="text-2xl font-bold text-gray-900 mb-3">{{ t('aboutPage.missionTitle') }}</h2>
                     <p class="text-gray-600 leading-relaxed">
                         {{ t('aboutPage.missionText') }}
@@ -22,9 +20,7 @@
                 </div>
 
                 <div class="bg-white rounded-2xl p-8 border border-gray-100">
-                    <div class="w-14 h-14 rounded-2xl bg-green-50 flex items-center justify-center mb-5 text-[#4CAF50] text-2xl">
-                        👁
-                    </div>
+                    <IconBadge :icon="Eye" tone="green" size="lg" class="mb-5" />
                     <h2 class="text-2xl font-bold text-gray-900 mb-3">{{ t('aboutPage.visionTitle') }}</h2>
                     <p class="text-gray-600 leading-relaxed">
                         {{ t('aboutPage.visionText') }}
@@ -40,11 +36,12 @@
                     :key="index"
                     class="bg-white rounded-2xl p-6 border border-gray-100 text-center"
                 >
-                    <div
-                        :class="['w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center text-2xl', item.color]"
-                    >
-                        {{ item.icon }}
-                    </div>
+                    <IconBadge
+                        :icon="item.icon"
+                        :tone="item.tone"
+                        size="lg"
+                        class="mx-auto mb-4"
+                    />
                     <h3 class="font-bold text-gray-900 mb-2">{{ item.title }}</h3>
                     <p class="text-sm text-gray-500">{{ item.desc }}</p>
                 </div>
@@ -59,26 +56,26 @@
                     rel="noopener noreferrer"
                     class="flex items-center gap-5 bg-white rounded-2xl p-6 border border-gray-100 hover:border-[#2A7DE1]/30 hover:shadow-md transition-all group"
                 >
-                    <div
-                        :class="['w-14 h-14 rounded-2xl flex-shrink-0 flex items-center justify-center text-2xl', doc.color]"
-                    >
-                        📄
-                    </div>
+                    <IconBadge
+                        :icon="doc.icon"
+                        :tone="doc.tone"
+                        size="lg"
+                    />
+
                     <div class="flex-1">
                         <h3 class="font-bold text-gray-900 group-hover:text-[#2A7DE1] transition-colors">
                             {{ doc.title }}
                         </h3>
                         <p class="text-sm text-gray-500 mt-1">{{ doc.desc }}</p>
                     </div>
-                    <span class="text-gray-300 group-hover:text-[#2A7DE1]">↗</span>
+
+                    <ExternalLink class="w-4 h-4 text-gray-300 group-hover:text-[#2A7DE1]" />
                 </a>
             </div>
 
             <div class="bg-white rounded-2xl p-8 border border-gray-100 mb-20">
                 <div class="flex items-center gap-3 mb-6">
-                    <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[#2A7DE1] text-2xl">
-                        🏛
-                    </div>
+                    <IconBadge :icon="Building2" tone="blue" size="md" />
                     <div>
                         <h2 class="text-xl font-bold text-gray-900">
                             {{ t('aboutPage.legalTitle') }}
@@ -165,15 +162,27 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import {
+    Heart,
+    Eye,
+    ShieldCheck,
+    Target,
+    Star,
+    FileText,
+    ScrollText,
+    ExternalLink,
+    Building2,
+} from 'lucide-vue-next'
 import SectionHeader from '../components/shared/SectionHeader.vue'
+import IconBadge from '../components/shared/IconBadge.vue'
 
 const { t, tm } = useI18n()
 
 const values = computed(() => [
-    { icon: '🛡', title: tm('aboutPage.values')[0].title, desc: tm('aboutPage.values')[0].desc, color: 'bg-blue-50 text-[#2A7DE1]' },
-    { icon: '❤', title: tm('aboutPage.values')[1].title, desc: tm('aboutPage.values')[1].desc, color: 'bg-red-50 text-red-500' },
-    { icon: '🎯', title: tm('aboutPage.values')[2].title, desc: tm('aboutPage.values')[2].desc, color: 'bg-green-50 text-[#4CAF50]' },
-    { icon: '⭐', title: tm('aboutPage.values')[3].title, desc: tm('aboutPage.values')[3].desc, color: 'bg-orange-50 text-[#FF9800]' },
+    { icon: ShieldCheck, title: tm('aboutPage.values')[0].title, desc: tm('aboutPage.values')[0].desc, tone: 'blue' },
+    { icon: Heart, title: tm('aboutPage.values')[1].title, desc: tm('aboutPage.values')[1].desc, tone: 'red' },
+    { icon: Target, title: tm('aboutPage.values')[2].title, desc: tm('aboutPage.values')[2].desc, tone: 'green' },
+    { icon: Star, title: tm('aboutPage.values')[3].title, desc: tm('aboutPage.values')[3].desc, tone: 'orange' },
 ])
 
 const docs = computed(() => [
@@ -181,13 +190,15 @@ const docs = computed(() => [
         title: tm('aboutPage.docs')[0].title,
         desc: tm('aboutPage.docs')[0].desc,
         href: '#',
-        color: 'bg-blue-50 text-[#2A7DE1]',
+        tone: 'blue',
+        icon: FileText,
     },
     {
         title: tm('aboutPage.docs')[1].title,
         desc: tm('aboutPage.docs')[1].desc,
         href: '#',
-        color: 'bg-green-50 text-[#4CAF50]',
+        tone: 'green',
+        icon: ScrollText,
     },
 ])
 

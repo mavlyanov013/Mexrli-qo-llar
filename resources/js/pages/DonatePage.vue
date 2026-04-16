@@ -89,7 +89,13 @@
                                 v-model="serviceType"
                                 class="rounded-2xl h-12 bg-gray-50 border border-gray-300 w-full px-4 outline-none"
                             >
-                                <option value="general">{{ t('donatePage.serviceOptions.general') }}</option>
+                                <option value="general">
+                                    {{
+                                        caseData
+                                            ? `${caseData.name} uchun yordam`
+                                            : t('donatePage.serviceOptions.general')
+                                    }}
+                                </option>
                                 <option value="education">{{ t('donatePage.serviceOptions.education') }}</option>
                                 <option value="surgery">{{ t('donatePage.serviceOptions.surgery') }}</option>
                                 <option value="household">{{ t('donatePage.serviceOptions.household') }}</option>

@@ -17,8 +17,11 @@
                         :key="index"
                         class="flex items-start gap-4"
                     >
-                        <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
-                            <span class="text-[#2A7DE1] text-lg">{{ item.icon }}</span>
+                        <div
+                            class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+                            :class="item.color"
+                        >
+                            <component :is="item.icon" class="w-5 h-5" />
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">{{ item.label }}</p>
@@ -115,6 +118,12 @@
 import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '../services/api'
+import {
+    MapPin,
+    Phone,
+    Mail,
+    Clock,
+} from 'lucide-vue-next'
 
 const { t } = useI18n()
 
@@ -131,10 +140,30 @@ const form = reactive({
 })
 
 const contactInfo = computed(() => [
-    { icon: '📍', label: t('contactPage.address'), value: '123 Charity Lane, Tashkent, Uzbekistan' },
-    { icon: '☎', label: t('contactPage.phone'), value: '+998 71 123 45 67' },
-    { icon: '✉', label: t('contactPage.email'), value: 'info@mehrli.uz' },
-    { icon: '🕒', label: t('contactPage.workingHours'), value: t('contactPage.workingHoursValue') },
+    {
+        icon: MapPin,
+        label: t('contactPage.address'),
+        value: '123 Charity Lane, Tashkent, Uzbekistan',
+        color: 'bg-blue-50 text-[#2A7DE1]',
+    },
+    {
+        icon: Phone,
+        label: t('contactPage.phone'),
+        value: '+998 71 123 45 67',
+        color: 'bg-green-50 text-[#4CAF50]',
+    },
+    {
+        icon: Mail,
+        label: t('contactPage.email'),
+        value: 'info@mehrli.uz',
+        color: 'bg-orange-50 text-[#FF9800]',
+    },
+    {
+        icon: Clock,
+        label: t('contactPage.workingHours'),
+        value: t('contactPage.workingHoursValue'),
+        color: 'bg-purple-50 text-purple-600',
+    },
 ])
 
 const handleSubmit = async () => {

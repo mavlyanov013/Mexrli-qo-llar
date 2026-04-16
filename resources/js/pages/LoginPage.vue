@@ -3,7 +3,14 @@
         <div class="auth-overlay" />
         <div class="auth-card">
             <div class="auth-header">
+                <img
+                    src="/public/images/logo.png"
+                    alt="Mehrli Insonlar"
+                    class="auth-logo"
+                />
+
                 <p class="auth-badge">Mehrli Qo‘llar</p>
+
                 <h1>Tizimga kirish</h1>
                 <p class="auth-subtitle">
                     Yaxshilik qilish yo‘lida davom etish uchun akkauntingizga kiring.
@@ -212,5 +219,11 @@ input:focus {
 
 .auth-link a:hover {
     text-decoration: underline;
+}
+.auth-logo {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    margin: 0 auto 14px;
 }
 </style>

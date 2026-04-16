@@ -1,6 +1,6 @@
 <template>
     <div
-        class="w-full bg-red-50 border-b border-red-100 py-2 cursor-pointer"
+        class="sticky top-[72px] z-30 w-full bg-red-50/95 backdrop-blur border-b border-red-100 py-2 cursor-pointer"
         @click="goToLive"
     >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-3 text-sm">

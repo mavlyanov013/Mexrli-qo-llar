@@ -64,7 +64,7 @@ class HelpRequestController extends Controller
         $validated = $request->validate([
             'status' => 'sometimes|string|in:pending,under_review,approved,rejected,more_info_needed',
             'admin_notes' => 'nullable|string',
-            'case_id' => 'nullable|integer|exists:cases,id',
+            'case_id' => 'nullable|integer|exists:case_items,id',
         ]);
 
         $helpRequest->update($validated);

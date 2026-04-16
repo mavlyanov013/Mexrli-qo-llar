@@ -27,6 +27,7 @@ const posts = ref([])
 const payments = ref([])
 const loading = ref(false)
 const search = ref('')
+const paymentsMeta = ref(null)
 
 const loadData = async () => {
     loading.value = true
@@ -47,16 +48,17 @@ const loadData = async () => {
             volunteerService.getAll(),
             contactService.getAll(),
             blogService.getAll(),
-            paymentService.getAll(),
+            paymentService.getAll({ per_page: 100 }),
         ])
 
-        cases.value = Array.isArray(casesRes) ? casesRes : []
-        donations.value = Array.isArray(donationsRes) ? donationsRes : []
-        helpRequests.value = Array.isArray(helpRequestsRes) ? helpRequestsRes : []
-        volunteers.value = Array.isArray(volunteersRes) ? volunteersRes : []
-        messages.value = Array.isArray(messagesRes) ? messagesRes : []
-        posts.value = Array.isArray(postsRes) ? postsRes : []
-        payments.value = Array.isArray(paymentsRes) ? paymentsRes : []
+        cases.value = Array.isArray(casesRes?.data) ? casesRes.data : Array.isArray(casesRes) ? casesRes : []
+        donations.value = Array.isArray(donationsRes?.data) ? donationsRes.data : Array.isArray(donationsRes) ? donationsRes : []
+        helpRequests.value = Array.isArray(helpRequestsRes?.data) ? helpRequestsRes.data : Array.isArray(helpRequestsRes) ? helpRequestsRes : []
+        volunteers.value = Array.isArray(volunteersRes?.data) ? volunteersRes.data : Array.isArray(volunteersRes) ? volunteersRes : []
+        messages.value = Array.isArray(messagesRes?.data) ? messagesRes.data : Array.isArray(messagesRes) ? messagesRes : []
+        posts.value = Array.isArray(postsRes?.data) ? postsRes.data : Array.isArray(postsRes) ? postsRes : []
+        payments.value = Array.isArray(paymentsRes?.data) ? paymentsRes.data : []
+        paymentsMeta.value = paymentsRes?.meta ?? null
     } catch (error) {
         console.error('Admin data load error:', error)
         cases.value = []
@@ -66,6 +68,7 @@ const loadData = async () => {
         messages.value = []
         posts.value = []
         payments.value = []
+        paymentsMeta.value = null
     } finally {
         loading.value = false
     }

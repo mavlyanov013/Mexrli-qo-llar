@@ -5,23 +5,28 @@
                 {{ t('homeStats.topText') }}
             </p>
 
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div
                     v-for="(stat, index) in stats"
                     :key="index"
-                    class="text-center"
+                    class="flex flex-col items-center text-center"
                 >
-                    <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-blue-50 flex items-center justify-center">
-                        <span class="text-[#2A7DE1] text-lg">{{ stat.icon }}</span>
-                    </div>
-
-                    <AnimatedNumber
-                        :target="stat.value"
-                        :prefix="stat.prefix"
-                        :suffix="stat.suffix"
+                    <IconBadge
+                        :icon="stat.icon"
+                        :tone="stat.tone"
+                        size="lg"
+                        class="mb-4"
                     />
 
-                    <p class="text-sm text-gray-500 mt-1 font-medium">
+                    <div class="leading-none">
+                        <AnimatedNumber
+                            :target="stat.value"
+                            :prefix="stat.prefix"
+                            :suffix="stat.suffix"
+                        />
+                    </div>
+
+                    <p class="text-sm text-gray-500 mt-3 font-medium">
                         {{ stat.label }}
                     </p>
                 </div>
@@ -33,7 +38,9 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Wallet, Users, HeartHandshake, BriefcaseBusiness } from 'lucide-vue-next'
 import AnimatedNumber from '../shared/AnimatedNumber.vue'
+import IconBadge from '../shared/IconBadge.vue'
 
 const props = defineProps({
     cases: {
@@ -53,16 +60,12 @@ const props = defineProps({
 const { t } = useI18n()
 
 const totalRaised = computed(() => {
-    return props.donations.reduce((sum, item) => {
-        return sum + Number(item.amount || 0)
-    }, 0)
+    return props.donations.reduce((sum, item) => sum + Number(item.amount || 0), 0)
 })
 
 const activeDonorsCount = computed(() => {
     return new Set(
-        props.donations
-            .map((item) => item.donor_email)
-            .filter(Boolean)
+        props.donations.map((item) => item.donor_email).filter(Boolean)
     ).size
 })
 
@@ -78,47 +81,38 @@ const activeCasesCount = computed(() => {
     ).length
 })
 
-const volunteersCount = computed(() => {
-    return props.volunteers.filter((item) =>
-        ['approved', 'interviewing', 'pending'].includes(String(item.status || '').toLowerCase())
-    ).length
-})
-
 const stats = computed(() => [
     {
-        icon: '💰',
+        icon: Wallet,
+        tone: 'blue',
         label: t('homeStats.totalRaised'),
         value: totalRaised.value,
         prefix: '',
         suffix: ' UZS',
     },
     {
-        icon: '👥',
+        icon: Users,
+        tone: 'blue',
         label: t('homeStats.activeDonors'),
         value: activeDonorsCount.value,
         prefix: '',
         suffix: '+',
     },
     {
-        icon: '❤',
+        icon: HeartHandshake,
+        tone: 'red',
         label: t('homeStats.childrenHelped'),
         value: helpedChildrenCount.value,
         prefix: '',
         suffix: '',
     },
     {
-        icon: '💼',
+        icon: BriefcaseBusiness,
+        tone: 'orange',
         label: t('homeStats.activeProjects'),
         value: activeCasesCount.value,
         prefix: '',
         suffix: '',
-    },
-    {
-        icon: '🤝',
-        label: t('homeStats.volunteers'),
-        value: volunteersCount.value,
-        prefix: '',
-        suffix: '+',
     },
 ])
 </script>

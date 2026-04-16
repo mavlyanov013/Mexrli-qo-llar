@@ -2,43 +2,40 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'legacy_mongo_id',
         'legacy_local_id',
-
         'provider',
         'transaction_id',
         'status',
         'category',
-
         'payer_reference',
-
         'amount',
         'currency',
         'refunded_amount',
-
         'external_id',
         'service_id',
-
         'provider_time_ms',
         'provider_create_time',
         'provider_perform_time',
         'provider_cancel_time',
-
         'live_mode',
         'payload',
         'raw_information',
-
         'donation_id',
     ];
 
     protected $casts = [
-        'amount' => 'float',
-        'refunded_amount' => 'float',
+        'amount' => 'decimal:2',
+        'refunded_amount' => 'decimal:2',
         'live_mode' => 'boolean',
         'payload' => 'array',
     ];
@@ -80,7 +77,8 @@ class Payment extends Model
 
         return -2;
     }
-    public function donation()
+
+    public function donation(): BelongsTo
     {
         return $this->belongsTo(Donation::class);
     }

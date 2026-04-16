@@ -3,10 +3,12 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
                 <div>
-                    <div class="flex items-center gap-2.5 mb-5">
-                        <div class="w-9 h-9 rounded-xl bg-[#2A7DE1] flex items-center justify-center">
-                            <span class="text-white">❤</span>
-                        </div>
+                    <div class="flex items-center gap-3 mb-5">
+                        <img
+                            src="/public/images/logo.png"
+                            alt="Mehrli Insonlar"
+                            class="w-11 h-11 object-contain rounded-xl"
+                        />
                         <span class="text-xl font-bold tracking-tight">Mehrli</span>
                     </div>
 
@@ -16,14 +18,15 @@
 
                     <div class="flex gap-3">
                         <a
-                            v-for="item in ['facebook', 'twitter', 'instagram', 'youtube']"
-                            :key="item"
-                            href="#"
+                            v-for="item in socialLinks"
+                            :key="item.key"
+                            :href="item.href"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             class="w-9 h-9 rounded-lg bg-gray-800 hover:bg-[#2A7DE1] flex items-center justify-center transition-colors"
+                            :aria-label="item.label"
                         >
-                            <span class="text-xs font-bold uppercase text-gray-400 hover:text-white">
-                                {{ item[0] }}
-                            </span>
+                            <component :is="item.icon" class="w-4 h-4 text-gray-300 hover:text-white" />
                         </a>
                     </div>
                 </div>
@@ -52,15 +55,17 @@
 
                     <ul class="space-y-3">
                         <li class="flex items-center gap-2.5 text-sm text-gray-300">
-                            <span>📍</span>
+                            <MapPin class="w-4 h-4 text-gray-400 shrink-0" />
                             {{ t('footer.location') }}
                         </li>
+
                         <li class="flex items-center gap-2.5 text-sm text-gray-300">
-                            <span>☎</span>
+                            <Phone class="w-4 h-4 text-gray-400 shrink-0" />
                             +998 71 123 45 67
                         </li>
+
                         <li class="flex items-center gap-2.5 text-sm text-gray-300">
-                            <span>✉</span>
+                            <Mail class="w-4 h-4 text-gray-400 shrink-0" />
                             info@mehrli.uz
                         </li>
                     </ul>
@@ -94,9 +99,10 @@
                             class="bg-gray-800 border border-gray-700 text-white placeholder:text-gray-500 rounded-xl px-4 py-2 w-full outline-none"
                         />
                         <button
-                            class="bg-[#2A7DE1] hover:bg-[#1E6BC9] rounded-xl px-3 shrink-0"
+                            class="bg-[#2A7DE1] hover:bg-[#1E6BC9] rounded-xl px-3 shrink-0 inline-flex items-center justify-center"
+                            type="button"
                         >
-                            →
+                            <ArrowRight class="w-4 h-4 text-white" />
                         </button>
                     </div>
                 </div>
@@ -106,8 +112,10 @@
                 <p class="text-sm text-gray-500">
                     {{ t('footer.rights') }}
                 </p>
-                <p class="text-sm text-gray-500">
-                    {{ t('footer.madeWithLove') }}
+                <p class="text-sm text-gray-500 flex items-center gap-1.5">
+                    {{ t('footer.madeWithLovePrefix') }}
+                    <Heart class="w-4 h-4 text-red-400 fill-red-400" />
+                    {{ t('footer.madeWithLoveSuffix') }}
                 </p>
             </div>
         </div>
@@ -118,6 +126,16 @@
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import {
+    ArrowRight,
+    Facebook,
+    Heart,
+    Instagram,
+    Mail,
+    MapPin,
+    Phone,
+    Youtube,
+} from 'lucide-vue-next'
 
 const { t } = useI18n()
 const email = ref('')
@@ -133,7 +151,26 @@ const quickLinks = computed(() => [
 const supportLinks = computed(() => [
     { label: t('nav.faq'), to: '/faq' },
     { label: t('nav.contact'), to: '/contact' },
-    { label: t('footer.privacyPolicy'), to: '/faq' },
-    { label: t('footer.termsOfService'), to: '/faq' },
 ])
+
+const socialLinks = [
+    {
+        key: 'facebook',
+        label: 'Facebook',
+        icon: Facebook,
+        href: '#',
+    },
+    {
+        key: 'instagram',
+        label: 'Instagram',
+        icon: Instagram,
+        href: '#',
+    },
+    {
+        key: 'youtube',
+        label: 'YouTube',
+        icon: Youtube,
+        href: '#',
+    },
+]
 </script>

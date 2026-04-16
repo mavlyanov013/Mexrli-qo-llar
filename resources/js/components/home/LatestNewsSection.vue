@@ -25,7 +25,7 @@
                             </span>
 
                             <span class="text-xs text-gray-400 flex items-center gap-1">
-                                <span>🕒</span>
+                                <Clock3 class="w-3.5 h-3.5" />
                                 {{ formatDate(post.created_at || post.created_date) }}
                             </span>
                         </div>
@@ -59,6 +59,7 @@ import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import SectionHeader from '../shared/SectionHeader.vue'
+import { Clock3 } from 'lucide-vue-next'
 
 const { t, locale } = useI18n()
 

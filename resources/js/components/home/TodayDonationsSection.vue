@@ -12,7 +12,7 @@
                 </div>
 
                 <div class="flex items-center gap-2 text-xs text-gray-400">
-                    <span>⟳</span>
+                    <RefreshCw class="w-3.5 h-3.5" />
                     <span>{{ t('todayDonations.updatedAt') }}: {{ updatedAt }}</span>
                 </div>
             </div>
@@ -23,16 +23,20 @@
                     :key="index"
                     class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm"
                 >
-                    <div
-                        class="w-12 h-12 rounded-2xl flex items-center justify-center mb-4"
-                        :class="item.color"
-                    >
-                        <span v-if="item.type !== 'users'" class="text-lg font-bold">UZS</span>
-                        <span v-else class="text-lg font-bold">👥</span>
-                    </div>
+                    <IconBadge
+                        :icon="item.icon"
+                        :tone="item.tone"
+                        size="md"
+                        class="mb-4"
+                    />
 
-                    <p class="text-3xl font-bold text-gray-900">{{ item.value }}</p>
-                    <p class="text-sm text-gray-500 mt-1">{{ item.label }}</p>
+                    <p class="text-3xl font-bold text-gray-900">
+                        {{ item.value }}
+                    </p>
+
+                    <p class="text-sm text-gray-500 mt-2">
+                        {{ item.label }}
+                    </p>
                 </div>
             </div>
         </div>
@@ -42,12 +46,12 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RefreshCw, Wallet, Banknote, Users } from 'lucide-vue-next'
 import donationService from '@/services/donationService'
+import IconBadge from '../shared/IconBadge.vue'
 
 const { t, locale } = useI18n()
 
-const editing = ref(false)
-const cashInput = ref('')
 const cashAmount = ref(0)
 const donations = ref([])
 const updatedAtRaw = ref(null)
@@ -146,22 +150,22 @@ const formatNumber = (value) => {
 
 const cards = computed(() => [
     {
-        type: 'money',
         label: t('todayDonations.onlineAmount'),
         value: `${formatNumber(stats.value.total)} UZS`,
-        color: 'bg-green-50 text-[#4CAF50]',
+        tone: 'green',
+        icon: Wallet,
     },
     {
-        type: 'money',
         label: t('todayDonations.cashAmount'),
         value: `${formatNumber(cashAmount.value)} UZS`,
-        color: 'bg-yellow-50 text-yellow-600',
+        tone: 'yellow',
+        icon: Banknote,
     },
     {
-        type: 'users',
         label: t('todayDonations.uniqueDonors'),
         value: stats.value.donors,
-        color: 'bg-orange-50 text-[#FF9800]',
+        tone: 'orange',
+        icon: Users,
     },
 ])
 

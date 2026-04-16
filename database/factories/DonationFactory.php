@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Donation;
 use App\Models\CaseItem;
+use App\Models\Donation;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class DonationFactory extends Factory
@@ -14,6 +14,14 @@ class DonationFactory extends Factory
     {
         return [
             'case_id' => CaseItem::query()->inRandomOrder()->value('id'),
+
+            'service_type' => $this->faker->randomElement([
+                'general',
+                'education',
+                'surgery',
+                'household',
+                'home_repair',
+            ]),
 
             'donor_name' => $this->faker->name(),
             'donor_email' => $this->faker->safeEmail(),

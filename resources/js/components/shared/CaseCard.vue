@@ -42,7 +42,7 @@
                         v-if="caseData.location"
                         class="text-xs text-gray-400 flex items-center gap-1 mt-0.5"
                     >
-                        <span>📍</span>
+                        <MapPin class="w-3.5 h-3.5 text-red-400" />
                         {{ caseData.location }}
                     </p>
                 </div>
@@ -95,7 +95,8 @@
                     <button
                         class="rounded-xl bg-[#FF9800] hover:bg-[#F57C00] text-white gap-1.5 font-semibold px-4 py-2 inline-flex items-center"
                     >
-                        ❤ {{ t('caseCard.donate') }}
+                        <Heart class="w-4 h-4" />
+                        {{ t('caseCard.donate') }}
                     </button>
                 </RouterLink>
             </div>
@@ -107,6 +108,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
+import { Heart, MapPin } from 'lucide-vue-next'
 import ProgressRing from './ProgressRing.vue'
 
 const { t } = useI18n()

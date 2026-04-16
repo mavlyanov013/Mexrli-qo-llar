@@ -12,19 +12,26 @@ class CaseItemFactory extends Factory
     public function definition(): array
     {
         $goal = $this->faker->numberBetween(5000000, 50000000);
-        $raised = $this->faker->numberBetween(500000, $goal);
+        $raised = $this->faker->numberBetween(500000, (int) ($goal * 0.8));
 
         return [
-            'name' => $this->faker->name(),
-            'age' => $this->faker->optional()->numberBetween(1, 75),
+            'name' => $this->faker->firstName(),
+            'age' => $this->faker->numberBetween(1, 14),
             'photo_url' => 'https://picsum.photos/800/600?random=' . rand(1, 9999),
-            'location' => $this->faker->city(),
+            'location' => $this->faker->randomElement([
+                'Toshkent',
+                'Samarqand',
+                'Andijon',
+                'Namangan',
+                'Farg‘ona',
+                'Buxoro',
+            ]),
             'condition' => $this->faker->randomElement([
                 'Yurak operatsiyasi kerak',
                 'Onkologik davolanish',
-                'Reabilitatsiya',
+                'Reabilitatsiya kerak',
                 'Shoshilinch operatsiya',
-                'Nogironlik aravachasi kerak',
+                'Eshitish apparati kerak',
             ]),
             'story' => $this->faker->paragraphs(3, true),
             'short_description' => $this->faker->sentence(12),
@@ -39,6 +46,8 @@ class CaseItemFactory extends Factory
                 'emergency',
             ]),
             'status' => $this->faker->randomElement([
+                'active',
+                'active',
                 'active',
                 'completed',
                 'paused',
@@ -55,8 +64,8 @@ class CaseItemFactory extends Factory
                     'text' => $this->faker->sentence(),
                 ],
             ],
-            'is_featured' => $this->faker->boolean(30),
-            'is_urgent' => $this->faker->boolean(40),
+            'is_featured' => $this->faker->boolean(20),
+            'is_urgent' => $this->faker->boolean(35),
             'created_at' => $this->faker->dateTimeBetween('-2 months', 'now'),
             'updated_at' => now(),
         ];

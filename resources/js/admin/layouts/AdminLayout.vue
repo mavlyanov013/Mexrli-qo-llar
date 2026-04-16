@@ -54,13 +54,41 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import Sidebar from '../components/SideBar.vue'
 
-const activeTab = ref('overview')
 const sidebarOpen = ref(false)
 const { locale, t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 
 const languages = ['en', 'uz', 'ru']
+
+const allowedTabs = [
+    'overview',
+    'cases',
+    'donations',
+    'help-requests',
+    'volunteers',
+    'messages',
+    'blog',
+    'payments',
+]
+
+const activeTab = computed({
+    get() {
+        const tab = route.query.tab
+        return allowedTabs.includes(tab) ? tab : 'overview'
+    },
+    set(value) {
+        router.replace({
+            query: {
+                ...route.query,
+                tab: value,
+            },
+        })
+    },
+})
 
 const pageTitle = computed(() => {
     const map = {

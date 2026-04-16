@@ -5,7 +5,7 @@
         <div class="absolute right-0 top-0 bottom-0 w-full lg:w-[55%]">
             <img
                 :src="featuredCase?.photo_url || heroImage"
-                :alt="t('hero.imageAlt')"
+                :alt="featuredCase?.name || t('hero.imageAlt')"
                 class="w-full h-full object-cover"
             />
             <div class="absolute inset-0 bg-gradient-to-r from-white via-white/40 to-transparent" />
@@ -26,12 +26,13 @@
                         v-if="featuredCase"
                         class="mt-4 bg-orange-50 border border-orange-100 rounded-xl p-4"
                     >
-                        <div class="flex justify-between text-sm mb-2">
+                        <div class="flex justify-between text-sm mb-2 gap-3">
                             <span class="text-gray-600">{{ t('hero.raised') }}</span>
-                            <span class="font-bold text-gray-900">
-                                ${{ formatNumber(featuredCase.raised_amount || 0) }}
+
+                            <span class="font-bold text-gray-900 text-right">
+                                {{ formatNumber(featuredCase.raised_amount || 0) }} UZS
                                 {{ t('hero.of') }}
-                                ${{ formatNumber(featuredCase.goal_amount || 0) }}
+                                {{ formatNumber(featuredCase.goal_amount || 0) }} UZS
                             </span>
                         </div>
 
@@ -43,7 +44,7 @@
                         </div>
 
                         <p class="text-xs text-orange-600 mt-2 font-medium">
-                            ${{ formatNumber(remainingAmount) }} {{ t('hero.stillNeeded') }}
+                            {{ formatNumber(remainingAmount) }} UZS {{ t('hero.stillNeeded') }}
                         </p>
                     </div>
 
@@ -106,23 +107,23 @@ const headline = computed(() => {
 })
 
 const story = computed(() => {
-    return props.featuredCase?.short_description || t('hero.defaultStory')
+    return props.featuredCase?.short_description || props.featuredCase?.story || t('hero.defaultStory')
 })
 
 const progressPercent = computed(() => {
-    if (!props.featuredCase?.goal_amount) return 0
+    const goal = Number(props.featuredCase?.goal_amount || 0)
+    const raised = Number(props.featuredCase?.raised_amount || 0)
 
-    return Math.min(
-        Math.round(
-            ((props.featuredCase.raised_amount || 0) / props.featuredCase.goal_amount) * 100
-        ),
-        100
-    )
+    if (goal <= 0) return 0
+
+    return Math.min(Math.round((raised / goal) * 100), 100)
 })
 
 const remainingAmount = computed(() => {
-    if (!props.featuredCase?.goal_amount) return 0
-    return Math.max(props.featuredCase.goal_amount - (props.featuredCase.raised_amount || 0), 0)
+    const goal = Number(props.featuredCase?.goal_amount || 0)
+    const raised = Number(props.featuredCase?.raised_amount || 0)
+
+    return Math.max(goal - raised, 0)
 })
 
 const donateLink = computed(() => {

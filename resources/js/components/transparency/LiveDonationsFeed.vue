@@ -1,7 +1,7 @@
 <template>
     <div class="bg-white rounded-2xl p-6 border border-gray-100">
-        <div class="flex items-center gap-2 mb-5">
-            <span class="text-[#4CAF50] text-lg">↗</span>
+        <div class="flex items-center gap-3 mb-5">
+            <IconBadge :icon="TrendingUp" tone="green" size="sm" />
             <h3 class="font-bold text-gray-900">{{ t('transparencyPage.liveDonationsFeed') }}</h3>
             <div class="ml-auto w-2 h-2 rounded-full bg-green-500 animate-pulse" />
         </div>
@@ -13,7 +13,7 @@
                 class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors"
             >
                 <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                    <span class="text-[#2A7DE1]">❤</span>
+                    <Heart class="w-5 h-5 text-[#2A7DE1]" />
                 </div>
 
                 <div class="flex-1 min-w-0">
@@ -36,7 +36,7 @@
             </div>
 
             <div v-if="donations.length === 0" class="text-center py-8 text-gray-400">
-                <div class="text-2xl mb-2">♡</div>
+                <Heart class="w-8 h-8 mx-auto mb-2 opacity-30" />
                 <p class="text-sm">{{ t('transparencyPage.noRecentDonations') }}</p>
             </div>
         </div>
@@ -44,6 +44,9 @@
 </template>
 
 <script setup>
+import { Heart, TrendingUp } from 'lucide-vue-next'
+import IconBadge from '../shared/IconBadge.vue'
+
 const props = defineProps({
     donations: {
         type: Array,

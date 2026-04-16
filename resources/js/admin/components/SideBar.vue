@@ -1,5 +1,15 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
+import {
+    LayoutDashboard,
+    HeartPulse,
+    HandHeart,
+    LifeBuoy,
+    Users,
+    Mail,
+    Newspaper,
+    CreditCard,
+} from 'lucide-vue-next'
 
 const activeTab = defineModel()
 defineProps({
@@ -13,14 +23,14 @@ const emit = defineEmits(['close'])
 const { t } = useI18n()
 
 const tabs = [
-    { id: 'overview', labelKey: 'admin.overview', icon: '📊' },
-    { id: 'cases', labelKey: 'admin.cases', icon: '🩺' },
-    { id: 'donations', labelKey: 'admin.donations', icon: '💝' },
-    { id: 'help-requests', labelKey: 'admin.helpRequests', icon: '🆘' },
-    { id: 'volunteers', labelKey: 'admin.volunteers', icon: '🤝' },
-    { id: 'messages', labelKey: 'admin.messages', icon: '✉️' },
-    { id: 'blog', labelKey: 'admin.blog', icon: '📰' },
-    { id: 'payments', labelKey: 'admin.payments', icon: '💳' },
+    { id: 'overview', labelKey: 'admin.overview', icon: LayoutDashboard },
+    { id: 'cases', labelKey: 'admin.cases', icon: HeartPulse },
+    { id: 'donations', labelKey: 'admin.donations', icon: HandHeart },
+    { id: 'help-requests', labelKey: 'admin.helpRequests', icon: LifeBuoy },
+    { id: 'volunteers', labelKey: 'admin.volunteers', icon: Users },
+    { id: 'messages', labelKey: 'admin.messages', icon: Mail },
+    { id: 'blog', labelKey: 'admin.blog', icon: Newspaper },
+    { id: 'payments', labelKey: 'admin.payments', icon: CreditCard },
 ]
 
 const selectTab = (tabId) => {
@@ -43,9 +53,17 @@ const selectTab = (tabId) => {
         ]"
     >
         <div class="mb-8 flex items-start justify-between">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-900">{{ t('admin.panel') }}</h2>
-                <p class="text-sm text-gray-500 mt-1">{{ t('admin.management') }}</p>
+            <div class="flex items-center gap-3">
+                <img
+                    src="/public/images/logo.png"
+                    alt="Mehrli Insonlar"
+                    class="w-11 h-11 object-contain rounded-xl"
+                />
+
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">{{ t('admin.panel') }}</h2>
+                    <p class="text-sm text-gray-500 mt-1">{{ t('admin.management') }}</p>
+                </div>
             </div>
 
             <button
@@ -69,7 +87,7 @@ const selectTab = (tabId) => {
                         : 'text-gray-600 hover:bg-gray-50'
                 ]"
             >
-                <span class="text-base">{{ tab.icon }}</span>
+                <component :is="tab.icon" class="w-4.5 h-4.5" />
                 <span>{{ t(tab.labelKey) }}</span>
             </button>
         </nav>

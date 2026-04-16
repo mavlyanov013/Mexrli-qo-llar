@@ -3,7 +3,7 @@ import api from './api'
 export default {
     async getAll(params = {}) {
         const response = await api.get('/admin/payments', { params })
-        return response.data.data ?? response.data
+        return response.data
     },
 
     async getById(id) {
