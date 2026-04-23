@@ -33,6 +33,7 @@ return [
     ],
 
     'paynet' => [
+	'app_merchant_id' => env('PAYNET_APP_MERCHANT_ID', '4590'),
         'enabled' => env('PAYNET_ENABLED', true),
         'live_mode' => env('PAYNET_LIVE_MODE', true),
 

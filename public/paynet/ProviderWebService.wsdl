@@ -44,7 +44,7 @@
 
     <service name="ProviderWebService">
         <port name="ProviderWebServicePort" binding="tns:ProviderWebServiceBinding">
-            <soap:address location="https://mexrli.complex-solutions.uz/api/v1/billing/paynet"/>
+            <soap:address location="https://back.complex-solutions.uz/api/v1/billing/paynet"/>
         </port>
     </service>
 

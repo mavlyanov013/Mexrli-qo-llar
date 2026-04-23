@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\FinancialReport;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Faker\Factory as FakerFactory;
 
 class FinancialReportFactory extends Factory
 {
@@ -11,17 +12,19 @@ class FinancialReportFactory extends Factory
 
     public function definition(): array
     {
-        $income = $this->faker->numberBetween(10000000, 150000000);
-        $expense = $this->faker->numberBetween(5000000, $income);
+        $faker = FakerFactory::create();
+
+        $income = $faker->numberBetween(10000000, 150000000);
+        $expense = $faker->numberBetween(5000000, $income);
 
         return [
-            'month' => $this->faker->numberBetween(1, 12),
+            'month' => $faker->numberBetween(1, 12),
             'year' => now()->year,
             'total_income' => $income,
             'total_expense' => $expense,
-            'total_helped_cases' => $this->faker->numberBetween(5, 60),
+            'total_helped_cases' => $faker->numberBetween(5, 60),
             'report_file' => null,
-            'notes' => $this->faker->sentence(),
+            'notes' => $faker->sentence(),
             'created_at' => now(),
             'updated_at' => now(),
         ];

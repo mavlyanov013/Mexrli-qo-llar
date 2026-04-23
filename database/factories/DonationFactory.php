@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\CaseItem;
 use App\Models\Donation;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Faker\Factory as FakerFactory;
 
 class DonationFactory extends Factory
 {
@@ -12,38 +13,26 @@ class DonationFactory extends Factory
 
     public function definition(): array
     {
+        $faker = FakerFactory::create();
+
         return [
             'case_id' => CaseItem::query()->inRandomOrder()->value('id'),
-
-            'service_type' => $this->faker->randomElement([
-                'general',
-                'education',
-                'surgery',
-                'household',
-                'home_repair',
-            ]),
-
-            'donor_name' => $this->faker->name(),
-            'donor_email' => $this->faker->safeEmail(),
-
-            'amount' => $this->faker->numberBetween(50000, 5000000),
+            'donor_name' => $faker->name(),
+            'donor_email' => $faker->safeEmail(),
+            'amount' => $faker->numberBetween(50000, 5000000),
             'currency' => 'UZS',
-
-            'type' => $this->faker->randomElement([
+            'type' => $faker->randomElement([
                 'one_time',
                 'monthly',
             ]),
-
-            'message' => $this->faker->optional()->sentence(),
-            'is_anonymous' => $this->faker->boolean(20),
-
-            'status' => $this->faker->randomElement([
+            'message' => $faker->optional()->sentence(),
+            'is_anonymous' => $faker->boolean(20),
+            'status' => $faker->randomElement([
                 'completed',
                 'pending',
                 'failed',
             ]),
-
-            'created_at' => $this->faker->dateTimeBetween('-3 months', 'now'),
+            'created_at' => $faker->dateTimeBetween('-3 months', 'now'),
             'updated_at' => now(),
         ];
     }

@@ -10,11 +10,14 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Faker\Factory as FakerFactory;
 
 class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
+        $faker = FakerFactory::create();
+
         DB::statement('SET CONSTRAINTS ALL DEFERRED');
 
         Payment::query()->delete();
@@ -46,9 +49,7 @@ class DemoDataSeeder extends Seeder
             'is_urgent' => true,
         ]);
 
-        $cases = CaseItem::factory()
-            ->count(11)
-            ->create();
+        CaseItem::factory()->count(11)->create();
 
         $allCases = CaseItem::query()->get();
 
@@ -57,7 +58,7 @@ class DemoDataSeeder extends Seeder
         for ($i = 0; $i < 80; $i++) {
             $case = $i < 20 ? $featuredCase : $allCases->random();
 
-            $status = fake()->randomElement([
+            $status = $faker->randomElement([
                 'completed',
                 'completed',
                 'completed',
@@ -69,9 +70,9 @@ class DemoDataSeeder extends Seeder
             $donation = Donation::factory()->create([
                 'case_id' => $case->id,
                 'status' => $status,
-                'amount' => fake()->numberBetween(50000, 3000000),
+                'amount' => $faker->numberBetween(50000, 3000000),
                 'currency' => 'UZS',
-                'created_at' => fake()->dateTimeBetween('-3 months', 'now'),
+                'created_at' => $faker->dateTimeBetween('-3 months', 'now'),
                 'updated_at' => now(),
             ]);
 
@@ -110,8 +111,6 @@ class DemoDataSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
-
-//        FinancialReport::factory()->count(6)->create();
 
         User::create([
             'name' => 'Admin',

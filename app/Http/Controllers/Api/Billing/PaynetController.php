@@ -17,24 +17,28 @@ class PaynetController extends Controller
     ) {}
 
     public function handle(Request $request): Response
-    {
-        Log::info('PAYNET SOAP REQUEST', [
-            'ip' => $request->ip(),
-            'content_type' => $request->header('Content-Type'),
-        ]);
+{
+    Log::info('PAYNET SOAP REQUEST', [
+        'ip' => $request->ip(),
+        'method' => $request->method(),
+        'content_type' => $request->header('Content-Type'),
+        'content_length' => strlen((string) $request->getContent()),
+    ]);
 
-        if (app()->environment('local', 'staging')) {
-            Log::debug('PAYNET SOAP REQUEST RAW', [
-                'body' => $request->getContent(),
-            ]);
-        }
+    $body = trim((string) $request->getContent());
 
-        $xmlResponse = $this->paynetService->handleSoapRequest($request->getContent(), $request->ip());
-
-        return response($xmlResponse, 200, [
-            'Content-Type' => 'text/xml; charset=UTF-8',
+    if ($request->isMethod('get') || $body === '') {
+        return response('Paynet endpoint is alive', 200, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
         ]);
     }
+
+    $xmlResponse = $this->paynetService->handleSoapRequest($body, $request->ip());
+
+    return response($xmlResponse, 200, [
+        'Content-Type' => 'text/xml; charset=UTF-8',
+    ]);
+}
 
     public function status(Payment $payment): JsonResponse
     {

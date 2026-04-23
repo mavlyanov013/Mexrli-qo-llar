@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -33,14 +34,15 @@ class AuthController extends Controller
     {
         $credentials = $request->validated();
 
-        if (!auth()->attempt($credentials)) {
+        $user = User::query()
+            ->where('email', $credentials['email'])
+            ->first();
+
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
             return response()->json([
                 'message' => 'Login yoki parol xato',
             ], 422);
         }
-
-        /** @var \App\Models\User $user */
-        $user = auth()->user();
 
         $token = $user->createToken('auth_token')->accessToken;
 
@@ -58,8 +60,14 @@ class AuthController extends Controller
 
     public function me(): JsonResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var \App\Models\User|null $user */
         $user = auth('api')->user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 401);
+        }
 
         return response()->json([
             'user' => [

@@ -126,8 +126,9 @@ class CheckoutController extends Controller
         }
 
         if ($payment->provider === 'paynet') {
-            return 'https://app.paynet.uz/?m=4590';
-        }
+    		$merchantId = config('payments.paynet.app_merchant_id', '4590');
+    		return 'https://app.paynet.uz/?m=' . urlencode((string) $merchantId);
+	}
         if ($payment->provider === 'uzumbank') {
             return 'https://www.apelsin.uz/open-service?serviceId=12030307';
         }
