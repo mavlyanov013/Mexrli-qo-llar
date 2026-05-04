@@ -1,4 +1,7 @@
 import { createI18n } from 'vue-i18n'
+import enJson from './i18n/en.json'
+import uzJson from './i18n/uz.json'
+import ruJson from './i18n/ru.json'
 
 const savedLocale = localStorage.getItem('lang')
 const browserLocale = navigator.language?.split('-')[0]
@@ -1956,12 +1959,43 @@ const messages = {
     },
 }
 
+const isPlainObject = (value) => Object.prototype.toString.call(value) === '[object Object]'
+
+const deepMerge = (target, source) => {
+    const output = { ...target }
+
+    Object.keys(source || {}).forEach((key) => {
+        const sourceValue = source[key]
+        const targetValue = output[key]
+
+        if (isPlainObject(sourceValue) && isPlainObject(targetValue)) {
+            output[key] = deepMerge(targetValue, sourceValue)
+            return
+        }
+
+        output[key] = sourceValue
+    })
+
+    return output
+}
+
+const externalMessages = {
+    en: enJson,
+    uz: uzJson,
+    ru: ruJson,
+}
+
+const mergedMessages = Object.keys(messages).reduce((acc, localeKey) => {
+    acc[localeKey] = deepMerge(messages[localeKey] || {}, externalMessages[localeKey] || {})
+    return acc
+}, {})
+
 const i18n = createI18n({
     legacy: false,
     locale: getDefaultLocale(),
     fallbackLocale: 'en',
     globalInjection: true,
-    messages,
+    messages: mergedMessages,
 })
 
 export default i18n

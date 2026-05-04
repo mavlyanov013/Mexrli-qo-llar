@@ -8,6 +8,10 @@ import volunteerService from '@/services/volunteerService'
 import contactService from '@/services/contactService'
 import blogService from '@/services/blogService'
 import paymentService from '@/services/paymentService'
+import AdminTable from '@/admin/components/common/AdminTable.vue'
+import AdminEmptyState from '@/admin/components/common/AdminEmptyState.vue'
+import AdminPagination from '@/admin/components/common/AdminPagination.vue'
+import AdminToast from '@/admin/components/common/AdminToast.vue'
 
 const { t } = useI18n()
 
@@ -26,11 +30,21 @@ const messages = ref([])
 const posts = ref([])
 const payments = ref([])
 const loading = ref(false)
+const loadError = ref(false)
 const search = ref('')
 const paymentsMeta = ref(null)
+const paymentsPage = ref(1)
+
+const loadPayments = async (page = 1) => {
+    const paymentsRes = await paymentService.getAll({ per_page: 20, page })
+    payments.value = Array.isArray(paymentsRes?.data) ? paymentsRes.data : []
+    paymentsMeta.value = paymentsRes?.meta ?? null
+    paymentsPage.value = page
+}
 
 const loadData = async () => {
     loading.value = true
+    loadError.value = false
 
     try {
         const [
@@ -40,7 +54,6 @@ const loadData = async () => {
             volunteersRes,
             messagesRes,
             postsRes,
-            paymentsRes,
         ] = await Promise.all([
             caseService.getAllCases(),
             donationService.getAllDonations(),
@@ -48,7 +61,7 @@ const loadData = async () => {
             volunteerService.getAll(),
             contactService.getAll(),
             blogService.getAll(),
-            paymentService.getAll({ per_page: 100 }),
+            loadPayments(paymentsPage.value),
         ])
 
         cases.value = Array.isArray(casesRes?.data) ? casesRes.data : Array.isArray(casesRes) ? casesRes : []
@@ -57,10 +70,9 @@ const loadData = async () => {
         volunteers.value = Array.isArray(volunteersRes?.data) ? volunteersRes.data : Array.isArray(volunteersRes) ? volunteersRes : []
         messages.value = Array.isArray(messagesRes?.data) ? messagesRes.data : Array.isArray(messagesRes) ? messagesRes : []
         posts.value = Array.isArray(postsRes?.data) ? postsRes.data : Array.isArray(postsRes) ? postsRes : []
-        payments.value = Array.isArray(paymentsRes?.data) ? paymentsRes.data : []
-        paymentsMeta.value = paymentsRes?.meta ?? null
     } catch (error) {
         console.error('Admin data load error:', error)
+        loadError.value = true
         cases.value = []
         donations.value = []
         helpRequests.value = []
@@ -126,6 +138,30 @@ const filteredPayments = computed(() => {
     )
 })
 
+const paymentColumns = computed(() => ([
+    { key: 'provider', label: t('admin.provider') },
+    { key: 'transaction_id', label: t('admin.transactionId') },
+    { key: 'payer_reference', label: t('admin.payer') },
+    { key: 'amount', label: t('admin.amount') },
+    { key: 'status', label: t('admin.status') },
+]))
+
+const paymentsSummary = computed(() => {
+    const meta = paymentsMeta.value || {}
+    if (!meta.total) return ''
+    return `${meta.current_page}/${meta.last_page} • ${meta.total}`
+})
+
+const changePaymentsPage = async (page) => {
+    try {
+        await loadPayments(page)
+        loadError.value = false
+    } catch (error) {
+        console.error('Payments page load error:', error)
+        loadError.value = true
+    }
+}
+
 const filteredDonations = computed(() => {
     const q = search.value.trim().toLowerCase()
     if (!q) return donations.value
@@ -162,6 +198,11 @@ const filteredVolunteers = computed(() => {
 
 <template>
     <div class="space-y-6">
+        <AdminToast
+            :show="loadError"
+            :message="t('admin.loading')"
+            tone="error"
+        />
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <h1 class="text-2xl font-bold text-gray-900">{{ t('admin.dashboard') }}</h1>
 
@@ -173,7 +214,7 @@ const filteredVolunteers = computed(() => {
                     v-model="search"
                     type="text"
                     class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none"
-                    :placeholder="t('admin.search') || 'Search...'"
+                    :placeholder="t('admin.search') || t('admin.searchPlaceholder')"
                 />
             </div>
         </div>
@@ -272,36 +313,39 @@ const filteredVolunteers = computed(() => {
                     <h2 class="text-xl font-bold">{{ t('admin.payments') }} ({{ filteredPayments.length }})</h2>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-50">
-                        <tr>
-                            <th class="text-left p-4">{{ t('admin.provider') }}</th>
-                            <th class="text-left p-4">{{ t('admin.transactionId') }}</th>
-                            <th class="text-left p-4">{{ t('admin.payer') }}</th>
-                            <th class="text-left p-4">{{ t('admin.amount') }}</th>
-                            <th class="text-left p-4">{{ t('admin.status') }}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="payment in filteredPayments" :key="payment.id" class="border-t">
-                            <td class="p-4 uppercase font-medium">{{ payment.provider }}</td>
-                            <td class="p-4">{{ payment.transaction_id }}</td>
-                            <td class="p-4">{{ payment.payer_reference || '—' }}</td>
-                            <td class="p-4">{{ formatMoney(payment.amount) }}</td>
-                            <td class="p-4">
-                                <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium" :class="badgeClass(payment.status)">
-                                    {{ payment.status }}
-                                </span>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <AdminTable
+                    v-if="filteredPayments.length > 0"
+                    :columns="paymentColumns"
+                    :rows="filteredPayments"
+                >
+                    <template #cell-provider="{ value }">
+                        <span class="uppercase font-medium">{{ value }}</span>
+                    </template>
+                    <template #cell-payer_reference="{ value }">
+                        {{ value || t('common.unknown') }}
+                    </template>
+                    <template #cell-amount="{ value }">
+                        {{ formatMoney(value) }}
+                    </template>
+                    <template #cell-status="{ value }">
+                        <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium" :class="badgeClass(value)">
+                            {{ value }}
+                        </span>
+                    </template>
+                </AdminTable>
 
-                <div v-if="filteredPayments.length === 0" class="p-4 text-sm text-gray-500">
-                    {{ t('admin.noPayments') }}
-                </div>
+                <AdminEmptyState
+                    v-else
+                    :message="t('admin.noPayments')"
+                />
+
+                <AdminPagination
+                    v-if="paymentsMeta && !search.trim()"
+                    :current-page="paymentsMeta.current_page || 1"
+                    :last-page="paymentsMeta.last_page || 1"
+                    :summary="paymentsSummary"
+                    @change="changePaymentsPage"
+                />
             </div>
 
             <div v-if="props.activeTab === 'cases'" class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
@@ -354,15 +398,15 @@ const filteredVolunteers = computed(() => {
                         <tr v-for="d in filteredDonations" :key="d.id" class="border-t">
                             <td class="p-4">{{ d.is_anonymous ? t('admin.anonymous') : d.donor_name }}</td>
                             <td class="p-4">{{ formatMoney(d.amount) }}</td>
-                            <td class="p-4">{{ d.type || '—' }}</td>
-                            <td class="p-4">{{ d.created_at || d.created_date || '—' }}</td>
+                            <td class="p-4">{{ d.type || t('common.unknown') }}</td>
+                            <td class="p-4">{{ d.created_at || d.created_date || t('common.unknown') }}</td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
 
                 <div v-if="filteredDonations.length === 0" class="p-4 text-sm text-gray-500">
-                    {{ t('admin.noDonations') || 'No donations' }}
+                    {{ t('admin.noDonations') }}
                 </div>
             </div>
 
@@ -423,7 +467,7 @@ const filteredVolunteers = computed(() => {
                                     {{ t(`adminVolunteer.statuses.${v.status || 'pending'}`) }}
                                 </span>
                             </td>
-                            <td class="p-4">{{ v.city || '—' }}</td>
+                            <td class="p-4">{{ v.city || t('common.unknown') }}</td>
                         </tr>
                         </tbody>
                     </table>
@@ -448,7 +492,7 @@ const filteredVolunteers = computed(() => {
                             <p class="text-sm text-gray-500">{{ m.email }}</p>
                         </div>
                         <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium" :class="badgeClass(m.status)">
-                            {{ m.status || 'new' }}
+                            {{ m.status || t('common.unknown') }}
                         </span>
                     </div>
                     <p class="text-sm font-medium mt-3">{{ t('admin.subject') }}: {{ m.subject }}</p>

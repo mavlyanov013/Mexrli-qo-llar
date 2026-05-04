@@ -1,0 +1,89 @@
+{
+  "common": {
+    "brandName": "Mehrli Qo'llar",
+    "or": "или",
+    "unknown": "Неизвестно"
+  },
+  "auth": {
+    "login": {
+      "title": "Вход в систему",
+      "subtitle": "Войдите в аккаунт, чтобы продолжать делать добрые дела.",
+      "email": "Email",
+      "emailPlaceholder": "Введите email",
+      "password": "Пароль",
+      "passwordPlaceholder": "Введите пароль",
+      "submit": "Войти",
+      "invalidCredentials": "Неверный email или пароль"
+    },
+    "register": {
+      "title": "Регистрация",
+      "subtitle": "Присоединяйтесь к платформе и станьте частью добрых дел.",
+      "name": "Имя",
+      "namePlaceholder": "Введите имя",
+      "email": "Email",
+      "emailPlaceholder": "Введите email",
+      "password": "Пароль",
+      "passwordPlaceholder": "Введите пароль",
+      "passwordConfirmation": "Подтвердите пароль",
+      "passwordConfirmationPlaceholder": "Повторите пароль",
+      "submit": "Зарегистрироваться",
+      "submitting": "Отправка...",
+      "success": "Регистрация успешно завершена",
+      "validationError": "Ошибка валидации",
+      "genericError": "Произошла ошибка",
+      "alreadyHaveAccount": "Уже есть аккаунт?",
+      "loginLink": "Войти"
+    }
+  },
+  "public": {
+    "donate": {
+      "paymentMethods": {
+        "paycom": {
+          "title": "Payme",
+          "description": "Онлайн-оплата"
+        },
+        "click": {
+          "title": "Click",
+          "description": "Онлайн-оплата"
+        },
+        "paynet": {
+          "title": "Paynet",
+          "description": "Оплата через Paynet"
+        },
+        "uzumbank": {
+          "title": "Uzum Bank",
+          "description": "Оплата через Uzum Bank"
+        }
+      },
+      "sumSuffix": "сум",
+      "forCaseSuffix": "поддержка для {name}"
+    }
+  },
+  "admin": {
+    "searchPlaceholder": "Поиск...",
+    "users": "Пользователи",
+    "pages": "Страницы",
+    "reports": "Отчеты",
+    "settings": "Настройки",
+    "create": "Создать",
+    "edit": "Редактировать",
+    "view": "Просмотр",
+    "delete": "Удалить",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "search": "Поиск",
+    "loading": "Загрузка...",
+    "noData": "Данные не найдены",
+    "actions": "Действия",
+    "role": "Роль",
+    "name": "Имя",
+    "email": "Email",
+    "status": "Статус",
+    "usersModule": {
+      "createUser": "Создать пользователя",
+      "editUser": "Редактировать пользователя",
+      "userDetails": "Детали пользователя",
+      "passwordOptional": "Пароль (необязательно при обновлении)"
+    }
+  }
+}

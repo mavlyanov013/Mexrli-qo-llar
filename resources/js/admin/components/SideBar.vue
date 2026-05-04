@@ -2,41 +2,47 @@
 import { useI18n } from 'vue-i18n'
 import {
     LayoutDashboard,
+    UserCog,
+    HandCoins,
     HeartPulse,
     HandHeart,
-    LifeBuoy,
     Users,
-    Mail,
     Newspaper,
     CreditCard,
+    FileText,
+    BarChart3,
+    Settings,
 } from 'lucide-vue-next'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 
-const activeTab = defineModel()
-defineProps({
+const props = defineProps({
     isOpen: {
         type: Boolean,
         default: false,
     },
+    user: {
+        type: Object,
+        default: null,
+    },
 })
-const emit = defineEmits(['close'])
 
 const { t } = useI18n()
+const route = useRoute()
+const emit = defineEmits(['close'])
 
-const tabs = [
-    { id: 'overview', labelKey: 'admin.overview', icon: LayoutDashboard },
-    { id: 'cases', labelKey: 'admin.cases', icon: HeartPulse },
-    { id: 'donations', labelKey: 'admin.donations', icon: HandHeart },
-    { id: 'help-requests', labelKey: 'admin.helpRequests', icon: LifeBuoy },
-    { id: 'volunteers', labelKey: 'admin.volunteers', icon: Users },
-    { id: 'messages', labelKey: 'admin.messages', icon: Mail },
-    { id: 'blog', labelKey: 'admin.blog', icon: Newspaper },
-    { id: 'payments', labelKey: 'admin.payments', icon: CreditCard },
-]
-
-const selectTab = (tabId) => {
-    activeTab.value = tabId
-    emit('close')
-}
+const navItems = computed(() => [
+    { to: '/admin/dashboard', label: t('admin.dashboard'), icon: LayoutDashboard },
+    { to: '/admin/users', label: t('admin.users'), icon: UserCog },
+    { to: '/admin/payments', label: t('admin.payments'), icon: CreditCard },
+    { to: '/admin/donations', label: t('admin.donations'), icon: HandCoins },
+    { to: '/admin/cases', label: t('admin.cases'), icon: HeartPulse },
+    { to: '/admin/blog', label: t('admin.blog'), icon: Newspaper },
+    { to: '/admin/volunteers', label: t('admin.volunteers'), icon: Users },
+    { to: '/admin/pages', label: t('admin.pages'), icon: FileText },
+    { to: '/admin/reports', label: t('admin.reports'), icon: BarChart3 },
+    { to: '/admin/settings', label: t('admin.settings'), icon: Settings },
+])
 </script>
 
 <template>
@@ -76,20 +82,21 @@ const selectTab = (tabId) => {
         </div>
 
         <nav class="space-y-2">
-            <button
-                v-for="tab in tabs"
-                :key="tab.id"
-                @click="selectTab(tab.id)"
+            <router-link
+                v-for="item in navItems"
+                :key="item.to"
+                :to="item.to"
+                @click="$emit('close')"
                 :class="[
                     'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors flex items-center gap-3',
-                    activeTab === tab.id
+                    route.path.startsWith(item.to)
                         ? 'bg-[#2A7DE1] text-white shadow-sm'
                         : 'text-gray-600 hover:bg-gray-50'
                 ]"
             >
-                <component :is="tab.icon" class="w-4.5 h-4.5" />
-                <span>{{ t(tab.labelKey) }}</span>
-            </button>
+                <component :is="item.icon" class="w-4.5 h-4.5" />
+                <span>{{ item.label }}</span>
+            </router-link>
         </nav>
     </aside>
 </template>

@@ -10,6 +10,7 @@ import NewsPage from '../pages/NewsPage.vue'
 import NewsDetailPage from '../pages/NewsDetailPage.vue'
 import DonatePage from '../pages/DonatePage.vue'
 import TransparencyPage from '../pages/TransparencyPage.vue'
+import { canAccessAdmin } from '@/admin/utils/permissions'
 
 const routes = [
     {
@@ -95,13 +96,170 @@ const routes = [
     {
         path: '/admin',
         component: () => import('@/admin/layouts/AdminLayout.vue'),
+        redirect: '/admin/dashboard',
         children: [
             {
-                path: '',
-                name: 'AdminDashboard',
-                component: () => import('@/admin/pages/AdminDashboard.vue'),
+                path: 'dashboard',
+                name: 'admin-dashboard',
+                component: () => import('@/admin/pages/AdminDashboardPage.vue'),
                 meta: { requiresAuth: true, admin: true }
-            }
+            },
+            {
+                path: 'users',
+                name: 'admin-users',
+                component: () => import('@/admin/pages/AdminUsersListPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'users/create',
+                name: 'admin-users-create',
+                component: () => import('@/admin/pages/AdminUsersCreatePage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'users/:id/edit',
+                name: 'admin-users-edit',
+                component: () => import('@/admin/pages/AdminUsersEditPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'users/:id',
+                name: 'admin-users-view',
+                component: () => import('@/admin/pages/AdminUsersViewPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'payments',
+                name: 'admin-payments',
+                component: () => import('@/admin/pages/AdminPaymentsPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'payments/:id',
+                name: 'admin-payments-view',
+                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
+                props: { title: 'Payment details', description: 'Payment details view page.' },
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'donations',
+                name: 'admin-donations',
+                component: () => import('@/admin/pages/AdminDonationsPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'donations/create',
+                name: 'admin-donations-create',
+                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
+                props: { title: 'Create donation', description: 'Donation create page.' },
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'donations/:id/edit',
+                name: 'admin-donations-edit',
+                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
+                props: { title: 'Edit donation', description: 'Donation edit page.' },
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'cases',
+                name: 'admin-cases',
+                component: () => import('@/admin/pages/AdminCasesPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'cases/create',
+                name: 'admin-cases-create',
+                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
+                props: { title: 'Create case', description: 'Case create page.' },
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'cases/:id/edit',
+                name: 'admin-cases-edit',
+                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
+                props: { title: 'Edit case', description: 'Case edit page.' },
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'blog',
+                name: 'admin-blog',
+                component: () => import('@/admin/pages/AdminBlogPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'blog/create',
+                name: 'admin-blog-create',
+                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
+                props: { title: 'Create blog post', description: 'Blog create page.' },
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'blog/:id/edit',
+                name: 'admin-blog-edit',
+                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
+                props: { title: 'Edit blog post', description: 'Blog edit page.' },
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'volunteers',
+                name: 'admin-volunteers',
+                component: () => import('@/admin/pages/AdminVolunteersPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'volunteers/:id',
+                name: 'admin-volunteers-view',
+                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
+                props: { title: 'Volunteer details', description: 'Volunteer details page.' },
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'pages',
+                name: 'admin-pages',
+                component: () => import('@/admin/pages/AdminPagesPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'pages/create',
+                name: 'admin-pages-create',
+                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
+                props: { title: 'Create page', description: 'CMS page create page.' },
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'pages/:id/edit',
+                name: 'admin-pages-edit',
+                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
+                props: { title: 'Edit page', description: 'CMS page edit page.' },
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'reports',
+                name: 'admin-reports',
+                component: () => import('@/admin/pages/AdminReportsPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'reports/create',
+                name: 'admin-reports-create',
+                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
+                props: { title: 'Create report', description: 'Financial report create page.' },
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'reports/:id/edit',
+                name: 'admin-reports-edit',
+                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
+                props: { title: 'Edit report', description: 'Financial report edit page.' },
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'settings',
+                name: 'admin-settings',
+                component: () => import('@/admin/pages/AdminSettingsPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
         ]
     },
     {
@@ -123,7 +281,7 @@ router.beforeEach((to, from, next) => {
         return next('/login')
     }
 
-    const isAdmin = user?.is_admin === true
+    const isAdmin = canAccessAdmin(user)
 
     if (to.meta.admin && !isAdmin) {
         return next('/')

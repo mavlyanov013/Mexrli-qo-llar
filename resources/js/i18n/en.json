@@ -1,0 +1,89 @@
+{
+  "common": {
+    "brandName": "Mehrli Qo'llar",
+    "or": "or",
+    "unknown": "Unknown"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Sign in to continue doing good together.",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "submit": "Sign in",
+      "invalidCredentials": "Email or password is invalid"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Join the platform and become part of meaningful change.",
+      "name": "Name",
+      "namePlaceholder": "Enter your name",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "passwordConfirmation": "Confirm password",
+      "passwordConfirmationPlaceholder": "Re-enter your password",
+      "submit": "Create account",
+      "submitting": "Submitting...",
+      "success": "Registration completed successfully",
+      "validationError": "Validation error occurred",
+      "genericError": "Something went wrong",
+      "alreadyHaveAccount": "Already have an account?",
+      "loginLink": "Sign in"
+    }
+  },
+  "public": {
+    "donate": {
+      "paymentMethods": {
+        "paycom": {
+          "title": "Payme",
+          "description": "Online payment"
+        },
+        "click": {
+          "title": "Click",
+          "description": "Online payment"
+        },
+        "paynet": {
+          "title": "Paynet",
+          "description": "Pay via Paynet terminals"
+        },
+        "uzumbank": {
+          "title": "Uzum Bank",
+          "description": "Pay via Uzum Bank"
+        }
+      },
+      "sumSuffix": "so'm",
+      "forCaseSuffix": "support for {name}"
+    }
+  },
+  "admin": {
+    "searchPlaceholder": "Search...",
+    "users": "Users",
+    "pages": "Pages",
+    "reports": "Reports",
+    "settings": "Settings",
+    "create": "Create",
+    "edit": "Edit",
+    "view": "View",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search",
+    "loading": "Loading...",
+    "noData": "No data found",
+    "actions": "Actions",
+    "role": "Role",
+    "name": "Name",
+    "email": "Email",
+    "status": "Status",
+    "usersModule": {
+      "createUser": "Create user",
+      "editUser": "Edit user",
+      "userDetails": "User details",
+      "passwordOptional": "Password (optional for update)"
+    }
+  }
+}

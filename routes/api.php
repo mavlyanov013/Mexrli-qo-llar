@@ -20,6 +20,10 @@ use App\Http\Controllers\Api\Billing\UzumBankController;
 use App\Http\Controllers\Api\Billing\CheckoutController;
 
 use App\Http\Controllers\Api\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Api\Admin\SettingController as AdminSettingController;
+use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Api\Admin\PageController as AdminPageController;
+use App\Http\Controllers\Api\Admin\SectionController as AdminSectionController;
 
 Route::prefix('v1')->group(function () {
 
@@ -130,10 +134,19 @@ Route::prefix('v1')->group(function () {
 
         // 💰 Donations (ALL, admin uchun)
         Route::get('/donations', [DonationController::class, 'index']);
+        Route::put('/donations/{id}', [DonationController::class, 'update']);
+        Route::delete('/donations/{id}', [DonationController::class, 'destroy']);
 
         // 💳 Payments
         Route::get('/payments', [AdminPaymentController::class, 'index']);
         Route::get('/payments/{id}', [AdminPaymentController::class, 'show']);
+
+        // 👤 Users
+        Route::get('/users', [AdminUserController::class, 'index']);
+        Route::post('/users', [AdminUserController::class, 'store']);
+        Route::get('/users/{id}', [AdminUserController::class, 'show']);
+        Route::put('/users/{id}', [AdminUserController::class, 'update']);
+        Route::delete('/users/{id}', [AdminUserController::class, 'destroy']);
 
         // 📩 Help Requests
         Route::get('/help-requests', [HelpRequestController::class, 'index']);
@@ -149,6 +162,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/contact-messages', [ContactMessageController::class, 'index']);
         Route::get('/contact-messages/{id}', [ContactMessageController::class, 'show']);
         Route::put('/contact-messages/{id}', [ContactMessageController::class, 'update']);
+        Route::delete('/contact-messages/{id}', [ContactMessageController::class, 'destroy']);
 
         // 📰 Blog
         Route::get('/blog-posts', [BlogPostController::class, 'index']);
@@ -156,5 +170,28 @@ Route::prefix('v1')->group(function () {
         Route::get('/blog-posts/{id}', [BlogPostController::class, 'show']);
         Route::put('/blog-posts/{id}', [BlogPostController::class, 'update']);
         Route::delete('/blog-posts/{id}', [BlogPostController::class, 'destroy']);
+
+        // 📄 CMS Pages / Sections
+        Route::get('/pages', [AdminPageController::class, 'index']);
+        Route::post('/pages', [AdminPageController::class, 'store']);
+        Route::get('/pages/{id}', [AdminPageController::class, 'show']);
+        Route::put('/pages/{id}', [AdminPageController::class, 'update']);
+        Route::delete('/pages/{id}', [AdminPageController::class, 'destroy']);
+
+        Route::post('/sections', [AdminSectionController::class, 'store']);
+        Route::put('/sections/{id}', [AdminSectionController::class, 'update']);
+        Route::delete('/sections/{id}', [AdminSectionController::class, 'destroy']);
+        Route::post('/sections/reorder', [AdminSectionController::class, 'reorder']);
+
+        // ⚙️ Settings
+        Route::get('/settings', [AdminSettingController::class, 'index']);
+        Route::put('/settings', [AdminSettingController::class, 'upsert']);
+
+        // 📊 Reports
+        Route::get('/reports', [FinancialReportController::class, 'index']);
+        Route::post('/reports', [FinancialReportController::class, 'store']);
+        Route::get('/reports/{id}', [FinancialReportController::class, 'show']);
+        Route::put('/reports/{id}', [FinancialReportController::class, 'update']);
+        Route::delete('/reports/{id}', [FinancialReportController::class, 'destroy']);
     });
 });

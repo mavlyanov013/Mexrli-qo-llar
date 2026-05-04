@@ -9,33 +9,33 @@
                     class="auth-logo"
                 />
 
-                <p class="auth-badge">Mehrli Qo‘llar</p>
+                <p class="auth-badge">{{ t('common.brandName') }}</p>
 
-                <h1>Tizimga kirish</h1>
+                <h1>{{ t('auth.login.title') }}</h1>
                 <p class="auth-subtitle">
-                    Yaxshilik qilish yo‘lida davom etish uchun akkauntingizga kiring.
+                    {{ t('auth.login.subtitle') }}
                 </p>
             </div>
 
             <form @submit.prevent="submit" class="auth-form">
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email">{{ t('auth.login.email') }}</label>
                     <input
                         id="email"
                         v-model="form.email"
                         type="email"
-                        placeholder="Email kiriting"
+                        :placeholder="t('auth.login.emailPlaceholder')"
                         autocomplete="email"
                     />
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Parol</label>
+                    <label for="password">{{ t('auth.login.password') }}</label>
                     <input
                         id="password"
                         v-model="form.password"
                         type="password"
-                        placeholder="Parol kiriting"
+                        :placeholder="t('auth.login.passwordPlaceholder')"
                         autocomplete="current-password"
                     />
                 </div>
@@ -43,7 +43,7 @@
                 <p v-if="error" class="error-message">{{ error }}</p>
 
                 <button type="submit" class="auth-button">
-                    Kirish
+                    {{ t('auth.login.submit') }}
                 </button>
 
 <!--                <p class="auth-link">-->
@@ -57,9 +57,11 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuth } from '../composables/useAuth'
 
 const { login } = useAuth()
+const { t } = useI18n()
 
 const form = reactive({
     email: '',
@@ -74,7 +76,7 @@ const submit = async () => {
     try {
         await login(form)
     } catch (e) {
-        error.value = e.response?.data?.message || 'Email yoki parol noto‘g‘ri'
+        error.value = e.response?.data?.message || t('auth.login.invalidCredentials')
     }
 }
 </script>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -16,6 +17,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
+        'role',
     ];
 
     protected $hidden = [
@@ -29,6 +31,21 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'role' => 'string',
         ];
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    public function hasRole(string $role): bool
+    {
+        if ($this->roles()->where('name', $role)->exists()) {
+            return true;
+        }
+
+        return $this->role === $role || ($this->is_admin && $role === 'super_admin');
     }
 }

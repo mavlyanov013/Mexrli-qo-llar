@@ -24,6 +24,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'is_admin' => $user->is_admin,
+                'role' => $user->role,
             ],
             'token' => $token,
             'token_type' => 'Bearer',
@@ -54,6 +55,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'is_admin' => $user->is_admin,
+                'role' => $user->role,
             ],
         ]);
     }
@@ -75,6 +77,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'is_admin' => $user->is_admin,
+                'role' => $user->role,
             ],
         ]);
     }

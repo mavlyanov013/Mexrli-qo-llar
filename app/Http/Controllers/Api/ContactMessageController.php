@@ -72,4 +72,14 @@ class ContactMessageController extends Controller
             'data' => new ContactMessageResource($contactMessage->fresh()),
         ]);
     }
+
+    public function destroy(int $id): JsonResponse
+    {
+        $contactMessage = ContactMessage::query()->findOrFail($id);
+        $contactMessage->delete();
+
+        return response()->json([
+            'message' => 'Contact message deleted successfully',
+        ]);
+    }
 }

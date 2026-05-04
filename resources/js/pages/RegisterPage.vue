@@ -3,57 +3,57 @@
         <div class="auth-overlay" />
         <div class="auth-card">
             <div class="auth-header">
-                <p class="auth-badge">Mehrli Qo‘llar</p>
-                <h1>Ro‘yxatdan o‘tish</h1>
+                <p class="auth-badge">{{ t('common.brandName') }}</p>
+                <h1>{{ t('auth.register.title') }}</h1>
                 <p class="auth-subtitle">
-                    Platformaga qo‘shiling va ezgu ishlarning bir qismiga aylaning.
+                    {{ t('auth.register.subtitle') }}
                 </p>
             </div>
 
             <form @submit.prevent="submit" class="auth-form">
                 <div class="form-group">
-                    <label for="name">Ism</label>
+                    <label for="name">{{ t('auth.register.name') }}</label>
                     <input
                         id="name"
                         v-model="form.name"
                         type="text"
-                        placeholder="Ismingizni kiriting"
+                        :placeholder="t('auth.register.namePlaceholder')"
                         autocomplete="name"
                     />
                     <small v-if="errors.name">{{ errors.name[0] }}</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email">{{ t('auth.register.email') }}</label>
                     <input
                         id="email"
                         v-model="form.email"
                         type="email"
-                        placeholder="Email kiriting"
+                        :placeholder="t('auth.register.emailPlaceholder')"
                         autocomplete="email"
                     />
                     <small v-if="errors.email">{{ errors.email[0] }}</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Parol</label>
+                    <label for="password">{{ t('auth.register.password') }}</label>
                     <input
                         id="password"
                         v-model="form.password"
                         type="password"
-                        placeholder="Parol kiriting"
+                        :placeholder="t('auth.register.passwordPlaceholder')"
                         autocomplete="new-password"
                     />
                     <small v-if="errors.password">{{ errors.password[0] }}</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="password_confirmation">Parolni tasdiqlang</label>
+                    <label for="password_confirmation">{{ t('auth.register.passwordConfirmation') }}</label>
                     <input
                         id="password_confirmation"
                         v-model="form.password_confirmation"
                         type="password"
-                        placeholder="Parolni qayta kiriting"
+                        :placeholder="t('auth.register.passwordConfirmationPlaceholder')"
                         autocomplete="new-password"
                     />
                 </div>
@@ -62,12 +62,12 @@
                 <p v-if="error" class="error-message">{{ error }}</p>
 
                 <button type="submit" class="auth-button" :disabled="loading">
-                    {{ loading ? "Yuborilmoqda..." : "Ro‘yxatdan o‘tish" }}
+                    {{ loading ? t('auth.register.submitting') : t('auth.register.submit') }}
                 </button>
 
                 <p class="auth-link">
-                    Akkount bormi?
-                    <router-link to="/login">Kirish</router-link>
+                    {{ t('auth.register.alreadyHaveAccount') }}
+                    <router-link to="/login">{{ t('auth.register.loginLink') }}</router-link>
                 </p>
             </form>
         </div>
@@ -76,9 +76,11 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuth } from '../composables/useAuth'
 
 const { register } = useAuth()
+const { t } = useI18n()
 
 const form = reactive({
     name: '',
@@ -100,13 +102,13 @@ const submit = async () => {
 
     try {
         await register(form)
-        message.value = 'Ro‘yxatdan o‘tish muvaffaqiyatli bajarildi'
+        message.value = t('auth.register.success')
     } catch (e) {
         if (e.response?.status === 422) {
-            error.value = e.response.data.message || 'Validation xatolik yuz berdi'
+            error.value = e.response.data.message || t('auth.register.validationError')
             errors.value = e.response.data.errors || {}
         } else {
-            error.value = e.response?.data?.message || 'Xatolik yuz berdi'
+            error.value = e.response?.data?.message || t('auth.register.genericError')
         }
     } finally {
         loading.value = false

@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen bg-[#F8FAFC] flex">
-        <Sidebar v-model="activeTab" :is-open="sidebarOpen" @close="sidebarOpen = false" />
+        <Sidebar :is-open="sidebarOpen" :user="authUser" @close="sidebarOpen = false" />
 
         <main class="flex-1 lg:ml-64 min-w-0">
             <div class="sticky top-0 z-30 bg-[#F8FAFC]/90 backdrop-blur border-b border-gray-100">
@@ -43,9 +43,7 @@
             </div>
 
             <div class="px-4 pb-6 lg:px-8 lg:pb-8 pt-4">
-                <router-view v-slot="{ Component }">
-                    <component :is="Component" :active-tab="activeTab" />
-                </router-view>
+                <router-view />
             </div>
         </main>
     </div>
@@ -54,55 +52,31 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import Sidebar from '../components/SideBar.vue'
 
 const sidebarOpen = ref(false)
 const { locale, t } = useI18n()
 const route = useRoute()
-const router = useRouter()
+const authUser = computed(() => JSON.parse(localStorage.getItem('user') || 'null'))
 
 const languages = ['en', 'uz', 'ru']
 
-const allowedTabs = [
-    'overview',
-    'cases',
-    'donations',
-    'help-requests',
-    'volunteers',
-    'messages',
-    'blog',
-    'payments',
-]
-
-const activeTab = computed({
-    get() {
-        const tab = route.query.tab
-        return allowedTabs.includes(tab) ? tab : 'overview'
-    },
-    set(value) {
-        router.replace({
-            query: {
-                ...route.query,
-                tab: value,
-            },
-        })
-    },
-})
-
 const pageTitle = computed(() => {
     const map = {
-        overview: t('admin.dashboard'),
-        cases: t('admin.cases'),
-        donations: t('admin.donations'),
-        'help-requests': t('admin.helpRequests'),
-        volunteers: t('admin.volunteers'),
-        messages: t('admin.messages'),
-        blog: t('admin.blog'),
-        payments: t('admin.payments'),
+        '/admin/dashboard': t('admin.dashboard'),
+        '/admin/users': t('admin.users'),
+        '/admin/payments': t('admin.payments'),
+        '/admin/donations': t('admin.donations'),
+        '/admin/cases': t('admin.cases'),
+        '/admin/blog': t('admin.blog'),
+        '/admin/volunteers': t('admin.volunteers'),
+        '/admin/pages': t('admin.pages'),
+        '/admin/reports': t('admin.reports'),
+        '/admin/settings': t('admin.settings'),
     }
-
-    return map[activeTab.value] || t('admin.panel')
+    const entry = Object.entries(map).find(([path]) => route.path.startsWith(path))
+    return entry ? entry[1] : t('admin.panel')
 })
 
 const setLocale = (lang) => {

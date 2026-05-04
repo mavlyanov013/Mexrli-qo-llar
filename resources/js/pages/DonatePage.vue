@@ -13,7 +13,7 @@
                     {{ t('donatePage.successText') }}
                 </p>
                 <p class="text-2xl font-bold text-[#2A7DE1]">
-                    {{ Number(finalAmount || 0).toLocaleString() }} so'm
+                    {{ Number(finalAmount || 0).toLocaleString() }} {{ t('public.donate.sumSuffix') }}
                 </p>
             </div>
 
@@ -92,7 +92,7 @@
                                 <option value="general">
                                     {{
                                         caseData
-                                            ? `${caseData.name} uchun yordam`
+                                            ? t('public.donate.forCaseSuffix', { name: caseData.name })
                                             : t('donatePage.serviceOptions.general')
                                     }}
                                 </option>
@@ -115,7 +115,7 @@
                                 @click="selectPreset(item.amount)"
                             >
                                 <div class="text-2xl font-bold text-gray-900 leading-none">
-                                    {{ Number(item.amount).toLocaleString() }} so'm
+                                    {{ Number(item.amount).toLocaleString() }} {{ t('public.donate.sumSuffix') }}
                                 </div>
                                 <div class="text-xs text-gray-500 mt-2 leading-5">
                                     {{ item.label }}
@@ -125,7 +125,7 @@
 
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium pointer-events-none">
-                                so'm
+                                {{ t('public.donate.sumSuffix') }}
                             </span>
                             <input
                                 v-model="customAmount"
@@ -152,8 +152,8 @@
                 : 'border-gray-200 hover:border-gray-300'"
                                 @click="paymentMethod = 'paycom'"
                             >
-                                <div class="font-bold text-gray-900">Payme</div>
-                                <div class="text-sm text-gray-500 mt-1">Online payment</div>
+                                <div class="font-bold text-gray-900">{{ t('public.donate.paymentMethods.paycom.title') }}</div>
+                                <div class="text-sm text-gray-500 mt-1">{{ t('public.donate.paymentMethods.paycom.description') }}</div>
                             </button>
 
                             <button
@@ -164,8 +164,8 @@
                 : 'border-gray-200 hover:border-gray-300'"
                                 @click="paymentMethod = 'click'"
                             >
-                                <div class="font-bold text-gray-900">Click</div>
-                                <div class="text-sm text-gray-500 mt-1">Online payment</div>
+                                <div class="font-bold text-gray-900">{{ t('public.donate.paymentMethods.click.title') }}</div>
+                                <div class="text-sm text-gray-500 mt-1">{{ t('public.donate.paymentMethods.click.description') }}</div>
                             </button>
 
                             <button
@@ -176,8 +176,8 @@
                 : 'border-gray-200 hover:border-gray-300'"
                                 @click="paymentMethod = 'paynet'"
                             >
-                                <div class="font-bold text-gray-900">Paynet</div>
-                                <div class="text-sm text-gray-500 mt-1">Paynet orqali to'lov</div>
+                                <div class="font-bold text-gray-900">{{ t('public.donate.paymentMethods.paynet.title') }}</div>
+                                <div class="text-sm text-gray-500 mt-1">{{ t('public.donate.paymentMethods.paynet.description') }}</div>
                             </button>
 
                             <button
@@ -188,8 +188,8 @@
                 : 'border-gray-200 hover:border-gray-300'"
                                 @click="paymentMethod = 'uzumbank'"
                             >
-                                <div class="font-bold text-gray-900">Uzum Bank</div>
-                                <div class="text-sm text-gray-500 mt-1">Uzum Bank orqali to'lov</div>
+                                <div class="font-bold text-gray-900">{{ t('public.donate.paymentMethods.uzumbank.title') }}</div>
+                                <div class="text-sm text-gray-500 mt-1">{{ t('public.donate.paymentMethods.uzumbank.description') }}</div>
                             </button>
                         </div>
                     </div>
@@ -242,7 +242,7 @@
                     >
                         <span v-if="submitting">{{ t('donatePage.processing') }}</span>
                         <span v-else>
-                            ❤ {{ t('donatePage.completeDonation', { amount: `${Number(finalAmount || 0).toLocaleString()} so'm` }) }}
+                            ❤ {{ t('donatePage.completeDonation', { amount: `${Number(finalAmount || 0).toLocaleString()} ${t('public.donate.sumSuffix')}` }) }}
                         </span>
                     </button>
                 </form>

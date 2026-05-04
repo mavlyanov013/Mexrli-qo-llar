@@ -16,7 +16,7 @@ export function useAuth() {
         user.value = res.user
 
         if (res.user?.is_admin) {
-            router.push('/admin')
+            router.push('/admin/dashboard')
         } else {
             router.push('/')
         }

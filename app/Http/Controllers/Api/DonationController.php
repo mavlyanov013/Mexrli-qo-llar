@@ -7,17 +7,41 @@ use App\Http\Requests\StoreDonationRequest;
 use App\Http\Resources\DonationResource;
 use App\Models\Donation;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class DonationController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $donations = Donation::query()
-            ->latest()
-            ->get();
+        $query = Donation::query()->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->string('status'));
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->string('type'));
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->string('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('donor_name', 'like', "%{$search}%")
+                    ->orWhere('donor_email', 'like', "%{$search}%");
+            });
+        }
+
+        $donations = $query->paginate((int) $request->input('per_page', 20));
 
         return response()->json([
-            'data' => DonationResource::collection($donations),
+            'message' => 'Donations fetched successfully',
+            'data' => DonationResource::collection($donations->items()),
+            'meta' => [
+                'current_page' => $donations->currentPage(),
+                'last_page' => $donations->lastPage(),
+                'per_page' => $donations->perPage(),
+                'total' => $donations->total(),
+            ],
         ]);
     }
     public function publicIndex(): JsonResponse
@@ -50,6 +74,33 @@ class DonationController extends Controller
 
         return response()->json([
             'data' => $donations,
+        ]);
+    }
+
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $donation = Donation::query()->findOrFail($id);
+        $validated = $request->validate([
+            'status' => ['nullable', 'string', 'max:100'],
+            'type' => ['nullable', 'string', 'max:100'],
+            'amount' => ['nullable', 'numeric', 'min:0'],
+            'message' => ['nullable', 'string'],
+        ]);
+        $donation->update($validated);
+
+        return response()->json([
+            'message' => 'Donation updated successfully',
+            'data' => new DonationResource($donation->fresh()),
+        ]);
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        $donation = Donation::query()->findOrFail($id);
+        $donation->delete();
+
+        return response()->json([
+            'message' => 'Donation deleted successfully',
         ]);
     }
 }

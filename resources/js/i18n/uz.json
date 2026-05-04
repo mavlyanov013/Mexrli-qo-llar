@@ -1,0 +1,89 @@
+{
+  "common": {
+    "brandName": "Mehrli Qo'llar",
+    "or": "yoki",
+    "unknown": "Noma'lum"
+  },
+  "auth": {
+    "login": {
+      "title": "Tizimga kirish",
+      "subtitle": "Yaxshilik qilish yo'lida davom etish uchun akkauntingizga kiring.",
+      "email": "Email",
+      "emailPlaceholder": "Email kiriting",
+      "password": "Parol",
+      "passwordPlaceholder": "Parol kiriting",
+      "submit": "Kirish",
+      "invalidCredentials": "Email yoki parol noto'g'ri"
+    },
+    "register": {
+      "title": "Ro'yxatdan o'tish",
+      "subtitle": "Platformaga qo'shiling va ezgu ishlarning bir qismiga aylaning.",
+      "name": "Ism",
+      "namePlaceholder": "Ismingizni kiriting",
+      "email": "Email",
+      "emailPlaceholder": "Email kiriting",
+      "password": "Parol",
+      "passwordPlaceholder": "Parol kiriting",
+      "passwordConfirmation": "Parolni tasdiqlang",
+      "passwordConfirmationPlaceholder": "Parolni qayta kiriting",
+      "submit": "Ro'yxatdan o'tish",
+      "submitting": "Yuborilmoqda...",
+      "success": "Ro'yxatdan o'tish muvaffaqiyatli bajarildi",
+      "validationError": "Validation xatolik yuz berdi",
+      "genericError": "Xatolik yuz berdi",
+      "alreadyHaveAccount": "Akkount bormi?",
+      "loginLink": "Kirish"
+    }
+  },
+  "public": {
+    "donate": {
+      "paymentMethods": {
+        "paycom": {
+          "title": "Payme",
+          "description": "Onlayn to'lov"
+        },
+        "click": {
+          "title": "Click",
+          "description": "Onlayn to'lov"
+        },
+        "paynet": {
+          "title": "Paynet",
+          "description": "Paynet orqali to'lov"
+        },
+        "uzumbank": {
+          "title": "Uzum Bank",
+          "description": "Uzum Bank orqali to'lov"
+        }
+      },
+      "sumSuffix": "so'm",
+      "forCaseSuffix": "{name} uchun yordam"
+    }
+  },
+  "admin": {
+    "searchPlaceholder": "Qidirish...",
+    "users": "Foydalanuvchilar",
+    "pages": "Sahifalar",
+    "reports": "Hisobotlar",
+    "settings": "Sozlamalar",
+    "create": "Yaratish",
+    "edit": "Tahrirlash",
+    "view": "Ko'rish",
+    "delete": "O'chirish",
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "search": "Qidirish",
+    "loading": "Yuklanmoqda...",
+    "noData": "Ma'lumot topilmadi",
+    "actions": "Amallar",
+    "role": "Rol",
+    "name": "Ism",
+    "email": "Email",
+    "status": "Holat",
+    "usersModule": {
+      "createUser": "Foydalanuvchi yaratish",
+      "editUser": "Foydalanuvchini tahrirlash",
+      "userDetails": "Foydalanuvchi tafsilotlari",
+      "passwordOptional": "Parol (yangilashda ixtiyoriy)"
+    }
+  }
+}

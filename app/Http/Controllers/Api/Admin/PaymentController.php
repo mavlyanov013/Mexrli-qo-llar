@@ -3,27 +3,22 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Payment;
+use App\Services\Admin\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
+    public function __construct(private readonly PaymentService $paymentService)
+    {
+    }
+
     public function index(Request $request): JsonResponse
     {
-        $query = Payment::query()->latest();
-
-        if ($request->filled('provider')) {
-            $query->where('provider', $request->string('provider'));
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->string('status'));
-        }
-
-        $payments = $query->paginate((int) $request->input('per_page', 20));
+        $payments = $this->paymentService->list($request);
 
         return response()->json([
+            'message' => 'Payments fetched successfully',
             'data' => $payments->items(),
             'meta' => [
                 'current_page' => $payments->currentPage(),
@@ -36,9 +31,10 @@ class PaymentController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        $payment = Payment::query()->findOrFail($id);
+        $payment = $this->paymentService->findOrFail($id);
 
         return response()->json([
+            'message' => 'Payment fetched successfully',
             'data' => $payment,
         ]);
     }
