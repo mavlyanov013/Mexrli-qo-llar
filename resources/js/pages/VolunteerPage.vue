@@ -130,13 +130,13 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import api from '../services/api'
 import SectionHeader from '../components/shared/SectionHeader.vue'
+import { useVolunteerApplications } from '@/composables/useVolunteerApplications'
 
 const { t } = useI18n()
 
 const submitted = ref(false)
-const submitting = ref(false)
+const { loading: submitting, submitApplication } = useVolunteerApplications()
 
 const roles = computed(() => [
     {
@@ -189,14 +189,9 @@ const form = reactive({
 })
 
 const handleSubmit = async () => {
-    submitting.value = true
-    try {
-        await api.post('/volunteer-applications', form)
+    const result = await submitApplication(form)
+    if (!result.error) {
         submitted.value = true
-    } catch (error) {
-        console.error('Volunteer submit error:', error)
-    } finally {
-        submitting.value = false
     }
 }
 </script>

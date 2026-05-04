@@ -1,6 +1,16 @@
 import api from './api'
+import { normalizeList, normalizeMeta, toServiceError } from './serviceHelpers'
 
 export default {
+    async fetchList(params = {}) {
+        try {
+            const response = await api.get('/cases', { params })
+            return { data: normalizeList(response), meta: normalizeMeta(response), error: null }
+        } catch (error) {
+            return { data: [], meta: null, error: toServiceError(error, 'Failed to fetch cases') }
+        }
+    },
+
     async getCases(params = {}) {
         const response = await api.get('/admin/cases', { params })
         return response.data.data ?? response.data

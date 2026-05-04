@@ -107,11 +107,8 @@ const monthlyData = computed(() => {
         const found = months.find(m => m.key === key)
 
         if (found) {
-            // 💡 received
             found.received += Number(d.amount || 0)
-
-            // 💡 spent (fake for now → later financial report bilan almashtiramiz)
-            found.spent += Number(d.amount || 0) * 0.85
+            found.spent += Number(d.amount || 0)
         }
     }
 

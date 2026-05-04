@@ -2,7 +2,20 @@
   "common": {
     "brandName": "Mehrli Qo'llar",
     "or": "or",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "loading": "Loading...",
+    "refresh": "Refresh",
+    "status": {
+      "pending": "Pending",
+      "success": "Success",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "funded": "Funded",
+      "new": "New",
+      "reviewed": "Reviewed",
+      "accepted": "Accepted",
+      "rejected": "Rejected"
+    }
   },
   "auth": {
     "login": {
@@ -58,6 +71,22 @@
       "sumSuffix": "so'm",
       "forCaseSuffix": "support for {name}"
     }
+  },
+  "partnersPage": {
+    "title": "Trusted Partners",
+    "subtitle": "Organizations that stand with us",
+    "empty": "Partner organizations will appear here.",
+    "visitWebsite": "Visit website"
+  },
+  "payStatus": {
+    "paynetTitle": "Paynet payment status",
+    "uzumTitle": "Uzum Bank payment status",
+    "paymentId": "Payment ID",
+    "provider": "Provider",
+    "transactionId": "Transaction ID",
+    "amount": "Amount",
+    "payNow": "Pay now",
+    "notFound": "Payment not found"
   },
   "admin": {
     "searchPlaceholder": "Search...",

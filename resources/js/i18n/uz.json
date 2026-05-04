@@ -2,7 +2,20 @@
   "common": {
     "brandName": "Mehrli Qo'llar",
     "or": "yoki",
-    "unknown": "Noma'lum"
+    "unknown": "Noma'lum",
+    "loading": "Yuklanmoqda...",
+    "refresh": "Yangilash",
+    "status": {
+      "pending": "Kutilmoqda",
+      "success": "Muvaffaqiyatli",
+      "failed": "Xatolik",
+      "cancelled": "Bekor qilingan",
+      "funded": "Moliyalashtirilgan",
+      "new": "Yangi",
+      "reviewed": "Ko'rib chiqilgan",
+      "accepted": "Qabul qilingan",
+      "rejected": "Rad etilgan"
+    }
   },
   "auth": {
     "login": {
@@ -58,6 +71,22 @@
       "sumSuffix": "so'm",
       "forCaseSuffix": "{name} uchun yordam"
     }
+  },
+  "partnersPage": {
+    "title": "Ishonchli hamkorlar",
+    "subtitle": "Biz bilan birga bo'lgan tashkilotlar",
+    "empty": "Hamkor tashkilotlar shu yerda ko'rsatiladi.",
+    "visitWebsite": "Veb-saytga o'tish"
+  },
+  "payStatus": {
+    "paynetTitle": "Paynet to'lov holati",
+    "uzumTitle": "Uzum Bank to'lov holati",
+    "paymentId": "To'lov ID",
+    "provider": "Provayder",
+    "transactionId": "Tranzaksiya ID",
+    "amount": "Summa",
+    "payNow": "Hozir to'lash",
+    "notFound": "To'lov topilmadi"
   },
   "admin": {
     "searchPlaceholder": "Qidirish...",

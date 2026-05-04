@@ -2,7 +2,20 @@
   "common": {
     "brandName": "Mehrli Qo'llar",
     "or": "или",
-    "unknown": "Неизвестно"
+    "unknown": "Неизвестно",
+    "loading": "Загрузка...",
+    "refresh": "Обновить",
+    "status": {
+      "pending": "Ожидает",
+      "success": "Успешно",
+      "failed": "Ошибка",
+      "cancelled": "Отменено",
+      "funded": "Профинансировано",
+      "new": "Новая",
+      "reviewed": "Рассмотрено",
+      "accepted": "Принято",
+      "rejected": "Отклонено"
+    }
   },
   "auth": {
     "login": {
@@ -58,6 +71,22 @@
       "sumSuffix": "сум",
       "forCaseSuffix": "поддержка для {name}"
     }
+  },
+  "partnersPage": {
+    "title": "Проверенные партнеры",
+    "subtitle": "Организации, которые поддерживают нас",
+    "empty": "Здесь будут отображаться партнерские организации.",
+    "visitWebsite": "Перейти на сайт"
+  },
+  "payStatus": {
+    "paynetTitle": "Статус платежа Paynet",
+    "uzumTitle": "Статус платежа Uzum Bank",
+    "paymentId": "ID платежа",
+    "provider": "Провайдер",
+    "transactionId": "ID транзакции",
+    "amount": "Сумма",
+    "payNow": "Оплатить",
+    "notFound": "Платеж не найден"
   },
   "admin": {
     "searchPlaceholder": "Поиск...",

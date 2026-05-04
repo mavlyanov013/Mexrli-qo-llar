@@ -21,8 +21,8 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { Wallet, Banknote, Users } from 'lucide-vue-next'
+import { computed } from 'vue'
+import { Wallet, HandCoins, Users } from 'lucide-vue-next'
 import IconBadge from '../shared/IconBadge.vue'
 
 const props = defineProps({
@@ -35,9 +35,6 @@ const props = defineProps({
         required: true,
     },
 })
-
-const todayKey = `cash_donations_${new Date().toISOString().slice(0, 10)}`
-const cashAmount = ref(Number(localStorage.getItem(todayKey) || 0))
 
 const isTodayDate = (dateString) => {
     if (!dateString) return false
@@ -76,9 +73,9 @@ const stats = computed(() => [
         tone: 'green',
     },
     {
-        label: props.t('transparencyPage.cashToday'),
-        value: `${cashAmount.value.toLocaleString()} UZS`,
-        icon: Banknote,
+        label: props.t('transparencyPage.totalToday'),
+        value: `${todayStats.value.totalAmount.toLocaleString()} UZS`,
+        icon: HandCoins,
         tone: 'yellow',
     },
     {

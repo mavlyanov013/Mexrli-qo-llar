@@ -30,15 +30,13 @@
                         {{ t(`transparencyPage.reportTypes.${report.typeKey}`) }}
                     </span>
 
-                    <a
+                    <ExternalLink
                         :href="report.file_url"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="inline-flex items-center gap-2 rounded-xl px-5 py-3 border border-gray-300 bg-white text-gray-900 font-medium hover:bg-gray-50"
+                        classes="inline-flex items-center gap-2 rounded-xl px-5 py-3 border border-gray-300 bg-white text-gray-900 font-medium hover:bg-gray-50"
                     >
                         <Download class="w-4 h-4" />
                         {{ t('transparencyPage.downloadReport') }}
-                    </a>
+                    </ExternalLink>
                 </div>
             </div>
         </div>
@@ -52,6 +50,7 @@
 <script setup>
 import { Download, FileText } from 'lucide-vue-next'
 import IconBadge from '../shared/IconBadge.vue'
+import ExternalLink from '../shared/ExternalLink.vue'
 
 defineProps({
     reports: {
