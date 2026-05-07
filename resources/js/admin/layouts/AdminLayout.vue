@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import Sidebar from '../components/SideBar.vue'
@@ -69,6 +69,10 @@ const pageTitle = computed(() => {
         '/admin/payments': t('admin.payments'),
         '/admin/donations': t('admin.donations'),
         '/admin/cases': t('admin.cases'),
+        '/admin/help-requests': "Yordam so‘rovlari",
+        '/admin/about-sections': "About bo‘limlari",
+        '/admin/news': "Yangiliklar",
+        '/admin/faq': "FAQ",
         '/admin/blog': t('admin.blog'),
         '/admin/volunteers': t('admin.volunteers'),
         '/admin/pages': t('admin.pages'),
@@ -83,4 +87,11 @@ const setLocale = (lang) => {
     locale.value = lang
     localStorage.setItem('lang', lang)
 }
+
+onMounted(() => {
+    if (locale.value !== 'uz') {
+        locale.value = 'uz'
+        localStorage.setItem('lang', 'uz')
+    }
+})
 </script>

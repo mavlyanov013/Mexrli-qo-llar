@@ -54,7 +54,7 @@ const routes = [
         component: NewsPage,
     },
     {
-        path: '/news/:id',
+        path: '/news/:slug',
         name: 'news-detail',
         component: NewsDetailPage,
     },
@@ -222,6 +222,54 @@ const routes = [
                 path: 'cases/:id',
                 name: 'admin-cases-view',
                 component: () => import('@/admin/pages/AdminCasesPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'about-sections',
+                name: 'admin-about-sections',
+                component: () => import('@/admin/pages/AboutPageEditor.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'news',
+                name: 'admin-news',
+                component: () => import('@/admin/pages/AdminNewsPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'news/create',
+                name: 'admin-news-create',
+                component: () => import('@/admin/pages/AdminNewsPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'news/:id/edit',
+                name: 'admin-news-edit',
+                component: () => import('@/admin/pages/AdminNewsPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'faq',
+                name: 'admin-faq',
+                component: () => import('@/admin/pages/AdminFaqPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'faq/create',
+                name: 'admin-faq-create',
+                component: () => import('@/admin/pages/AdminFaqPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'faq/:id/edit',
+                name: 'admin-faq-edit',
+                component: () => import('@/admin/pages/AdminFaqPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'help-requests',
+                name: 'admin-help-requests',
+                component: () => import('@/admin/pages/AdminHelpRequestsPage.vue'),
                 meta: { requiresAuth: true, admin: true }
             },
             {

@@ -21,6 +21,6 @@ export default {
         return res.data
     },
     getBySlug(slug) {
-        return api.get(`/about`).then((r) => r.data)
+        return api.get(`/pages/${slug}`).then((r) => r.data)
     },
 }

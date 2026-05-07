@@ -10,9 +10,12 @@ class HelpRequest extends Model
     protected $fillable = [
         'full_name',
         'phone',
+        'description',
         'city',
         'situation_description',
+        'category',
         'support_type',
+        'attachments',
         'medical_documents',
         'photos',
         'consent_given',
@@ -22,6 +25,7 @@ class HelpRequest extends Model
     ];
 
     protected $casts = [
+        'attachments' => 'array',
         'medical_documents' => 'array',
         'photos' => 'array',
         'consent_given' => 'boolean',

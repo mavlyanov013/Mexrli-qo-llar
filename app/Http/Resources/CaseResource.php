@@ -15,15 +15,20 @@ class CaseResource extends JsonResource
             'age' => $this->age,
             'photo_url' => $this->photo_url,
             'location' => $this->location,
+            'phone' => $this->phone,
             'condition' => $this->condition,
             'story' => $this->story,
             'short_description' => $this->short_description,
+            'title' => $this->name,
+            'description' => $this->short_description ?: $this->story,
 
             'goal_amount' => (float) $this->goal_amount,
             'raised_amount' => (float) $this->raised_amount,
 
             'urgency' => $this->urgency,
             'category' => $this->category,
+            'source' => $this->source,
+            'created_from_request_id' => $this->created_from_request_id,
             'status' => $this->status,
 
             // arrays

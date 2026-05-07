@@ -125,7 +125,7 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
-import blogService from '../services/blogService'
+import newsService from '../services/newsService'
 import caseService from '../services/caseService'
 
 const { t, locale } = useI18n()
@@ -139,7 +139,7 @@ const fetchPost = async () => {
     loading.value = true
 
     try {
-        post.value = await blogService.getBlogPostById(route.params.id)
+        post.value = await newsService.getBySlug(route.params.slug)
 
         if (post.value?.case_id) {
             const caseResult = await caseService.getCaseById(post.value.case_id)

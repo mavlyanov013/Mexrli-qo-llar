@@ -74,29 +74,29 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
-                        {{ t('helpRequestPage.supportType') }}
+                        Kategoriya *
                     </label>
                     <select
-                        v-model="form.support_type"
+                        v-model="form.category"
                         class="rounded-xl mt-2 border border-gray-300 px-4 py-3 w-full outline-none"
                     >
-                        <option value="medical_treatment">{{ t('helpRequestPage.supportOptions.medical_treatment') }}</option>
-                        <option value="surgery">{{ t('helpRequestPage.supportOptions.surgery') }}</option>
-                        <option value="rehabilitation">{{ t('helpRequestPage.supportOptions.rehabilitation') }}</option>
-                        <option value="medication">{{ t('helpRequestPage.supportOptions.medication') }}</option>
-                        <option value="family_support">{{ t('helpRequestPage.supportOptions.family_support') }}</option>
-                        <option value="other">{{ t('helpRequestPage.supportOptions.other') }}</option>
+                        <option value="medical_treatment">Tibbiy davolanish</option>
+                        <option value="surgery">Jarrohlik</option>
+                        <option value="rehabilitation">Reabilitatsiya</option>
+                        <option value="medication">Dori-darmon</option>
+                        <option value="family_support">Oilaviy yordam</option>
+                        <option value="other">Boshqa</option>
                     </select>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
-                        {{ t('helpRequestPage.situation') }}
+                        Tavsif *
                     </label>
                     <textarea
-                        v-model="form.situation_description"
+                        v-model="form.description"
                         rows="6"
-                        :placeholder="t('helpRequestPage.situationPlaceholder')"
+                        placeholder="Vaziyatni yozing"
                         class="rounded-xl mt-2 border border-gray-300 px-4 py-3 w-full outline-none resize-none"
                         required
                     />
@@ -108,20 +108,18 @@
                     </label>
                     <div class="mt-2 border-2 border-dashed border-gray-200 rounded-xl p-6 text-center">
                         <div class="text-3xl text-gray-400 mx-auto mb-2">📄</div>
-                        <p class="text-sm text-gray-500 mb-3">
-                            {{ t('helpRequestPage.medicalDocumentsHint') }}
-                        </p>
+                        <p class="text-sm text-gray-500 mb-3">Fayllar ixtiyoriy</p>
                         <input
                             type="file"
                             multiple
                             accept=".pdf,.jpg,.jpeg,.png"
-                            @change="handleLocalFiles($event, 'medical_documents')"
+                            @change="handleLocalFiles($event, 'attachments')"
                         />
                         <p
-                            v-if="form.medical_documents.length > 0"
+                            v-if="form.attachments.length > 0"
                             class="text-sm text-green-600 mt-2"
                         >
-                            {{ t('helpRequestPage.filesSelected', { count: form.medical_documents.length }) }}
+                            {{ form.attachments.length }} ta fayl tanlandi
                         </p>
                     </div>
                 </div>
@@ -186,9 +184,12 @@ const submitting = ref(false)
 const form = reactive({
     full_name: '',
     phone: '',
+    category: 'medical_treatment',
+    description: '',
     city: '',
     situation_description: '',
     support_type: 'medical_treatment',
+    attachments: [],
     medical_documents: [],
     photos: [],
     consent_given: false,
@@ -208,6 +209,9 @@ const handleSubmit = async () => {
     submitting.value = true
 
     try {
+        form.situation_description = form.description
+        form.support_type = form.category
+        form.medical_documents = [...form.attachments]
         await helpRequestService.createHelpRequest(form)
         submitted.value = true
     } catch (error) {

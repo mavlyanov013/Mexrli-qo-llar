@@ -226,7 +226,7 @@
                                 <RouterLink
                                     v-for="post in relatedNews"
                                     :key="post.id"
-                                    :to="`/news/${post.id}`"
+                                    :to="`/news/${post.slug || post.id}`"
                                     class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group border border-gray-100"
                                 >
                                     <img
@@ -371,7 +371,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 import caseService from '../services/caseService'
 import donationService from '../services/donationService'
-import blogService from '../services/blogService'
+import newsService from '../services/newsService'
 import ProgressRing from '../components/shared/ProgressRing.vue'
 
 const { t, locale } = useI18n()
@@ -416,7 +416,7 @@ const fetchDonations = async () => {
 
 const fetchRelatedNews = async () => {
     try {
-        const allPosts = await blogService.getBlogPosts()
+        const allPosts = await newsService.getLatest()
         relatedNews.value = allPosts.filter(
             (item) => String(item.case_id) === String(caseData.value.id)
         ).slice(0, 5)

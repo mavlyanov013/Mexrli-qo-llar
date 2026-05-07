@@ -111,7 +111,11 @@
 
                 <!-- STATUS -->
                 <select v-model="form.status" class="input">
+                    <option value="new">Yangi</option>
+                    <option value="draft">Qoralama</option>
                     <option value="active">Faol</option>
+                    <option value="paused">To‘xtatilgan</option>
+                    <option value="completed">Yakunlangan</option>
                     <option value="closed">Yopilgan</option>
                 </select>
 

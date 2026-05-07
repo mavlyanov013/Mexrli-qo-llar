@@ -7,7 +7,7 @@
                 :to="createTo"
                 class="rounded-lg bg-[#2A7DE1] px-4 py-2 text-sm font-medium text-white"
             >
-                {{ t('admin.create') }}
+                ➕ {{ t('admin.create') }}
             </router-link>
         </div>
         <div class="rounded-xl border border-gray-200 bg-white p-4">

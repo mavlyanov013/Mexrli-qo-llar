@@ -3,10 +3,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
             <div class="text-center max-w-3xl mx-auto mb-16">
                 <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-5">
-                    {{ t('aboutPage.title') }}
+                    {{ hero?.title || t('aboutPage.title') }}
                 </h1>
                 <p class="text-lg text-gray-600 leading-relaxed">
-                    {{ t('aboutPage.subtitle') }}
+                    {{ hero?.content || t('aboutPage.subtitle') }}
                 </p>
             </div>
 
@@ -92,23 +92,21 @@
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
                                 {{ t('aboutPage.orgName') }}
                             </p>
-                            <p class="font-semibold text-gray-800">
-                                Благотворительный фонд «Mehrli»
-                            </p>
+                            <p class="font-semibold text-gray-800">{{ legalItems[0]?.content || '—' }}</p>
                         </div>
 
                         <div class="bg-gray-50 rounded-xl p-4">
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
                                 {{ t('aboutPage.inn') }}
                             </p>
-                            <p class="font-semibold text-gray-800 font-mono">—</p>
+                            <p class="font-semibold text-gray-800 font-mono">{{ legalItems[1]?.content || '—' }}</p>
                         </div>
 
                         <div class="bg-gray-50 rounded-xl p-4">
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
                                 {{ t('aboutPage.legalAddress') }}
                             </p>
-                            <p class="font-semibold text-gray-800">—</p>
+                            <p class="font-semibold text-gray-800">{{ legalItems[2]?.content || '—' }}</p>
                         </div>
                     </div>
 
@@ -117,21 +115,21 @@
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
                                 {{ t('aboutPage.bank') }}
                             </p>
-                            <p class="font-semibold text-gray-800">—</p>
+                            <p class="font-semibold text-gray-800">{{ legalItems[3]?.content || '—' }}</p>
                         </div>
 
                         <div class="bg-gray-50 rounded-xl p-4">
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
                                 {{ t('aboutPage.accountUzs') }}
                             </p>
-                            <p class="font-semibold text-gray-800 font-mono">—</p>
+                            <p class="font-semibold text-gray-800 font-mono">{{ legalItems[4]?.content || '—' }}</p>
                         </div>
 
                         <div class="bg-gray-50 rounded-xl p-4">
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
                                 {{ t('aboutPage.mfoBik') }}
                             </p>
-                            <p class="font-semibold text-gray-800 font-mono">—</p>
+                            <p class="font-semibold text-gray-800 font-mono">{{ legalItems[5]?.content || '—' }}</p>
                         </div>
                     </div>
                 </div>
@@ -160,7 +158,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
     Heart,
@@ -175,7 +173,6 @@ import {
 } from 'lucide-vue-next'
 import SectionHeader from '../components/shared/SectionHeader.vue'
 import IconBadge from '../components/shared/IconBadge.vue'
-import { ref, onMounted } from 'vue'
 import pageService from '@/services/pageService'
 
 const page = ref(null)
@@ -196,36 +193,78 @@ const fetchPage = async () => {
 
 const { t, tm } = useI18n()
 
-const values = computed(() => [
-    { icon: ShieldCheck, title: tm('aboutPage.values')[0].title, desc: tm('aboutPage.values')[0].desc, tone: 'blue' },
-    { icon: Heart, title: tm('aboutPage.values')[1].title, desc: tm('aboutPage.values')[1].desc, tone: 'red' },
-    { icon: Target, title: tm('aboutPage.values')[2].title, desc: tm('aboutPage.values')[2].desc, tone: 'green' },
-    { icon: Star, title: tm('aboutPage.values')[3].title, desc: tm('aboutPage.values')[3].desc, tone: 'orange' },
-])
+const iconMap = {
+    Heart,
+    Eye,
+    ShieldCheck,
+    Target,
+    Star,
+    FileText,
+    ScrollText,
+    Building2,
+}
 
-const docs = computed(() => [
-    {
-        title: tm('aboutPage.docs')[0].title,
-        desc: tm('aboutPage.docs')[0].desc,
-        href: '#',
-        tone: 'blue',
-        icon: FileText,
-    },
-    {
-        title: tm('aboutPage.docs')[1].title,
-        desc: tm('aboutPage.docs')[1].desc,
-        href: '#',
-        tone: 'green',
-        icon: ScrollText,
-    },
-])
+const sections = computed(() => page.value?.sections ?? [])
+const byType = (type) => sections.value.filter((item) => item.type === type)
 
-const team = computed(() => [
-    { name: 'Dr. Aziza Karimova', role: tm('aboutPage.team')[0].role, initials: 'AK' },
-    { name: 'Rustam Alimov', role: tm('aboutPage.team')[1].role, initials: 'RA' },
-    { name: 'Nodira Tosheva', role: tm('aboutPage.team')[2].role, initials: 'NT' },
-    { name: 'Bekzod Umarov', role: tm('aboutPage.team')[3].role, initials: 'BU' },
-])
+const hero = computed(() => byType('hero')[0] ?? null)
+
+const values = computed(() => {
+    const items = byType('value')
+    if (items.length) {
+        return items.map((item) => ({
+            icon: iconMap[item.extra?.icon] || ShieldCheck,
+            title: item.title,
+            desc: item.content,
+            tone: item.extra?.tone || 'blue',
+        }))
+    }
+
+    return [
+        { icon: ShieldCheck, title: tm('aboutPage.values')[0].title, desc: tm('aboutPage.values')[0].desc, tone: 'blue' },
+        { icon: Heart, title: tm('aboutPage.values')[1].title, desc: tm('aboutPage.values')[1].desc, tone: 'red' },
+        { icon: Target, title: tm('aboutPage.values')[2].title, desc: tm('aboutPage.values')[2].desc, tone: 'green' },
+        { icon: Star, title: tm('aboutPage.values')[3].title, desc: tm('aboutPage.values')[3].desc, tone: 'orange' },
+    ]
+})
+
+const docs = computed(() => {
+    const items = byType('doc')
+    if (items.length) {
+        return items.map((item) => ({
+            title: item.title,
+            desc: item.content,
+            href: item.extra?.href || '#',
+            tone: item.extra?.tone || 'blue',
+            icon: iconMap[item.extra?.icon] || FileText,
+        }))
+    }
+
+    return [
+        { title: tm('aboutPage.docs')[0].title, desc: tm('aboutPage.docs')[0].desc, href: '#', tone: 'blue', icon: FileText },
+        { title: tm('aboutPage.docs')[1].title, desc: tm('aboutPage.docs')[1].desc, href: '#', tone: 'green', icon: ScrollText },
+    ]
+})
+
+const legalItems = computed(() => byType('legal'))
+
+const team = computed(() => {
+    const items = byType('team')
+    if (items.length) {
+        return items.map((item) => ({
+            name: item.title,
+            role: item.subtitle || item.content || '',
+            initials: (item.title || '?').split(' ').slice(0, 2).map((v) => v[0]).join('').toUpperCase(),
+        }))
+    }
+
+    return [
+        { name: 'Dr. Aziza Karimova', role: tm('aboutPage.team')[0].role, initials: 'AK' },
+        { name: 'Rustam Alimov', role: tm('aboutPage.team')[1].role, initials: 'RA' },
+        { name: 'Nodira Tosheva', role: tm('aboutPage.team')[2].role, initials: 'NT' },
+        { name: 'Bekzod Umarov', role: tm('aboutPage.team')[3].role, initials: 'BU' },
+    ]
+})
 
 onMounted(fetchPage)
 </script>

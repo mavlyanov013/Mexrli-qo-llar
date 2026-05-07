@@ -17,8 +17,10 @@ class StoreHelpRequestRequest extends FormRequest
         return [
             'full_name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:50'],
+            'description' => ['nullable', 'string'],
             'city' => ['nullable', 'string', 'max:255'],
             'situation_description' => ['required', 'string'],
+            'category' => ['nullable', 'string', 'max:120'],
             'support_type' => [
                 'nullable',
                 Rule::in([
@@ -30,6 +32,8 @@ class StoreHelpRequestRequest extends FormRequest
                     'other',
                 ]),
             ],
+            'attachments' => ['nullable', 'array'],
+            'attachments.*' => ['string'],
             'medical_documents' => ['nullable', 'array'],
             'medical_documents.*' => ['string'],
             'photos' => ['nullable', 'array'],

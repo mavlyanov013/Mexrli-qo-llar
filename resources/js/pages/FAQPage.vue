@@ -21,7 +21,7 @@
                         class="w-full text-left font-semibold text-gray-900 py-5 flex items-center justify-between"
                         @click="toggle(index)"
                     >
-                        <span>{{ faq.q }}</span>
+                        <span>{{ faq.question }}</span>
                         <span class="text-xl text-gray-400">
                             {{ openIndex === index ? '−' : '+' }}
                         </span>
@@ -31,7 +31,7 @@
                         v-if="openIndex === index"
                         class="text-gray-600 pb-5 leading-relaxed"
                     >
-                        {{ faq.a }}
+                        {{ faq.answer }}
                     </div>
                 </div>
             </div>
@@ -40,15 +40,21 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import faqService from '@/services/faqService'
 
-const { t, tm } = useI18n()
+const { t } = useI18n()
 const openIndex = ref(0)
+const faqs = ref([])
 
-const faqs = computed(() => tm('faqPage.items'))
+const fetchFaqs = async () => {
+    faqs.value = await faqService.getPublicList({ active_only: true })
+}
 
 const toggle = (index) => {
     openIndex.value = openIndex.value === index ? null : index
 }
+
+onMounted(fetchFaqs)
 </script>

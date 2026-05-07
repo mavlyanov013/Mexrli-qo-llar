@@ -7,7 +7,7 @@
                 <RouterLink
                     v-for="post in visiblePosts"
                     :key="post.id"
-                    :to="`/news/${post.id}`"
+                    :to="`/news/${post.slug || post.id}`"
                     class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group transition hover:shadow-md"
                 >
                     <div class="aspect-video overflow-hidden">

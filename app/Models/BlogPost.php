@@ -22,5 +22,6 @@ class BlogPost extends Model
     protected $casts = [
         'is_featured' => 'boolean',
         'tags' => 'array',
+        'published_at' => 'datetime',
     ];
 }

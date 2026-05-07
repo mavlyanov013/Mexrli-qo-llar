@@ -8,6 +8,7 @@ export const PAYMENT_STATUSES = {
 }
 
 export const CASE_STATUSES = {
+    new: { labelKey: 'common.status.new', tone: 'info' },
     draft: { labelKey: 'common.status.draft', tone: 'info' },
     active: { labelKey: 'common.status.active', tone: 'success' },
     paused: { labelKey: 'common.status.paused', tone: 'warning' },
@@ -35,6 +36,6 @@ export const MESSAGE_STATUSES = {
     replied: { labelKey: 'common.status.replied', tone: 'success' },
 }
 
-export const CASE_STATUS_OPTIONS = ['draft','active','paused','completed','closed']
+export const CASE_STATUS_OPTIONS = ['new','draft','active','paused','completed','closed']
 export const PAYMENT_STATUS_OPTIONS = ['pending', 'success', 'failed', 'cancelled', 'completed']
 export const VOLUNTEER_STATUS_OPTIONS = ['new', 'reviewed', 'accepted', 'rejected']

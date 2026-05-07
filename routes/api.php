@@ -10,7 +10,9 @@ use App\Http\Controllers\Api\VolunteerApplicationController;
 use App\Http\Controllers\Api\FinancialReportController;
 use App\Http\Controllers\Api\PageController;
 use App\Http\Controllers\Api\BlogPostController;
+use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\PartnerController;
+use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\ContactMessageController;
 
 use App\Http\Controllers\Api\Billing\PaycomController;
@@ -25,6 +27,8 @@ use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Api\Admin\SectionController as AdminSectionController;
 use App\Http\Controllers\Api\Admin\MediaController as AdminMediaController;
+use App\Http\Controllers\Api\Admin\FaqController as AdminFaqController;
+use App\Http\Controllers\Api\Admin\NewsController as AdminNewsController;
 
 Route::prefix('v1')->group(function () {
 
@@ -84,6 +88,9 @@ Route::prefix('v1')->group(function () {
 
     Route::get('/blog-posts', [BlogPostController::class, 'index']);
     Route::get('/blog-posts/{id}', [BlogPostController::class, 'show']);
+    Route::get('/news', [NewsController::class, 'index']);
+    Route::get('/news/{slug}', [NewsController::class, 'show']);
+    Route::get('/faq', [FaqController::class, 'index']);
 
     Route::get('/cases', [CaseController::class, 'index']);
     Route::get('/cases/{id}', [CaseController::class, 'show']);
@@ -166,6 +173,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/help-requests', [HelpRequestController::class, 'index']);
         Route::get('/help-requests/{id}', [HelpRequestController::class, 'show']);
         Route::put('/help-requests/{id}', [HelpRequestController::class, 'update']);
+        Route::post('/help-requests/{id}/approve', [HelpRequestController::class, 'approve']);
+        Route::post('/help-requests/{id}/reject', [HelpRequestController::class, 'reject']);
+        Route::post('/help-requests/{id}/convert-to-case', [HelpRequestController::class, 'convertToCase']);
 
         // 🙋 Volunteers
         Route::post('/volunteer-applications', [VolunteerApplicationController::class, 'store']);
@@ -190,6 +200,19 @@ Route::prefix('v1')->group(function () {
         Route::get('/blog-posts/{id}', [BlogPostController::class, 'show']);
         Route::put('/blog-posts/{id}', [BlogPostController::class, 'update']);
         Route::delete('/blog-posts/{id}', [BlogPostController::class, 'destroy']);
+
+        // 📰 News CMS
+        Route::get('/news', [AdminNewsController::class, 'index']);
+        Route::post('/news', [AdminNewsController::class, 'store']);
+        Route::get('/news/{id}', [AdminNewsController::class, 'show']);
+        Route::put('/news/{id}', [AdminNewsController::class, 'update']);
+        Route::delete('/news/{id}', [AdminNewsController::class, 'destroy']);
+
+        // ❓ FAQ CMS
+        Route::get('/faq', [AdminFaqController::class, 'index']);
+        Route::post('/faq', [AdminFaqController::class, 'store']);
+        Route::put('/faq/{id}', [AdminFaqController::class, 'update']);
+        Route::delete('/faq/{id}', [AdminFaqController::class, 'destroy']);
 
         // 📄 CMS Pages / Sections
         Route::get('/pages', [AdminPageController::class, 'index']);

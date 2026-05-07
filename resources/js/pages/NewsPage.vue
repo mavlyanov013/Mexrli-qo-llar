@@ -9,7 +9,7 @@
 
             <RouterLink
                 v-if="featured"
-                :to="`/news/${featured.id}`"
+                :to="`/news/${featured.slug}`"
                 class="block mb-12 group"
             >
                 <div class="relative rounded-2xl overflow-hidden">
@@ -72,7 +72,7 @@
                 <RouterLink
                     v-for="post in filteredPosts"
                     :key="post.id"
-                    :to="`/news/${post.id}`"
+                    :to="`/news/${post.slug}`"
                     class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group"
                 >
                     <div class="aspect-video overflow-hidden">
@@ -113,7 +113,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
-import blogService from '../services/blogService'
+import newsService from '../services/newsService'
 
 const { t, locale } = useI18n()
 
@@ -127,7 +127,7 @@ const fetchPosts = async () => {
     loading.value = true
 
     try {
-        posts.value = await blogService.getBlogPosts()
+        posts.value = await newsService.getLatest()
     } finally {
         loading.value = false
     }
