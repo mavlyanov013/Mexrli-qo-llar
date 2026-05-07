@@ -3,8 +3,11 @@ import { normalizeList, normalizeItem, normalizeMeta, toServiceError } from './s
 
 const partnerService = {
     async getAll(params = {}) {
+        const endpoint = params.admin ? '/admin/partners' : '/partners'
+        const requestParams = { ...params }
+        delete requestParams.admin
         try {
-            const response = await api.get('/partners', { params })
+            const response = await api.get(endpoint, { params: requestParams })
             return { data: normalizeList(response), meta: normalizeMeta(response), error: null }
         } catch (error) {
             return { data: [], meta: null, error: toServiceError(error, 'Failed to fetch partners') }
@@ -17,6 +20,15 @@ const partnerService = {
             return { data: normalizeItem(response), error: null }
         } catch (error) {
             return { data: null, error: toServiceError(error, 'Failed to create partner') }
+        }
+    },
+
+    async getById(id) {
+        try {
+            const response = await api.get(`/admin/partners/${id}`)
+            return { data: normalizeItem(response), error: null }
+        } catch (error) {
+            return { data: null, error: toServiceError(error, 'Failed to fetch partner') }
         }
     },
 
@@ -36,6 +48,10 @@ const partnerService = {
         } catch (error) {
             return { error: toServiceError(error, 'Failed to delete partner') }
         }
+    },
+
+    async toggleStatus(id, isActive) {
+        return this.update(id, { is_active: isActive })
     },
 }
 

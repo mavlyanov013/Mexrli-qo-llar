@@ -20,6 +20,33 @@ export default {
         }
     },
 
+    async update(id, payload) {
+        try {
+            const response = await api.put(`/admin/volunteer-applications/${id}`, payload)
+            return { data: response.data?.data ?? response.data, error: null }
+        } catch (error) {
+            return { data: null, error: toServiceError(error, 'Failed to update volunteer application') }
+        }
+    },
+
+    async getById(id) {
+        try {
+            const response = await api.get(`/admin/volunteer-applications/${id}`)
+            return { data: response.data?.data ?? response.data, error: null }
+        } catch (error) {
+            return { data: null, error: toServiceError(error, 'Failed to fetch volunteer application') }
+        }
+    },
+
+    async remove(id) {
+        try {
+            await api.delete(`/admin/volunteer-applications/${id}`)
+            return { error: null }
+        } catch (error) {
+            return { error: toServiceError(error, 'Failed to delete volunteer application') }
+        }
+    },
+
     async createVolunteerApplication(payload) {
         const response = await api.post('/volunteer-applications', payload)
         return response.data.data ?? response.data

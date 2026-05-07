@@ -86,7 +86,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import api from '../services/api'
+import caseService from '../services/caseService'
 import CaseCard from '../components/shared/CaseCard.vue'
 import SectionHeader from '../components/shared/SectionHeader.vue'
 
@@ -103,15 +103,9 @@ const showFilters = ref(false)
 const fetchCases = async () => {
     loading.value = true
 
-    try {
-        const response = await api.get('/cases')
-        cases.value = response?.data?.data || []
-    } catch (error) {
-        console.error('Cases load error:', error)
-        cases.value = []
-    } finally {
-        loading.value = false
-    }
+    const result = await caseService.fetchList()
+    cases.value = result.data || []
+    loading.value = false
 }
 
 const filteredCases = computed(() => {

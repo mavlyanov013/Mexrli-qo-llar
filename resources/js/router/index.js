@@ -105,6 +105,30 @@ const routes = [
                 meta: { requiresAuth: true, admin: true }
             },
             {
+                path: 'partners',
+                name: 'admin-partners',
+                component: () => import('@/admin/pages/AdminPartnersPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'partners/create',
+                name: 'admin-partners-create',
+                component: () => import('@/admin/pages/AdminPartnersPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'partners/:id/edit',
+                name: 'admin-partners-edit',
+                component: () => import('@/admin/pages/AdminPartnersPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'partners/:id',
+                name: 'admin-partners-view',
+                component: () => import('@/admin/pages/AdminPartnersPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
                 path: 'users',
                 name: 'admin-users',
                 component: () => import('@/admin/pages/AdminUsersListPage.vue'),
@@ -135,10 +159,21 @@ const routes = [
                 meta: { requiresAuth: true, admin: true }
             },
             {
+                path: 'payments/create',
+                name: 'admin-payments-create',
+                component: () => import('@/admin/pages/AdminPaymentsPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'payments/:id/edit',
+                name: 'admin-payments-edit',
+                component: () => import('@/admin/pages/AdminPaymentsPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
                 path: 'payments/:id',
                 name: 'admin-payments-view',
-                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
-                props: { title: 'Payment details', description: 'Payment details view page.' },
+                component: () => import('@/admin/pages/AdminPaymentsPage.vue'),
                 meta: { requiresAuth: true, admin: true }
             },
             {
@@ -150,15 +185,19 @@ const routes = [
             {
                 path: 'donations/create',
                 name: 'admin-donations-create',
-                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
-                props: { title: 'Create donation', description: 'Donation create page.' },
+                component: () => import('@/admin/pages/AdminDonationsPage.vue'),
                 meta: { requiresAuth: true, admin: true }
             },
             {
                 path: 'donations/:id/edit',
                 name: 'admin-donations-edit',
-                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
-                props: { title: 'Edit donation', description: 'Donation edit page.' },
+                component: () => import('@/admin/pages/AdminDonationsPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'donations/:id',
+                name: 'admin-donations-view',
+                component: () => import('@/admin/pages/AdminDonationsPage.vue'),
                 meta: { requiresAuth: true, admin: true }
             },
             {
@@ -170,15 +209,19 @@ const routes = [
             {
                 path: 'cases/create',
                 name: 'admin-cases-create',
-                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
-                props: { title: 'Create case', description: 'Case create page.' },
+                component: () => import('@/admin/pages/AdminCasesPage.vue'),
                 meta: { requiresAuth: true, admin: true }
             },
             {
                 path: 'cases/:id/edit',
                 name: 'admin-cases-edit',
-                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
-                props: { title: 'Edit case', description: 'Case edit page.' },
+                component: () => import('@/admin/pages/AdminCasesPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'cases/:id',
+                name: 'admin-cases-view',
+                component: () => import('@/admin/pages/AdminCasesPage.vue'),
                 meta: { requiresAuth: true, admin: true }
             },
             {
@@ -210,8 +253,31 @@ const routes = [
             {
                 path: 'volunteers/:id',
                 name: 'admin-volunteers-view',
-                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
-                props: { title: 'Volunteer details', description: 'Volunteer details page.' },
+                component: () => import('@/admin/pages/AdminVolunteersPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'volunteers/create',
+                name: 'admin-volunteers-create',
+                component: () => import('@/admin/pages/AdminVolunteersPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'volunteers/:id/edit',
+                name: 'admin-volunteers-edit',
+                component: () => import('@/admin/pages/AdminVolunteersPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'messages',
+                name: 'admin-messages',
+                component: () => import('@/admin/pages/AdminMessagesPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'messages/:id',
+                name: 'admin-messages-view',
+                component: () => import('@/admin/pages/AdminMessagesPage.vue'),
                 meta: { requiresAuth: true, admin: true }
             },
             {
@@ -243,15 +309,19 @@ const routes = [
             {
                 path: 'reports/create',
                 name: 'admin-reports-create',
-                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
-                props: { title: 'Create report', description: 'Financial report create page.' },
+                component: () => import('@/admin/pages/AdminReportsPage.vue'),
                 meta: { requiresAuth: true, admin: true }
             },
             {
                 path: 'reports/:id/edit',
                 name: 'admin-reports-edit',
-                component: () => import('@/admin/pages/AdminPlaceholderPage.vue'),
-                props: { title: 'Edit report', description: 'Financial report edit page.' },
+                component: () => import('@/admin/pages/AdminReportsPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'reports/:id',
+                name: 'admin-reports-view',
+                component: () => import('@/admin/pages/AdminReportsPage.vue'),
                 meta: { requiresAuth: true, admin: true }
             },
             {

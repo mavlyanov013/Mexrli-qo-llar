@@ -113,7 +113,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
-import api from '../services/api'
+import blogService from '../services/blogService'
 
 const { t, locale } = useI18n()
 
@@ -127,11 +127,7 @@ const fetchPosts = async () => {
     loading.value = true
 
     try {
-        const response = await api.get('/blog-posts')
-        posts.value = response?.data?.data || []
-    } catch (error) {
-        console.error('News load error:', error)
-        posts.value = []
+        posts.value = await blogService.getBlogPosts()
     } finally {
         loading.value = false
     }

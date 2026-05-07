@@ -125,7 +125,8 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
-import api from '../services/api'
+import blogService from '../services/blogService'
+import caseService from '../services/caseService'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -138,16 +139,11 @@ const fetchPost = async () => {
     loading.value = true
 
     try {
-        const response = await api.get(`/blog-posts/${route.params.id}`)
-        post.value = response?.data?.data || response?.data || null
+        post.value = await blogService.getBlogPostById(route.params.id)
 
         if (post.value?.case_id) {
-            try {
-                const caseResponse = await api.get(`/cases/${post.value.case_id}`)
-                linkedCase.value = caseResponse?.data?.data || caseResponse?.data || null
-            } catch (error) {
-                linkedCase.value = null
-            }
+            const caseResult = await caseService.getCaseById(post.value.case_id)
+            linkedCase.value = caseResult.data || null
         }
     } catch (error) {
         console.error('News detail load error:', error)

@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDonationRequest;
 use App\Http\Resources\DonationResource;
 use App\Models\Donation;
+use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class DonationController extends Controller
 {
@@ -57,7 +59,35 @@ class DonationController extends Controller
     }
     public function store(StoreDonationRequest $request): JsonResponse
     {
-        $donation = Donation::create($request->validated());
+        $payload = $request->validated();
+        $isAdminRoute = $request->is('api/v1/admin/*');
+        $isManualCash = $isAdminRoute && ($request->boolean('is_manual_cash') || ($payload['type'] ?? null) === 'manual');
+
+        if ($isManualCash) {
+            $payload['type'] = 'manual';
+            $payload['status'] = 'completed';
+            $payload['service_type'] = 'cash';
+            $payload['message'] = $payload['note'] ?? ($payload['message'] ?? null);
+        }
+
+        unset($payload['is_manual_cash'], $payload['note']);
+
+        $donation = Donation::create($payload);
+
+        if ($isManualCash) {
+            Payment::query()->create([
+                'provider' => 'cash',
+                'transaction_id' => 'CASH-' . strtoupper(Str::random(12)),
+                'status' => 'completed',
+                'category' => 'manual',
+                'payer_reference' => (string) $donation->id,
+                'amount' => $donation->amount,
+                'currency' => $donation->currency ?: 'UZS',
+                'donation_id' => $donation->id,
+                'live_mode' => false,
+                'type' => 'required|in:online,cash',
+            ]);
+        }
 
         return response()->json([
             'message' => 'Donation muvaffaqiyatli qabul qilindi',
@@ -74,6 +104,15 @@ class DonationController extends Controller
 
         return response()->json([
             'data' => $donations,
+        ]);
+    }
+
+    public function show(int $id): JsonResponse
+    {
+        $donation = Donation::query()->findOrFail($id);
+
+        return response()->json([
+            'data' => new DonationResource($donation),
         ]);
     }
 

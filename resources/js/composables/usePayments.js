@@ -24,5 +24,20 @@ export function usePayments() {
         if (!error.value) error.value = result.error
     }
 
-    return { payments, meta, providers, loading, error, fetchPayments, fetchProviders }
+    const updatePayment = async (id, payload) => paymentService.update(id, payload)
+    const createPayment = async (payload) => paymentService.create(payload)
+    const deletePayment = async (id) => paymentService.remove(id)
+
+    return {
+        payments,
+        meta,
+        providers,
+        loading,
+        error,
+        fetchPayments,
+        fetchProviders,
+        createPayment,
+        updatePayment,
+        deletePayment,
+    }
 }

@@ -18,15 +18,27 @@ class CaseResource extends JsonResource
             'condition' => $this->condition,
             'story' => $this->story,
             'short_description' => $this->short_description,
-            'goal_amount' => $this->goal_amount,
-            'raised_amount' => $this->raised_amount,
+
+            'goal_amount' => (float) $this->goal_amount,
+            'raised_amount' => (float) $this->raised_amount,
+
             'urgency' => $this->urgency,
             'category' => $this->category,
             'status' => $this->status,
-            'medical_documents' => $this->medical_documents,
-            'updates' => $this->updates,
-            'is_featured' => $this->is_featured,
-            'is_urgent' => $this->is_urgent,
+
+            // arrays
+            'medical_documents' => $this->medical_documents ?? [],
+            'updates' => $this->updates ?? [],
+
+            // flags
+            'is_featured' => (bool) $this->is_featured,
+            'is_urgent' => (bool) $this->is_urgent,
+
+            // relations (MUHIM)
+            'donations_count' => $this->donations_count ?? 0,
+            'donations' => $this->whenLoaded('donations'),
+            'help_requests' => $this->whenLoaded('helpRequests'),
+
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

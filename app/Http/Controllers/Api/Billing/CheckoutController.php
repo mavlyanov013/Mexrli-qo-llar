@@ -12,6 +12,23 @@ use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
+    public function providers(): JsonResponse
+    {
+        $providers = collect(['paynet', 'uzumbank'])
+            ->map(function (string $provider) {
+                $config = config("payments.{$provider}", []);
+                return [
+                    'key' => $provider,
+                    'enabled' => (bool) ($config['enabled'] ?? false),
+                    'min_amount' => $config['min_amount'] ?? null,
+                    'max_amount' => $config['max_amount'] ?? null,
+                ];
+            })
+            ->values();
+
+        return response()->json(['data' => $providers]);
+    }
+
     public function init(Request $request): JsonResponse
     {
         $data = $request->validate([

@@ -89,15 +89,15 @@
                             <option value="other">{{ t('volunteerPage.form.other') }}</option>
                         </select>
 
-                        <select
-                            v-model="form.availability"
-                            class="rounded-xl border border-gray-300 px-4 py-3 w-full outline-none"
-                        >
-                            <option value="full_time">{{ t('volunteerPage.form.availabilityOptions.fullTime') }}</option>
-                            <option value="part_time">{{ t('volunteerPage.form.availabilityOptions.partTime') }}</option>
-                            <option value="weekends">{{ t('volunteerPage.form.availabilityOptions.weekends') }}</option>
-                            <option value="flexible">{{ t('volunteerPage.form.availabilityOptions.flexible') }}</option>
-                        </select>
+<!--                        <select-->
+<!--                            v-model="form.availability"-->
+<!--                            class="rounded-xl border border-gray-300 px-4 py-3 w-full outline-none"-->
+<!--                        >-->
+<!--                            <option value="full_time">{{ t('volunteerPage.form.availabilityOptions.fullTime') }}</option>-->
+<!--                            <option value="part_time">{{ t('volunteerPage.form.availabilityOptions.partTime') }}</option>-->
+<!--                            <option value="weekends">{{ t('volunteerPage.form.availabilityOptions.weekends') }}</option>-->
+<!--                            <option value="flexible">{{ t('volunteerPage.form.availabilityOptions.flexible') }}</option>-->
+<!--                        </select>-->
 
                         <textarea
                             v-model="form.experience"

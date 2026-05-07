@@ -14,41 +14,45 @@ class SectionController extends Controller
     {
         $validated = $request->validate([
             'page_id' => ['required', 'exists:pages,id'],
-            'type' => ['required', 'string', 'max:50'],
-            'title' => ['nullable', 'string', 'max:255'],
-            'subtitle' => ['nullable', 'string', 'max:500'],
+            'type' => ['required', 'string'],
+
+            'title' => ['nullable', 'string'],
+            'subtitle' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
             'image' => ['nullable', 'string'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
-            'is_active' => ['sometimes', 'boolean'],
+
+            'sort_order' => ['nullable', 'integer'],
             'extra' => ['nullable', 'array'],
         ]);
 
-        $section = Section::query()->create($validated);
+        $section = Section::create($validated);
 
         return response()->json([
-            'message' => 'Section created successfully',
+            'message' => 'Section created',
             'data' => new SectionResource($section),
         ], 201);
     }
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $section = Section::query()->findOrFail($id);
+        $section = Section::findOrFail($id);
+
         $validated = $request->validate([
-            'type' => ['sometimes', 'string', 'max:50'],
-            'title' => ['nullable', 'string', 'max:255'],
-            'subtitle' => ['nullable', 'string', 'max:500'],
+            'type' => ['sometimes', 'string'],
+
+            'title' => ['nullable', 'string'],
+            'subtitle' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
             'image' => ['nullable', 'string'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
-            'is_active' => ['sometimes', 'boolean'],
+
+            'sort_order' => ['nullable', 'integer'],
             'extra' => ['nullable', 'array'],
         ]);
+
         $section->update($validated);
 
         return response()->json([
-            'message' => 'Section updated successfully',
+            'message' => 'Updated',
             'data' => new SectionResource($section->fresh()),
         ]);
     }

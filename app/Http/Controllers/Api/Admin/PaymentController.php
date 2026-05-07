@@ -29,6 +29,25 @@ class PaymentController extends Controller
         ]);
     }
 
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'provider' => ['required', 'string', 'in:paycom,click,paynet,uzumbank,cash'],
+            'status' => ['required', 'string', 'in:pending,success,failed,cancelled,completed'],
+            'transaction_id' => ['required', 'string', 'max:255'],
+            'amount' => ['required', 'numeric', 'min:0'],
+            'currency' => ['nullable', 'string', 'max:10'],
+            'donation_id' => ['nullable', 'integer', 'exists:donations,id'],
+        ]);
+
+        $payment = \App\Models\Payment::query()->create($validated);
+
+        return response()->json([
+            'message' => 'Payment created successfully',
+            'data' => $payment,
+        ], 201);
+    }
+
     public function show(int $id): JsonResponse
     {
         $payment = $this->paymentService->findOrFail($id);
@@ -36,6 +55,35 @@ class PaymentController extends Controller
         return response()->json([
             'message' => 'Payment fetched successfully',
             'data' => $payment,
+        ]);
+    }
+
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $payment = $this->paymentService->findOrFail($id);
+        $validated = $request->validate([
+            'provider' => ['sometimes', 'string', 'in:paycom,click,paynet,uzumbank,cash'],
+            'status' => ['sometimes', 'string', 'in:pending,success,failed,cancelled,completed'],
+            'transaction_id' => ['sometimes', 'string', 'max:255'],
+            'amount' => ['sometimes', 'numeric', 'min:0'],
+            'currency' => ['sometimes', 'string', 'max:10'],
+        ]);
+
+        $updated = $this->paymentService->update($payment, $validated);
+
+        return response()->json([
+            'message' => 'Payment updated successfully',
+            'data' => $updated,
+        ]);
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        $payment = $this->paymentService->findOrFail($id);
+        $payment->delete();
+
+        return response()->json([
+            'message' => 'Payment deleted successfully',
         ]);
     }
 }

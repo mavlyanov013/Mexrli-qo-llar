@@ -11,10 +11,12 @@ use Illuminate\Http\Request;
 
 class ContactMessageController extends Controller
 {
+    /* ================= LIST ================= */
     public function index(Request $request): JsonResponse
     {
         $query = ContactMessage::query()->latest();
 
+        // filter by status (admin panel uchun)
         if ($request->filled('status')) {
             $query->where('status', $request->string('status'));
         }
@@ -22,64 +24,67 @@ class ContactMessageController extends Controller
         $items = $query->paginate((int) $request->input('per_page', 20));
 
         return response()->json([
-            'data' => ContactMessageResource::collection($items->items()),
+            'data' => ContactMessageResource::collection($items),
             'meta' => [
                 'current_page' => $items->currentPage(),
-                'last_page' => $items->lastPage(),
-                'per_page' => $items->perPage(),
-                'total' => $items->total(),
+                'last_page'    => $items->lastPage(),
+                'per_page'     => $items->perPage(),
+                'total'        => $items->total(),
             ],
         ]);
     }
 
+    /* ================= STORE (USER SEND MESSAGE) ================= */
     public function store(StoreContactMessageRequest $request): JsonResponse
     {
         $payload = $request->validated();
 
-        if (!isset($payload['status'])) {
-            $payload['status'] = 'new';
-        }
+        // ⚠️ HAR DOIM NEW BO'LADI (user hech qachon status yubormaydi)
+        $payload['status'] = 'new';
 
-        $contactMessage = ContactMessage::create($payload);
+        $message = ContactMessage::create($payload);
 
         return response()->json([
             'message' => 'Xabaringiz muvaffaqiyatli yuborildi',
-            'data' => new ContactMessageResource($contactMessage),
+            'data'    => new ContactMessageResource($message),
         ], 201);
     }
 
+    /* ================= SHOW ================= */
     public function show(int $id): JsonResponse
     {
-        $contactMessage = ContactMessage::query()->findOrFail($id);
+        $message = ContactMessage::findOrFail($id);
 
         return response()->json([
-            'data' => new ContactMessageResource($contactMessage),
+            'data' => new ContactMessageResource($message),
         ]);
     }
 
+    /* ================= UPDATE (ADMIN ONLY) ================= */
     public function update(Request $request, int $id): JsonResponse
     {
-        $contactMessage = ContactMessage::query()->findOrFail($id);
+        $message = ContactMessage::findOrFail($id);
 
         $validated = $request->validate([
-            'status' => 'sometimes|string|in:new,read,replied,archived',
+            'status' => 'required|string|in:new,read,replied,archived',
         ]);
 
-        $contactMessage->update($validated);
+        $message->update($validated);
 
         return response()->json([
-            'message' => 'Contact message yangilandi',
-            'data' => new ContactMessageResource($contactMessage->fresh()),
+            'message' => 'Xabar holati yangilandi',
+            'data'    => new ContactMessageResource($message->fresh()),
         ]);
     }
 
+    /* ================= DELETE ================= */
     public function destroy(int $id): JsonResponse
     {
-        $contactMessage = ContactMessage::query()->findOrFail($id);
-        $contactMessage->delete();
+        $message = ContactMessage::findOrFail($id);
+        $message->delete();
 
         return response()->json([
-            'message' => 'Contact message deleted successfully',
+            'message' => 'Xabar o‘chirildi',
         ]);
     }
 }

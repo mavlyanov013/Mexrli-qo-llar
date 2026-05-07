@@ -11,7 +11,7 @@
             </router-link>
         </div>
         <div class="rounded-xl border border-gray-200 bg-white p-4">
-            <slot />
+            <slot v-if="$slots.default" />
         </div>
     </section>
 </template>

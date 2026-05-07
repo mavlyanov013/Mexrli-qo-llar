@@ -13,9 +13,11 @@ class Partner extends Model
         'description',
         'type',
         'is_featured',
+        'is_active',
     ];
 
     protected $casts = [
         'is_featured' => 'boolean',
+        'is_active' => 'boolean',
     ];
 }

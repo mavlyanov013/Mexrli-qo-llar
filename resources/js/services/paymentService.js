@@ -37,8 +37,39 @@ export default {
     },
 
     async getById(id) {
-        const response = await api.get(`/admin/payments/${id}`)
-        return response.data.data ?? response.data
+        try {
+            const response = await api.get(`/admin/payments/${id}`)
+            return { data: normalizeItem(response), error: null }
+        } catch (error) {
+            return { data: null, error: toServiceError(error, 'Failed to fetch payment') }
+        }
+    },
+
+    async create(payload) {
+        try {
+            const response = await api.post('/admin/payments', payload)
+            return { data: normalizeItem(response), error: null }
+        } catch (error) {
+            return { data: null, error: toServiceError(error, 'Failed to create payment') }
+        }
+    },
+
+    async update(id, payload) {
+        try {
+            const response = await api.put(`/admin/payments/${id}`, payload)
+            return { data: normalizeItem(response), error: null }
+        } catch (error) {
+            return { data: null, error: toServiceError(error, 'Failed to update payment') }
+        }
+    },
+
+    async remove(id) {
+        try {
+            await api.delete(`/admin/payments/${id}`)
+            return { error: null }
+        } catch (error) {
+            return { error: toServiceError(error, 'Failed to delete payment') }
+        }
     },
 
     async getPaynetStatus(id) {

@@ -27,4 +27,10 @@ class PaymentService
     {
         return Payment::query()->findOrFail($id);
     }
+
+    public function update(Payment $payment, array $payload): Payment
+    {
+        $payment->update($payload);
+        return $payment->fresh();
+    }
 }

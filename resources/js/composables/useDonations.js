@@ -17,5 +17,18 @@ export function useDonations() {
         loading.value = false
     }
 
-    return { donations, meta, loading, error, fetchDonations }
+    const createDonation = async (payload) => donationService.create(payload)
+    const updateDonation = async (id, payload) => donationService.update(id, payload)
+    const deleteDonation = async (id) => donationService.remove(id)
+
+    return {
+        donations,
+        meta,
+        loading,
+        error,
+        fetchDonations,
+        createDonation,
+        updateDonation,
+        deleteDonation,
+    }
 }

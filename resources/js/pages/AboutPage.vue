@@ -175,6 +175,24 @@ import {
 } from 'lucide-vue-next'
 import SectionHeader from '../components/shared/SectionHeader.vue'
 import IconBadge from '../components/shared/IconBadge.vue'
+import { ref, onMounted } from 'vue'
+import pageService from '@/services/pageService'
+
+const page = ref(null)
+const loading = ref(true)
+const error = ref(null)
+
+const fetchPage = async () => {
+    try {
+        const res = await pageService.getBySlug('about')
+        page.value = res.data
+    } catch (e) {
+        error.value = e.message
+    } finally {
+        loading.value = false
+    }
+}
+
 
 const { t, tm } = useI18n()
 
@@ -208,4 +226,6 @@ const team = computed(() => [
     { name: 'Nodira Tosheva', role: tm('aboutPage.team')[2].role, initials: 'NT' },
     { name: 'Bekzod Umarov', role: tm('aboutPage.team')[3].role, initials: 'BU' },
 ])
+
+onMounted(fetchPage)
 </script>

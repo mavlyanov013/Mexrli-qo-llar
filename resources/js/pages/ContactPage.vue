@@ -117,7 +117,7 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import api from '../services/api'
+import contactService from '../services/contactService'
 import {
     MapPin,
     Phone,
@@ -171,7 +171,8 @@ const handleSubmit = async () => {
     errorText.value = ''
 
     try {
-        await api.post('/contact-messages', form)
+        const result = await contactService.sendContact(form)
+        if (result.error) throw result.error
         submitted.value = true
     } catch (error) {
         console.error('Contact submit error:', error)

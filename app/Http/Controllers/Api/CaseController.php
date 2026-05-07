@@ -12,7 +12,9 @@ class CaseController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = CaseItem::query()->latest();
+        $query = CaseItem::query()
+            ->withCount('donations')
+            ->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->string('status'));
@@ -25,7 +27,7 @@ class CaseController extends Controller
         $cases = $query->paginate((int) $request->input('per_page', 12));
 
         return response()->json([
-            'data' => CaseResource::collection($cases->items()),
+            'data' => CaseResource::collection($cases),
             'meta' => [
                 'current_page' => $cases->currentPage(),
                 'last_page' => $cases->lastPage(),
@@ -43,16 +45,21 @@ class CaseController extends Controller
             'story' => 'nullable|string',
             'short_description' => 'nullable|string',
             'category' => 'nullable|string|max:100',
-            'status' => 'nullable|string|max:50',
+            'status' => 'nullable|string|in:draft,active,paused,completed,closed',
             'urgency' => 'nullable|string|max:50',
             'goal_amount' => 'nullable|numeric|min:0',
             'raised_amount' => 'nullable|numeric|min:0',
             'is_urgent' => 'sometimes|boolean',
             'medical_documents' => 'nullable|array',
             'medical_documents.*' => 'string',
+            'photo_url' => 'nullable|string',
         ]);
 
+        $validated['medical_documents'] = $validated['medical_documents'] ?? [];
+        $validated['updates'] = $validated['updates'] ?? [];
+
         $case = CaseItem::create($validated);
+
 
         return response()->json([
             'message' => 'Case yaratildi',
@@ -62,7 +69,13 @@ class CaseController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        $case = CaseItem::query()->findOrFail($id);
+        $case = CaseItem::query()
+            ->with([
+                'donations',
+                'helpRequests'
+            ])
+            ->withCount('donations')
+            ->findOrFail($id);
 
         return response()->json([
             'data' => new CaseResource($case),
@@ -79,14 +92,23 @@ class CaseController extends Controller
             'story' => 'nullable|string',
             'short_description' => 'nullable|string',
             'category' => 'nullable|string|max:100',
-            'status' => 'nullable|string|max:50',
+            'status' => 'nullable|string|in:draft,active,paused,completed,closed',
             'urgency' => 'nullable|string|max:50',
             'goal_amount' => 'nullable|numeric|min:0',
             'raised_amount' => 'nullable|numeric|min:0',
             'is_urgent' => 'sometimes|boolean',
             'medical_documents' => 'nullable|array',
             'medical_documents.*' => 'string',
+            'photo_url' => 'nullable|string',
         ]);
+
+        if (!isset($validated['medical_documents'])) {
+            $validated['medical_documents'] = $case->medical_documents ?? [];
+        }
+
+        if (!isset($validated['updates'])) {
+            $validated['updates'] = $case->updates ?? [];
+        }
 
         $case->update($validated);
 

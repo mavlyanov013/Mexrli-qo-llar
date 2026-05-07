@@ -255,8 +255,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import api from '../services/api'
 import donationService from '../services/donationService'
+import caseService from '../services/caseService'
 
 const { t, tm } = useI18n()
 const route = useRoute()
@@ -321,12 +321,8 @@ const selectPreset = (value) => {
 const fetchCase = async () => {
     if (!caseId.value) return
 
-    try {
-        const response = await api.get(`/cases/${caseId.value}`)
-        caseData.value = response?.data?.data || response?.data || null
-    } catch {
-        caseData.value = null
-    }
+    const result = await caseService.getCaseById(caseId.value)
+    caseData.value = result.data || null
 }
 
 watch(

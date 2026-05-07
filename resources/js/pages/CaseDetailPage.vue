@@ -369,7 +369,9 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
-import api from '../services/api'
+import caseService from '../services/caseService'
+import donationService from '../services/donationService'
+import blogService from '../services/blogService'
 import ProgressRing from '../components/shared/ProgressRing.vue'
 
 const { t, locale } = useI18n()
@@ -384,8 +386,8 @@ const fetchCase = async () => {
     loading.value = true
 
     try {
-        const response = await api.get(`/cases/${route.params.id}`)
-        caseData.value = response?.data?.data || response?.data || null
+        const result = await caseService.getCaseById(route.params.id)
+        caseData.value = result.data || null
 
         if (caseData.value?.id) {
             await Promise.all([fetchDonations(), fetchRelatedNews()])
@@ -400,8 +402,7 @@ const fetchCase = async () => {
 
 const fetchDonations = async () => {
     try {
-        const response = await api.get('/donations/live')
-        const allDonations = response?.data?.data || []
+        const allDonations = await donationService.getCompletedDonations()
         donations.value = allDonations.filter(
             (item) =>
                 String(item.case_id) === String(caseData.value.id) &&
@@ -415,8 +416,7 @@ const fetchDonations = async () => {
 
 const fetchRelatedNews = async () => {
     try {
-        const response = await api.get('/blog-posts')
-        const allPosts = response?.data?.data || []
+        const allPosts = await blogService.getBlogPosts()
         relatedNews.value = allPosts.filter(
             (item) => String(item.case_id) === String(caseData.value.id)
         ).slice(0, 5)

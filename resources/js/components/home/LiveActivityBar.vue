@@ -20,7 +20,7 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '../../services/api'
+import donationService from '../../services/donationService'
 
 const router = useRouter()
 
@@ -33,8 +33,8 @@ let fetchInterval = null
 
 const fetchLiveDonations = async () => {
     try {
-        const res = await api.get('/donations/live')
-        donations.value = Array.isArray(res?.data?.data) ? res.data.data : []
+        const list = await donationService.getCompletedDonations()
+        donations.value = Array.isArray(list) ? list : []
 
         if (donations.value.length > 0) {
             updateText()

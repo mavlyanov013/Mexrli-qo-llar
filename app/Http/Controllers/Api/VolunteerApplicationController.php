@@ -37,7 +37,7 @@ class VolunteerApplicationController extends Controller
         $payload = $request->validated();
 
         if (!isset($payload['status'])) {
-            $payload['status'] = 'pending';
+            $payload['status'] = 'new';
         }
 
         $application = VolunteerApplication::create($payload);
@@ -62,7 +62,16 @@ class VolunteerApplicationController extends Controller
         $application = VolunteerApplication::query()->findOrFail($id);
 
         $validated = $request->validate([
-            'status' => 'sometimes|string|in:pending,approved,rejected,interviewing',
+            'full_name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|max:255',
+            'phone' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'role_interest' => 'sometimes|string|max:100',
+            'message' => 'nullable|string',
+            'experience' => 'nullable|string',
+            'motivation' => 'nullable|string',
+            'availability' => 'nullable|string|max:100',
+            'status' => 'sometimes|string|in:new,reviewed,accepted,rejected',
             'admin_notes' => 'nullable|string',
         ]);
 
@@ -71,6 +80,16 @@ class VolunteerApplicationController extends Controller
         return response()->json([
             'message' => 'Volunteer application yangilandi',
             'data' => new VolunteerApplicationResource($application->fresh()),
+        ]);
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        $application = VolunteerApplication::query()->findOrFail($id);
+        $application->delete();
+
+        return response()->json([
+            'message' => 'Volunteer application deleted',
         ]);
     }
 }

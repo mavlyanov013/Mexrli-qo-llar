@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import {
     LayoutDashboard,
+    Handshake,
     UserCog,
     HandCoins,
     HeartPulse,
@@ -12,6 +13,7 @@ import {
     FileText,
     BarChart3,
     Settings,
+    Mail,
 } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
@@ -33,12 +35,14 @@ const emit = defineEmits(['close'])
 
 const navItems = computed(() => [
     { to: '/admin/dashboard', label: t('admin.dashboard'), icon: LayoutDashboard },
+    { to: '/admin/partners', label: t('admin.partners'), icon: Handshake },
     { to: '/admin/users', label: t('admin.users'), icon: UserCog },
     { to: '/admin/payments', label: t('admin.payments'), icon: CreditCard },
     { to: '/admin/donations', label: t('admin.donations'), icon: HandCoins },
     { to: '/admin/cases', label: t('admin.cases'), icon: HeartPulse },
     { to: '/admin/blog', label: t('admin.blog'), icon: Newspaper },
     { to: '/admin/volunteers', label: t('admin.volunteers'), icon: Users },
+    { to: '/admin/messages', label: t('admin.messages'), icon: Mail },
     { to: '/admin/pages', label: t('admin.pages'), icon: FileText },
     { to: '/admin/reports', label: t('admin.reports'), icon: BarChart3 },
     { to: '/admin/settings', label: t('admin.settings'), icon: Settings },

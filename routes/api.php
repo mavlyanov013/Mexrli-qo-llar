@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Api\Admin\SectionController as AdminSectionController;
+use App\Http\Controllers\Api\Admin\MediaController as AdminMediaController;
 
 Route::prefix('v1')->group(function () {
 
@@ -43,6 +44,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/billing/uzumbank/status/{payment}', [UzumBankController::class, 'status']);
 
     Route::post('/billing/checkout/init', [CheckoutController::class, 'init']);
+    Route::get('/billing/providers', [CheckoutController::class, 'providers']);
 
 
     /*
@@ -134,12 +136,24 @@ Route::prefix('v1')->group(function () {
 
         // 💰 Donations (ALL, admin uchun)
         Route::get('/donations', [DonationController::class, 'index']);
+        Route::post('/donations', [DonationController::class, 'store']);
+        Route::get('/donations/{id}', [DonationController::class, 'show']);
         Route::put('/donations/{id}', [DonationController::class, 'update']);
         Route::delete('/donations/{id}', [DonationController::class, 'destroy']);
 
         // 💳 Payments
         Route::get('/payments', [AdminPaymentController::class, 'index']);
+        Route::post('/payments', [AdminPaymentController::class, 'store']);
         Route::get('/payments/{id}', [AdminPaymentController::class, 'show']);
+        Route::put('/payments/{id}', [AdminPaymentController::class, 'update']);
+        Route::delete('/payments/{id}', [AdminPaymentController::class, 'destroy']);
+
+        // 🤝 Partners
+        Route::get('/partners', [PartnerController::class, 'index']);
+        Route::post('/partners', [PartnerController::class, 'store']);
+        Route::get('/partners/{id}', [PartnerController::class, 'show']);
+        Route::put('/partners/{id}', [PartnerController::class, 'update']);
+        Route::delete('/partners/{id}', [PartnerController::class, 'destroy']);
 
         // 👤 Users
         Route::get('/users', [AdminUserController::class, 'index']);
@@ -154,15 +168,21 @@ Route::prefix('v1')->group(function () {
         Route::put('/help-requests/{id}', [HelpRequestController::class, 'update']);
 
         // 🙋 Volunteers
+        Route::post('/volunteer-applications', [VolunteerApplicationController::class, 'store']);
         Route::get('/volunteer-applications', [VolunteerApplicationController::class, 'index']);
         Route::get('/volunteer-applications/{id}', [VolunteerApplicationController::class, 'show']);
         Route::put('/volunteer-applications/{id}', [VolunteerApplicationController::class, 'update']);
+        Route::delete('/volunteer-applications/{id}', [VolunteerApplicationController::class, 'destroy']);
 
         // 📬 Contact Messages
         Route::get('/contact-messages', [ContactMessageController::class, 'index']);
         Route::get('/contact-messages/{id}', [ContactMessageController::class, 'show']);
         Route::put('/contact-messages/{id}', [ContactMessageController::class, 'update']);
         Route::delete('/contact-messages/{id}', [ContactMessageController::class, 'destroy']);
+
+        // 🖼️ Media
+        Route::post('/media', [AdminMediaController::class, 'store']);
+        Route::delete('/media', [AdminMediaController::class, 'destroy']);
 
         // 📰 Blog
         Route::get('/blog-posts', [BlogPostController::class, 'index']);
@@ -177,6 +197,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/pages/{id}', [AdminPageController::class, 'show']);
         Route::put('/pages/{id}', [AdminPageController::class, 'update']);
         Route::delete('/pages/{id}', [AdminPageController::class, 'destroy']);
+        Route::get('/pages/{slug}', [PageController::class, 'showBySlug']);
 
         Route::post('/sections', [AdminSectionController::class, 'store']);
         Route::put('/sections/{id}', [AdminSectionController::class, 'update']);

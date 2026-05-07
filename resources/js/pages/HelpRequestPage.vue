@@ -176,7 +176,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import api from '../services/api'
+import helpRequestService from '../services/helpRequestService'
 
 const { t } = useI18n()
 
@@ -208,7 +208,7 @@ const handleSubmit = async () => {
     submitting.value = true
 
     try {
-        await api.post('/help-requests', form)
+        await helpRequestService.createHelpRequest(form)
         submitted.value = true
     } catch (error) {
         console.error('Help request submit error:', error)
