@@ -30,4 +30,12 @@ export default {
         const res = await api.delete(`/admin/news/${id}`)
         return res.data
     },
+    uploadImage(formData) {
+        return api.post('/admin/media', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+    getById(id) {
+        return api.get(`/admin/news/${id}`).then(r => r.data)
+    }
 }

@@ -43,7 +43,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import {ref, onMounted, computed} from 'vue'
 import api from '@/services/api'
 import AdminCrudShell from "../components/common/AdminCrudShell.vue";
 
@@ -77,6 +77,34 @@ const resetForm = () => {
     form.value = { page_id: pageId.value, type: 'value', title: '', subtitle: '', content: '' }
     extraJson.value = '{}'
 }
+const values = computed(() =>
+    sections.value
+        .filter(s => s.type === 'value')
+        .map(s => ({
+            title: s.title,
+            desc: s.content,
+            icon: s.extra?.icon || 'Heart',
+            tone: s.extra?.tone || 'blue'
+        }))
+)
+const team = computed(() =>
+    sections.value
+        .filter(s => s.type === 'team')
+        .map(s => ({
+            name: s.title,
+            role: s.subtitle,
+            initials: s.title.split(' ').map(n => n[0]).join('')
+        }))
+)
+const docs = computed(() =>
+    sections.value
+        .filter(s => s.type === 'doc')
+        .map(s => ({
+            title: s.title,
+            desc: s.content,
+            href: s.extra?.href || '#'
+        }))
+)
 
 const openCreate = () => {
     resetForm()

@@ -243,6 +243,12 @@ const routes = [
                 meta: { requiresAuth: true, admin: true }
             },
             {
+                path: 'news/:id',
+                name: 'admin-news-view',
+                component: () => import('@/admin/pages/AdminNewsPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
                 path: 'news/:id/edit',
                 name: 'admin-news-edit',
                 component: () => import('@/admin/pages/AdminNewsPage.vue'),
