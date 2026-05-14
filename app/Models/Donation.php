@@ -14,7 +14,7 @@ class Donation extends Model
         'case_id',
         'service_type',
         'donor_name',
-        'donor_email',
+        'donor_phone',
         'amount',
         'currency',
         'type',

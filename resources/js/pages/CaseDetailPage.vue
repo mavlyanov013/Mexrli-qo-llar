@@ -123,14 +123,14 @@
                                 <div class="flex justify-between py-2.5">
                                     <span class="text-sm text-gray-500">{{ t('caseDetailPage.goalAmount') }}</span>
                                     <span class="text-sm font-semibold text-[#4CAF50]">
-                                        ${{ formatNumber(caseData.goal_amount) }}
+                                        {{ formatMoney(caseData.goal_amount) }}
                                     </span>
                                 </div>
 
                                 <div class="flex justify-between py-2.5">
                                     <span class="text-sm text-gray-500">{{ t('caseDetailPage.raisedAmount') }}</span>
                                     <span class="text-sm font-semibold text-[#2A7DE1]">
-                                        ${{ formatNumber(caseData.raised_amount) }}
+                                        {{ formatMoney(caseData.raised_amount) }}
                                     </span>
                                 </div>
                             </div>
@@ -259,7 +259,7 @@
                                 <div>
                                     <p class="text-sm text-gray-500">{{ t('caseDetailPage.raised') }}</p>
                                     <p class="text-2xl font-bold text-gray-900">
-                                        ${{ formatNumber(caseData.raised_amount || 0) }}
+                                        {{ formatMoney(caseData.raised_amount || 0) }}
                                     </p>
                                 </div>
 
@@ -274,7 +274,7 @@
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="text-gray-500">{{ t('caseDetailPage.funded', { percent: percentage }) }}</span>
                                     <span class="font-medium">
-                                        {{ t('caseDetailPage.goal', { amount: formatNumber(caseData.goal_amount) }) }}
+                                        {{ t('caseDetailPage.goal', { amount: formatMoney(caseData.goal_amount) }) }}
                                     </span>
                                 </div>
 
@@ -303,21 +303,21 @@
                                     <div class="flex justify-between text-sm">
                                         <span class="text-gray-600">{{ t('caseDetailPage.required') }}</span>
                                         <span class="font-semibold">
-                                            ${{ formatNumber(caseData.goal_amount) }}
+                                            {{ formatMoney(caseData.goal_amount) }}
                                         </span>
                                     </div>
 
                                     <div class="flex justify-between text-sm">
                                         <span class="text-gray-600">{{ t('caseDetailPage.raisedShort') }}</span>
                                         <span class="font-semibold text-[#4CAF50]">
-                                            ${{ formatNumber(caseData.raised_amount || 0) }}
+                                            {{ formatMoney(caseData.raised_amount || 0) }}
                                         </span>
                                     </div>
 
                                     <div class="flex justify-between text-sm">
                                         <span class="text-gray-600">{{ t('caseDetailPage.remaining') }}</span>
                                         <span class="font-semibold text-[#FF9800]">
-                                            ${{ formatNumber(remainingAmount) }}
+                                            {{ formatMoney(remainingAmount) }}
                                         </span>
                                     </div>
                                 </div>
@@ -348,7 +348,7 @@
                                         </div>
 
                                         <span class="text-sm font-semibold">
-                                            ${{ donation.amount }}
+                                            {{ formatMoney(donation.amount) }}
                                         </span>
                                     </div>
                                 </div>
@@ -464,10 +464,10 @@ const progressStyle = computed(() => {
     }
 })
 
-const formatNumber = (value) => {
+
+const formatMoney = (value) => {
     return Number(value || 0).toLocaleString()
 }
-
 const formatShortDate = (value) => {
     if (!value) return ''
 

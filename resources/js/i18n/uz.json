@@ -93,6 +93,8 @@
     "notFound": "To'lov topilmadi"
   },
   "admin": {
+      "donorName": "Ism",
+      "donorPhone": "Telefon raqami",
     "searchPlaceholder": "Qidirish...",
     "users": "Foydalanuvchilar",
     "partners": "Hamkorlar",

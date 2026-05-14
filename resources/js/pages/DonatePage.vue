@@ -204,9 +204,9 @@
                         />
 
                         <input
-                            v-model="email"
-                            type="email"
-                            :placeholder="t('donatePage.email')"
+                            v-model="phone"
+                            type="tel"
+                            :placeholder="t('donatePage.phone')"
                             class="rounded-2xl h-12 border border-gray-300 w-full px-4 outline-none"
                             required
                         />
@@ -252,7 +252,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import donationService from '../services/donationService'
@@ -286,7 +286,6 @@ const type = ref('one_time')
 const amount = ref(10000)
 const customAmount = ref('')
 const name = ref('')
-const email = ref('')
 const message = ref('')
 const anonymous = ref(false)
 const paymentMethod = ref('paycom')
@@ -333,6 +332,8 @@ watch(
     { immediate: true }
 )
 
+const phone = ref('')
+
 const handleSubmit = async () => {
     errorText.value = ''
 
@@ -348,7 +349,7 @@ const handleSubmit = async () => {
             case_id: caseId.value || undefined,
             service_type: serviceType.value,
             donor_name: name.value,
-            donor_email: email.value,
+            donor_phone: phone.value,
             amount: Number(finalAmount.value),
             currency: 'UZS',
             type: type.value,

@@ -7,14 +7,24 @@
 
                 <AdminTable :columns="columns" :rows="payments">
 
+                    <!-- DONOR NAME -->
+                    <template #cell-donor_name="{ row }">
+                        {{ row.payload?.donor_name || '-' }}
+                    </template>
+
+                    <!-- DONOR PHONE -->
+                    <template #cell-donor_phone="{ row }">
+                        {{ row.payload?.donor_phone || '-' }}
+                    </template>
+
+                    <!-- STATUS -->
                     <template #cell-status="{ row }">
                         <StatusBadge :status="row.status" :map="PAYMENT_STATUSES" />
                     </template>
 
+                    <!-- ACTIONS -->
                     <template #cell-actions="{ row }">
                         <div class="flex items-center gap-3">
-
-                            <!-- VIEW -->
                             <router-link
                                 :to="`/admin/payments/${row.id}`"
                                 class="text-blue-600 hover:scale-110 transition"
@@ -22,7 +32,6 @@
                                 <Eye class="w-4 h-4" />
                             </router-link>
 
-                            <!-- EDIT -->
                             <router-link
                                 :to="`/admin/payments/${row.id}/edit`"
                                 class="text-amber-600 hover:scale-110 transition"
@@ -30,14 +39,12 @@
                                 <Pencil class="w-4 h-4" />
                             </router-link>
 
-                            <!-- DELETE -->
                             <button
                                 @click="remove(row.id)"
                                 class="text-red-600 hover:scale-110 transition"
                             >
                                 <Trash2 class="w-4 h-4" />
                             </button>
-
                         </div>
                     </template>
 
@@ -51,7 +58,15 @@
             <div class="space-y-2 text-sm">
                 <p><strong>ID:</strong> {{ current.id }}</p>
                 <p><strong>{{ t('admin.provider') }}:</strong> {{ current.provider }}</p>
-                <p><strong>{{ t('admin.transactionId') }}:</strong> {{ current.transaction_id }}</p>
+                <p>
+                    <strong>{{ t('admin.donorName') }}:</strong>
+                    {{ current.payload?.donor_name }}
+                </p>
+
+                <p>
+                    <strong>{{ t('admin.donorPhone') }}:</strong>
+                    {{ current.payload?.donor_phone }}
+                </p>
                 <p><strong>{{ t('admin.amount') }}:</strong> {{ current.amount }} {{ current.currency }}</p>
                 <p>
                     <strong>{{ t('admin.status') }}:</strong>
@@ -69,12 +84,20 @@
                     <option value="cash">cash</option>
                 </select>
 
-                <input v-model="form.transaction_id" class="h-10 rounded-lg border px-3 text-sm"
-                       :placeholder="t('admin.transactionId')" required />
-
                 <input v-model.number="form.amount" type="number" min="0" step="0.01"
                        class="h-10 rounded-lg border px-3 text-sm"
                        :placeholder="t('admin.amount')" required />
+                <input
+                    v-model="form.donor_name"
+                    class="h-10 rounded-lg border px-3 text-sm"
+                    :placeholder="t('admin.donorName')"
+                    required
+                />
+                <input
+                    v-model="form.donor_phone"
+                    class="h-10 rounded-lg border px-3 text-sm"
+                    placeholder="Telefon (ixtiyoriy)"
+                />
 
                 <input v-model="form.currency" class="h-10 rounded-lg border px-3 text-sm" placeholder="UZS" />
 
@@ -146,22 +169,40 @@ const title = computed(() =>
                 : 'Create payment'
 )
 
-const form = reactive({
-    provider: 'cash',
-    transaction_id: '',
-    amount: 0,
-    status: 'pending',
-    currency: 'UZS',
-})
+
 
 const columns = [
     { key: 'id', label: 'ID' },
     { key: 'provider', label: t('admin.provider') },
-    { key: 'transaction_id', label: t('admin.transactionId') },
+    { key: 'donor_name', label: t('admin.donorName') },
+    { key: 'donor_phone', label: t('admin.donorPhone') },
     { key: 'status', label: t('admin.status') },
     { key: 'actions', label: t('admin.actions') },
 ]
+const form = reactive({
+    provider: 'cash',
+    donor_name: '',
+    donor_phone: '',
+    amount: 0,
+    status: 'completed',
+    currency: 'UZS',
+})
+const save = async () => {
+    const payload = {
+        provider: 'cash',
+        amount: form.amount,
+        currency: form.currency,
+        donor_name: form.donor_name,
+        donor_phone: form.donor_phone,
+        status: 'completed',
+    }
 
+    const result = await createPayment(payload)
+
+    if (!result.error) {
+        router.push('/admin/payments')
+    }
+}
 const loadCurrent = async () => {
     if (!route.params.id) return
 
@@ -179,17 +220,6 @@ const loadCurrent = async () => {
     }
 }
 
-const save = async () => {
-    const payload = { ...form }
-
-    const result = isEditMode.value
-        ? await updatePayment(route.params.id, payload)
-        : await createPayment(payload)
-
-    if (!result.error) {
-        router.push('/admin/payments')
-    }
-}
 
 const remove = async (id) => {
     if (!confirm('Delete this payment?')) return

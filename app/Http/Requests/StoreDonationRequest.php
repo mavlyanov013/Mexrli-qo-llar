@@ -21,7 +21,7 @@ class StoreDonationRequest extends FormRequest
             'amount' => ['required', 'numeric', 'min:1'],
             'currency' => ['nullable', 'string', 'max:10'],
             'type' => ['nullable', Rule::in(['one_time', 'monthly', 'manual'])],
-            'message' => ['nullable', 'string'],
+            'donor_phone' => ['nullable', 'string', 'max:30'],
             'note' => ['nullable', 'string'],
             'is_manual_cash' => ['nullable', 'boolean'],
             'is_anonymous' => ['nullable', 'boolean'],

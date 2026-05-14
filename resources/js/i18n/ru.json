@@ -93,6 +93,8 @@
     "notFound": "Платеж не найден"
   },
   "admin": {
+      "donorName": "Имя",
+      "donorPhone": "Номер телефона",
     "searchPlaceholder": "Поиск...",
     "users": "Пользователи",
     "partners": "Партнеры",

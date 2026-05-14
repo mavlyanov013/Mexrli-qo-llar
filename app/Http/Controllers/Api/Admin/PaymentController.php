@@ -33,14 +33,28 @@ class PaymentController extends Controller
     {
         $validated = $request->validate([
             'provider' => ['required', 'string', 'in:paycom,click,paynet,uzumbank,cash'],
-            'status' => ['required', 'string', 'in:pending,success,failed,cancelled,completed'],
-            'transaction_id' => ['required', 'string', 'max:255'],
             'amount' => ['required', 'numeric', 'min:0'],
             'currency' => ['nullable', 'string', 'max:10'],
             'donation_id' => ['nullable', 'integer', 'exists:donations,id'],
+
+            // YANGI
+            'donor_name' => ['required', 'string', 'max:255'],
+            'donor_phone' => ['nullable', 'string', 'max:50'],
         ]);
 
-        $payment = \App\Models\Payment::query()->create($validated);
+        // CASH uchun avtomatik
+        if ($validated['provider'] === 'cash') {
+            $validated['status'] = 'completed';
+            $validated['transaction_id'] = 'CASH_' . time();
+        }
+
+        $payment = \App\Models\Payment::query()->create([
+            ...$validated,
+            'payload' => [
+                'donor_name' => $validated['donor_name'],
+                'donor_phone' => $validated['donor_phone'] ?? null,
+            ]
+        ]);
 
         return response()->json([
             'message' => 'Payment created successfully',

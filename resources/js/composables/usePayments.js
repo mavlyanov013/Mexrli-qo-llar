@@ -11,8 +11,13 @@ export function usePayments() {
     const fetchPayments = async (params = {}) => {
         loading.value = true
         error.value = null
+
         const result = await paymentService.fetchList(params)
-        payments.value = result.data || []
+
+        payments.value = (result.data || []).filter(
+            (p) => ['pending', 'success', 'completed'].includes(p.status)
+        )
+
         meta.value = result.meta
         error.value = result.error
         loading.value = false

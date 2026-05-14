@@ -13,7 +13,7 @@ class DonationResource extends JsonResource
             'id' => $this->id,
             'case_id' => $this->case_id,
             'donor_name' => $this->donor_name,
-            'donor_email' => $this->donor_email,
+            'donor_phone' => $this->donor_phone,
             'amount' => $this->amount,
             'currency' => $this->currency,
             'type' => $this->type,

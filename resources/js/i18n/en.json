@@ -93,6 +93,8 @@
     "notFound": "Payment not found"
   },
   "admin": {
+      "donorName": "Name",
+      "donorPhone": "Phone number",
     "searchPlaceholder": "Search...",
     "users": "Users",
     "partners": "Partners",

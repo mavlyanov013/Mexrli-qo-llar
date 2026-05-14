@@ -2,6 +2,9 @@
     <AdminCrudShell :title="title" :create-to="isListMode ? '/admin/news/create' : ''">
         <template v-if="isListMode">
             <AdminTable :columns="columns" :rows="rows">
+                <template #cell-published_at="{ row }">
+                    {{ new Date(row.published_at || row.created_at).toLocaleString() }}
+                </template>
                 <template #cell-actions="{ row }">
                     <div class="flex items-center gap-3">
                         <router-link

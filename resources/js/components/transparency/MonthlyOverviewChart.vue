@@ -9,11 +9,11 @@
         <div class="flex gap-6 h-80">
             <!-- Y axis -->
             <div class="flex flex-col justify-between text-xs text-gray-400 pr-2">
-                <span>$180k</span>
-                <span>$135k</span>
-                <span>$90k</span>
-                <span>$45k</span>
-                <span>$0</span>
+                <span>180 000 so'm</span>
+                <span>135 000 so'm</span>
+                <span>90 000 so'm</span>
+                <span>45 000 so'm</span>
+                <span>0 so'm</span>
             </div>
 
             <!-- Bars -->

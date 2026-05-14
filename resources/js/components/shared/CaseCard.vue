@@ -57,10 +57,10 @@
             <div class="mb-4">
                 <div class="flex justify-between text-xs mb-1.5">
                     <span class="text-[#4CAF50] font-semibold">
-                        ${{ formatNumber(caseData.raised_amount || 0) }} {{ t('caseCard.raised') }}
+                        {{ formatMoney(caseData.raised_amount || 0) }} {{ t('caseCard.raised') }}
                     </span>
                     <span class="text-gray-400">
-                        {{ t('caseCard.of') }} ${{ formatNumber(caseData.goal_amount || 0) }}
+                        {{ t('caseCard.of') }} {{ formatMoney(caseData.goal_amount || 0) }}
                     </span>
                 </div>
 
@@ -75,7 +75,7 @@
                     v-if="remaining > 0"
                     class="text-xs text-[#FF9800] font-semibold mt-1.5"
                 >
-                    ${{ formatNumber(remaining) }} {{ t('caseCard.stillNeeded') }}
+                    {{ formatMoney(remaining) }} {{ t('caseCard.stillNeeded') }}
                 </p>
             </div>
 
@@ -167,5 +167,6 @@ const progressStyle = computed(() => {
     }
 })
 
-const formatNumber = (value) => Number(value || 0).toLocaleString()
+const formatMoney = (value) =>
+    new Intl.NumberFormat('uz-UZ').format(value || 0) + " so'm"
 </script>

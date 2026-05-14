@@ -135,40 +135,73 @@
                 <input v-model.number="form.raised_amount" type="number" class="input" placeholder="Yig‘ilgan summa" />
 
                 <!-- RASM -->
-                <input type="file" class="input md:col-span-2" @change="uploadImage" />
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium mb-2">Rasm yuklash</label>
+
+                    <div
+                        class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 transition"
+                        @click="$refs.imageInput.click()"
+                    >
+                        <input
+                            ref="imageInput"
+                            type="file"
+                            class="hidden"
+                            accept="image/*"
+                            @change="uploadImage"
+                        />
+
+                        <div v-if="!previewUrl">
+                            <p class="text-gray-500">📷 Rasm tanlang yoki bu yerga bosing</p>
+                        </div>
+
+                        <img
+                            v-else
+                            :src="previewUrl"
+                            class="mx-auto h-32 object-cover rounded-lg"
+                        />
+                    </div>
+                </div>
 
                 <img v-if="previewUrl" :src="previewUrl" class="h-24 w-24 rounded-xl object-cover"  alt=""/>
 
                 <!-- HUJJAT UPLOAD -->
-                <input type="file"
-                       multiple
-                       class="input md:col-span-2"
-                       @change="uploadDocs" />
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium mb-2">Hujjatlar</label>
 
-                <div v-if="form.medical_documents.length" class="md:col-span-2">
+                    <div
+                        class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 transition"
+                        @click="$refs.docsInput.click()"
+                    >
+                        <input
+                            ref="docsInput"
+                            type="file"
+                            multiple
+                            class="hidden"
+                            @change="uploadDocs"
+                        />
 
-                    <h3 class="font-semibold mb-2">Hujjatlar</h3>
+                        <p class="text-gray-500">📎 Hujjat yuklash uchun bosing</p>
+                    </div>
+                </div>
 
+                <div v-if="form.medical_documents.length" class="md:col-span-2 mt-3">
                     <div class="space-y-2">
-                        <div v-for="(doc, i) in form.medical_documents"
-                             :key="i"
-                             class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                        <div
+                            v-for="(doc, i) in form.medical_documents"
+                            :key="i"
+                            class="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
+                        >
+                            <span class="text-sm truncate">📎 {{ doc.name }}</span>
 
-                            <a :href="doc.url"
-                               target="_blank"
-                               class="text-blue-600 text-sm">
-                                📎 {{ doc.name || 'Hujjat ' + (i+1) }}
-                            </a>
-
-                            <button type="button"
-                                    class="text-red-500 text-sm"
-                                    @click="removeDoc(i)">
+                            <button
+                                type="button"
+                                class="text-red-500 text-sm"
+                                @click="removeDoc(i)"
+                            >
                                 O‘chirish
                             </button>
-
                         </div>
                     </div>
-
                 </div>
 
                 <!-- DESCRIPTION -->
@@ -282,11 +315,16 @@ const uploadImage = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const res = await mediaService.upload(file, 'cases')
+    // preview
+    previewUrl.value = URL.createObjectURL(file)
 
-    if (!res.error) {
-        form.photo_url = res.data.url
-        previewUrl.value = res.data.url
+    const res = await mediaService.upload(file, 'cases/images')
+
+    const url = res?.data?.data?.url
+
+    if (url) {
+        form.photo_url = url
+        previewUrl.value = url
     }
 }
 
@@ -296,11 +334,11 @@ const uploadDocs = async (e) => {
     for (const file of files) {
         const res = await mediaService.upload(file, 'cases/docs')
 
-        if (!res.error && res.data?.url) {
-            form.medical_documents.push({
-                url: res.data.url,
-                name: file.name
-            })
+        const url = res?.data?.data?.url
+
+        if (url) {
+            // ⚠️ Faqat STRING push qilinadi
+            form.medical_documents.push(url)
         }
     }
 }
@@ -316,10 +354,11 @@ watch(
     { immediate: true }
 )
 
-const removeDoc = (i) => form.medical_documents.splice(i, 1)
+const removeDoc = (i) => {
+    form.medical_documents.splice(i, 1)
+}
 
 const save = async () => {
-
     const payload = {
         ...form,
         medical_documents: form.medical_documents
