@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\SectionType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -11,13 +12,15 @@ class SectionResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'type' => $this->type,
+            'type' => SectionType::tryFrom($this->type)?->value ?? $this->type,
             'title' => $this->title,
             'subtitle' => $this->subtitle,
             'content' => $this->content,
             'image' => $this->image,
             'sort_order' => $this->sort_order,
-            'extra' => $this->extra,
+            'extra' => is_array($this->extra)
+                ? $this->extra
+                : (json_decode($this->extra ?? '{}', true) ?? []),
         ];
     }
 }

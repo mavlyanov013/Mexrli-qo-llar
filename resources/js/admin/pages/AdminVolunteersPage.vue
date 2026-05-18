@@ -6,13 +6,20 @@
 
         <!-- ================= RO‘YXAT ================= -->
         <template v-if="isListMode">
-            <ListState :loading="loading" :error="error" :empty="volunteers.length === 0">
+            <ListState
+                :loading="loading"
+                :error="error"
+                :empty="volunteers.length === 0"
+            >
 
                 <AdminTable :columns="columns" :rows="volunteers">
 
-                    <!-- HOLATI -->
+                    <!-- HOLAT -->
                     <template #cell-status="{ row }">
-                        <StatusBadge :status="row.status" :map="VOLUNTEER_STATUSES" />
+                        <StatusBadge
+                            :status="row.status"
+                            :map="VOLUNTEER_STATUSES"
+                        />
                     </template>
 
                     <!-- AMALLAR -->
@@ -62,13 +69,16 @@
                 <p><b>Email:</b> {{ current.email }}</p>
                 <p><b>Telefon:</b> {{ current.phone }}</p>
                 <p><b>Shahar:</b> {{ current.city }}</p>
-                <p><b>Qiziqayotgan yo‘nalish:</b> {{ current.role_interest }}</p>
+                <p><b>Qiziqish yo‘nalishi:</b> {{ current.role_interest }}</p>
                 <p><b>Tajriba:</b> {{ current.experience }}</p>
-                <p><b>Motivatsiya:</b> {{ current.motivation }}</p>
+                <p><b>Tavsif:</b> {{ current.motivation }}</p>
 
                 <p class="flex items-center gap-2">
                     <b>Holat:</b>
-                    <StatusBadge :status="current.status" :map="VOLUNTEER_STATUSES" />
+                    <StatusBadge
+                        :status="current.status"
+                        :map="VOLUNTEER_STATUSES"
+                    />
                 </p>
 
             </div>
@@ -81,23 +91,58 @@
                 @submit.prevent="save"
             >
 
-                <input v-model="form.full_name" class="input" placeholder="To‘liq ism" />
-                <input v-model="form.email" class="input" placeholder="Email" />
-                <input v-model="form.phone" class="input" placeholder="Telefon" />
-                <input v-model="form.city" class="input" placeholder="Shahar" />
+                <!-- ISM -->
+                <div>
+                    <label class="label">To‘liq ism</label>
+                    <input v-model="form.full_name" class="input" placeholder="Masalan: Ali Valiyev" />
+                </div>
 
-                <input v-model="form.role_interest" class="input" placeholder="Qiziqish yo‘nalishi" />
-                <input v-model="form.experience" class="input" placeholder="Tajriba" />
+                <!-- EMAIL -->
+                <div>
+                    <label class="label">Email manzil</label>
+                    <input v-model="form.email" class="input" placeholder="example@mail.com" />
+                </div>
 
-                <textarea v-model="form.motivation" class="input md:col-span-2" placeholder="Motivatsiya" />
+                <!-- TELEFON -->
+                <div>
+                    <label class="label">Telefon raqam</label>
+                    <input v-model="form.phone" class="input" placeholder="+998 90 123 45 67" />
+                </div>
 
-                <div class="md:col-span-2 flex gap-3 mt-2">
+                <!-- SHAHAR -->
+                <div>
+                    <label class="label">Shahar</label>
+                    <input v-model="form.city" class="input" placeholder="Masalan: Toshkent" />
+                </div>
+
+                <!-- YO‘NALISH -->
+                <div>
+                    <label class="label">Qiziqish yo‘nalishi</label>
+                    <input v-model="form.role_interest" class="input" placeholder="Masalan: Tibbiyot" />
+                </div>
+
+                <!-- TAJRIBA -->
+                <div>
+                    <label class="label">Tajriba</label>
+                    <input v-model="form.experience" class="input" placeholder="Masalan: 2 yil volontyorlik" />
+                </div>
+
+                <!-- MOTIVATSIYA -->
+                <div class="md:col-span-2">
+                    <label class="label">Motivatsiya</label>
+                    <textarea
+                        v-model="form.motivation"
+                        class="input"
+                        rows="4"
+                        placeholder="Nima sababdan ko‘ngilli bo‘lmoqchisiz?"
+                    />
+                </div>
+
+                <!-- BUTTON -->
+                <div class="md:col-span-2 flex gap-3 mt-2 justify-end">
                     <button class="btn-primary">Saqlash</button>
 
-                    <router-link
-                        to="/admin/volunteers"
-                        class="btn-secondary"
-                    >
+                    <router-link to="/admin/volunteers" class="btn-secondary">
                         Bekor qilish
                     </router-link>
                 </div>
@@ -201,7 +246,22 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: #555;
+}
+
 .input {
+    width: 100%;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 10px 14px;
@@ -215,15 +275,21 @@ onMounted(async () => {
 }
 
 .btn-primary {
-    background: #2A7DE1;
+    background: linear-gradient(135deg, #2A7DE1, #1d5fbf);
     color: white;
     padding: 10px 16px;
-    border-radius: 10px;
+    border-radius: 12px;
 }
 
 .btn-secondary {
     border: 1px solid #ddd;
     padding: 10px 16px;
-    border-radius: 10px;
+    border-radius: 12px;
+}
+
+.icon-btn {
+    padding: 8px;
+    border-radius: 8px;
+    transition: 0.2s;
 }
 </style>

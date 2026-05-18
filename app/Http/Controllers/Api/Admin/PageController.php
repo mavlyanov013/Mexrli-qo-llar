@@ -12,12 +12,19 @@ class PageController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Page::query()->with('sections')->latest();
+        $query = Page::query()
+            ->with('sections')
+            ->latest();
+
         if ($request->filled('search')) {
             $search = $request->string('search');
-            $query->where('title', 'like', "%{$search}%")
-                ->orWhere('slug', 'like', "%{$search}%");
+
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('slug', 'like', "%{$search}%");
+            });
         }
+
         $pages = $query->paginate((int) $request->input('per_page', 15));
 
         return response()->json([
@@ -54,8 +61,14 @@ class PageController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        $page = Page::query()->with('sections')->findOrFail($id);
-        return response()->json(['message' => 'Page fetched successfully', 'data' => new PageResource($page)]);
+        $page = Page::query()
+            ->with('sections')
+            ->findOrFail($id);
+
+        return response()->json([
+            'message' => 'Page fetched successfully',
+            'data' => new PageResource($page),
+        ]);
     }
 
     public function update(Request $request, int $id): JsonResponse
@@ -83,8 +96,9 @@ class PageController extends Controller
     public function showBySlug(string $slug): JsonResponse
     {
         $page = Page::query()
-            ->with(['sections' => function ($query) {
-                $query->where('is_active', true)->orderBy('sort_order');
+            ->with(['sections' => function ($q) {
+                $q->where('is_active', true)
+                    ->orderBy('sort_order');
             }])
             ->where('slug', $slug)
             ->where('is_active', true)

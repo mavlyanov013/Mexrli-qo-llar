@@ -87,51 +87,71 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- LEFT SIDE -->
                     <div class="space-y-4">
+
                         <div class="bg-gray-50 rounded-xl p-4">
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
                                 {{ t('aboutPage.orgName') }}
                             </p>
-                            <p class="font-semibold text-gray-800">{{ legalItems[0]?.content || '—' }}</p>
+                            <p class="font-semibold text-gray-800">
+                                {{ legalMap.orgName || '—' }}
+                            </p>
                         </div>
 
                         <div class="bg-gray-50 rounded-xl p-4">
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
                                 {{ t('aboutPage.inn') }}
                             </p>
-                            <p class="font-semibold text-gray-800 font-mono">{{ legalItems[1]?.content || '—' }}</p>
+                            <p class="font-semibold text-gray-800 font-mono">
+                                {{ legalMap.inn || '—' }}
+                            </p>
                         </div>
 
                         <div class="bg-gray-50 rounded-xl p-4">
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
                                 {{ t('aboutPage.legalAddress') }}
                             </p>
-                            <p class="font-semibold text-gray-800">{{ legalItems[2]?.content || '—' }}</p>
+                            <p class="font-semibold text-gray-800">
+                                {{ legalMap.legalAddress || '—' }}
+                            </p>
                         </div>
-                    </div>
 
-                    <div class="space-y-4">
                         <div class="bg-gray-50 rounded-xl p-4">
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
                                 {{ t('aboutPage.bank') }}
                             </p>
-                            <p class="font-semibold text-gray-800">{{ legalItems[3]?.content || '—' }}</p>
+                            <p class="font-semibold text-gray-800">
+                                {{ legalMap.bank || '—' }}
+                            </p>
                         </div>
+
+                    </div>
+
+                    <!-- RIGHT SIDE -->
+                    <div class="space-y-4">
 
                         <div class="bg-gray-50 rounded-xl p-4">
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
                                 {{ t('aboutPage.accountUzs') }}
                             </p>
-                            <p class="font-semibold text-gray-800 font-mono">{{ legalItems[4]?.content || '—' }}</p>
+                            <p class="font-semibold text-gray-800 font-mono">
+                                {{ legalMap.accountUzs || '—' }}
+                            </p>
                         </div>
 
                         <div class="bg-gray-50 rounded-xl p-4">
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
                                 {{ t('aboutPage.mfoBik') }}
                             </p>
-                            <p class="font-semibold text-gray-800 font-mono">{{ legalItems[5]?.content || '—' }}</p>
+                            <p class="font-semibold text-gray-800 font-mono">
+                                {{ legalMap.mfoBik || '—' }}
+                            </p>
                         </div>
+
                     </div>
+
                 </div>
             </div>
 
@@ -158,7 +178,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import {computed, ref, onMounted, watch} from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
     Heart,
@@ -171,6 +191,7 @@ import {
     ExternalLink,
     Building2,
 } from 'lucide-vue-next'
+
 import SectionHeader from '../components/shared/SectionHeader.vue'
 import IconBadge from '../components/shared/IconBadge.vue'
 import pageService from '@/services/pageService'
@@ -178,18 +199,6 @@ import pageService from '@/services/pageService'
 const page = ref(null)
 const loading = ref(true)
 const error = ref(null)
-
-const fetchPage = async () => {
-    try {
-        const res = await pageService.getBySlug('about')
-        page.value = res.data
-    } catch (e) {
-        error.value = e.message
-    } finally {
-        loading.value = false
-    }
-}
-
 
 const { t, tm } = useI18n()
 
@@ -204,66 +213,129 @@ const iconMap = {
     Building2,
 }
 
-const sections = computed(() => page.value?.sections ?? [])
-const byType = (type) => sections.value.filter((item) => item.type === type)
+/* ================= FETCH ================= */
+const fetchPage = async () => {
+    loading.value = true
+    try {
+        const res = await pageService.getBySlug('about')
 
+        page.value = res.data
+
+    } catch (e) {
+        error.value = e.message
+    } finally {
+        loading.value = false
+    }
+}
+
+/* ================= SAFE PARSE ================= */
+const safeExtra = (extra) => {
+    if (!extra) return {}
+    if (typeof extra === 'string') {
+        try {
+            return JSON.parse(extra)
+        } catch {
+            return {}
+        }
+    }
+    return extra
+}
+
+/* ================= SECTIONS ================= */
+const sections = computed(() => {
+    return page.value?.sections?.length
+        ? page.value.sections
+        : []
+})
+
+const byType = (type) => {
+    return sections.value.filter(s => String(s?.type) === type)
+}
+
+/* ================= HERO ================= */
 const hero = computed(() => byType('hero')[0] ?? null)
 
+/* ================= VALUES ================= */
 const values = computed(() => {
     const items = byType('value')
-    if (items.length) {
-        return items.map((item) => ({
-            icon: iconMap[item.extra?.icon] || ShieldCheck,
-            title: item.title,
-            desc: item.content,
-            tone: item.extra?.tone || 'blue',
+
+    if (!items.length) {
+        return tm('aboutPage.values').map((v) => ({
+            icon: ShieldCheck,
+            title: v.title,
+            desc: v.desc,
+            tone: 'blue',
         }))
     }
 
-    return [
-        { icon: ShieldCheck, title: tm('aboutPage.values')[0].title, desc: tm('aboutPage.values')[0].desc, tone: 'blue' },
-        { icon: Heart, title: tm('aboutPage.values')[1].title, desc: tm('aboutPage.values')[1].desc, tone: 'red' },
-        { icon: Target, title: tm('aboutPage.values')[2].title, desc: tm('aboutPage.values')[2].desc, tone: 'green' },
-        { icon: Star, title: tm('aboutPage.values')[3].title, desc: tm('aboutPage.values')[3].desc, tone: 'orange' },
-    ]
+    return items.map((item) => {
+        const extra = safeExtra(item.extra)
+
+        return {
+            icon: iconMap[extra.icon] || ShieldCheck,
+            title: item.title,
+            desc: item.content,
+            tone: extra.tone || 'blue',
+        }
+    })
 })
 
+/* ================= DOCS ================= */
 const docs = computed(() => {
     const items = byType('doc')
-    if (items.length) {
-        return items.map((item) => ({
+
+    if (!items.length) {
+        return tm('aboutPage.docs').map((d) => ({
+            title: d.title,
+            desc: d.desc,
+            href: '#',
+            icon: FileText,
+            tone: 'blue',
+        }))
+    }
+
+    return items.map((item) => {
+        const extra = safeExtra(item.extra)
+
+        return {
             title: item.title,
             desc: item.content,
-            href: item.extra?.href || '#',
-            tone: item.extra?.tone || 'blue',
-            icon: iconMap[item.extra?.icon] || FileText,
-        }))
-    }
-
-    return [
-        { title: tm('aboutPage.docs')[0].title, desc: tm('aboutPage.docs')[0].desc, href: '#', tone: 'blue', icon: FileText },
-        { title: tm('aboutPage.docs')[1].title, desc: tm('aboutPage.docs')[1].desc, href: '#', tone: 'green', icon: ScrollText },
-    ]
+            href: extra.href || '#',
+            icon: iconMap[extra.icon] || FileText,
+            tone: extra.tone || 'blue',
+        }
+    })
 })
 
-const legalItems = computed(() => byType('legal'))
+/* ================= LEGAL (FIXED ORDER ISSUE) ================= */
+const legalMap = computed(() => {
+    const map = {}
+    byType('legal').forEach((i) => {
+        map[i.title] = i.content
+    })
+    return map
+})
 
+/* ================= TEAM ================= */
 const team = computed(() => {
     const items = byType('team')
-    if (items.length) {
-        return items.map((item) => ({
-            name: item.title,
-            role: item.subtitle || item.content || '',
-            initials: (item.title || '?').split(' ').slice(0, 2).map((v) => v[0]).join('').toUpperCase(),
-        }))
-    }
 
-    return [
-        { name: 'Dr. Aziza Karimova', role: tm('aboutPage.team')[0].role, initials: 'AK' },
-        { name: 'Rustam Alimov', role: tm('aboutPage.team')[1].role, initials: 'RA' },
-        { name: 'Nodira Tosheva', role: tm('aboutPage.team')[2].role, initials: 'NT' },
-        { name: 'Bekzod Umarov', role: tm('aboutPage.team')[3].role, initials: 'BU' },
-    ]
+    return items.map((item) => {
+        const name = item.title || ''
+
+        const initials = name
+            .split(' ')
+            .filter(Boolean)
+            .map(w => w[0])
+            .join('')
+            .toUpperCase()
+
+        return {
+            name,
+            role: item.subtitle || '',
+            initials: initials || 'T'
+        }
+    })
 })
 
 onMounted(fetchPage)

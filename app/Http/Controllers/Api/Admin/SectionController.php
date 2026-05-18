@@ -7,23 +7,46 @@ use App\Http\Resources\SectionResource;
 use App\Models\Section;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
+use Illuminate\Validation\Rules\Enum;
+use App\Enums\SectionType;
+use Illuminate\Support\Facades\Storage;
 class SectionController extends Controller
 {
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'page_id' => ['required', 'exists:pages,id'],
-            'type' => ['required', 'string'],
+            'type' => ['required'],
 
             'title' => ['nullable', 'string'],
             'subtitle' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
-            'image' => ['nullable', 'string'],
+
+            'file' => ['nullable', 'file', 'max:10240'],
+            'image' => ['nullable', 'file', 'max:10240'],
 
             'sort_order' => ['nullable', 'integer'],
             'extra' => ['nullable', 'array'],
         ]);
+
+        // 🔥 file upload
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+
+            $path = $file->store('sections/files', 'public');
+
+            $validated['file_path'] = $path;
+            $validated['file_name'] = $file->getClientOriginalName();
+        }
+
+        // 🔥 image upload (optional)
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+
+            $path = $image->store('sections/images', 'public');
+
+            $validated['image'] = $path;
+        }
 
         $section = Section::create($validated);
 
@@ -38,7 +61,7 @@ class SectionController extends Controller
         $section = Section::findOrFail($id);
 
         $validated = $request->validate([
-            'type' => ['sometimes', 'string'],
+            'type' => ['sometimes', new Enum(SectionType::class)],
 
             'title' => ['nullable', 'string'],
             'subtitle' => ['nullable', 'string'],

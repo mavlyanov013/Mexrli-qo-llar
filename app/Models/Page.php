@@ -21,4 +21,11 @@ class Page extends Model
     {
         return $this->hasMany(Section::class)->orderBy('sort_order');
     }
+    protected $casts = [
+        'extra' => 'array',
+    ];
+
+    protected $attributes = [
+        'extra' => '{}',
+    ];
 }

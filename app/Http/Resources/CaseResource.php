@@ -32,7 +32,12 @@ class CaseResource extends JsonResource
             'status' => $this->status,
 
             // arrays
-            'medical_documents' => $this->medical_documents ?? [],
+            'medical_documents' => collect($this->medical_documents ?? [])
+                ->map(fn($doc) => [
+                    'url' => $doc['url'] ?? $doc,
+                    'name' => $doc['name'] ?? basename($doc),
+                ])
+                ->values(),
             'updates' => $this->updates ?? [],
 
             // flags

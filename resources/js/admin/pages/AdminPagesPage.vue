@@ -58,17 +58,62 @@
 
                 <!-- SECTIONS -->
                 <div v-if="current.sections?.length">
-                    <h3 class="font-semibold mt-4">Bo‘limlar</h3>
+                    <h3 class="font-semibold mt-6 mb-3">Bo‘limlar</h3>
 
                     <div
                         v-for="section in current.sections"
                         :key="section.id"
-                        class="border p-3 rounded mt-2"
+                        class="border p-4 rounded-lg mt-3 bg-white space-y-3"
                     >
-                        <p><b>{{ section.title }}</b></p>
-                        <p class="text-sm text-gray-600">
-                            {{ section.content }}
-                        </p>
+                        <!-- TYPE -->
+                        <div class="text-xs text-gray-400 uppercase">
+                            {{ section.type }}
+                        </div>
+
+                        <!-- TITLE -->
+                        <input
+                            v-model="section.title"
+                            class="input"
+                            placeholder="Title"
+                        />
+
+                        <!-- SUBTITLE -->
+                        <input
+                            v-model="section.subtitle"
+                            class="input"
+                            placeholder="Subtitle"
+                        />
+
+                        <!-- CONTENT -->
+                        <textarea
+                            v-model="section.content"
+                            class="input"
+                            placeholder="Content"
+                        />
+
+                        <!-- EXTRA JSON -->
+                        <textarea
+                            v-model="section._extra"
+                            class="input"
+                            placeholder='{"icon":"Eye","tone":"blue"}'
+                        />
+
+                        <!-- ACTIONS -->
+                        <div class="flex gap-2 justify-end">
+                            <button
+                                class="btn-secondary"
+                                @click="updateSection(section)"
+                            >
+                                Saqlash
+                            </button>
+
+                            <button
+                                class="text-red-600"
+                                @click="deleteSection(section.id)"
+                            >
+                                O‘chirish
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -112,23 +157,57 @@ const fetchPages = async () => {
     loading.value = true
     try {
         const res = await pageService.getAll()
-        pages.value = res.data
+        pages.value = res.data.data
     } catch (e) {
         error.value = e.message
     } finally {
         loading.value = false
     }
 }
+const updateSection = async (section) => {
+    try {
+        let extra = {}
+
+        try {
+            extra = JSON.parse(section._extra || '{}')
+        } catch {
+            extra = {}
+        }
+
+        await api.put(`/admin/sections/${section.id}`, {
+            page_id: current.value.id,
+            type: section.type,
+            title: section.title,
+            subtitle: section.subtitle,
+            content: section.content,
+            extra
+        })
+
+        await openPage(current.value.id)
+    } catch (e) {
+        console.error(e)
+    }
+}
+
+const deleteSection = async (id) => {
+    if (!confirm('O‘chirishni tasdiqlaysizmi?')) return
+
+    await api.delete(`/admin/sections/${id}`)
+    await openPage(current.value.id)
+}
 
 const openPage = async (id) => {
     selectedId.value = id
 
-    try {
-        const res = await pageService.getById(id)
-        current.value = res.data
-    } catch (e) {
-        console.error(e)
-    }
+    const res = await pageService.getById(id)
+    const data = res.data.data
+
+    data.sections = data.sections.map(s => ({
+        ...s,
+        _extra: JSON.stringify(s.extra || {}, null, 2)
+    }))
+
+    current.value = data
 }
 
 const backToList = () => {
@@ -146,3 +225,17 @@ const remove = async (id) => {
 /* ================= INIT ================= */
 onMounted(fetchPages)
 </script>
+
+<style scoped>
+.input {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 8px 10px;
+}
+.btn-secondary {
+    border: 1px solid #ddd;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+</style>

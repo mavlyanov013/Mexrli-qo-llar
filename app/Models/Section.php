@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Enums\SectionType;
 
 class Section extends Model
 {
@@ -14,14 +15,15 @@ class Section extends Model
         'subtitle',
         'content',
         'image',
+        'file_path',
+        'file_name',
         'sort_order',
-        'is_active',
         'extra',
     ];
 
     protected $casts = [
+//        'type' => SectionType::class,
         'extra' => 'array',
-        'is_active' => 'boolean',
     ];
 
     public function page(): BelongsTo

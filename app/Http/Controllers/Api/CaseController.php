@@ -53,8 +53,8 @@ class CaseController extends Controller
             'goal_amount' => 'nullable|numeric|min:0',
             'raised_amount' => 'nullable|numeric|min:0',
             'is_urgent' => 'sometimes|boolean',
-            'medical_documents' => 'nullable|array',
-            'medical_documents.*' => 'string',
+            'medical_documents.*.url' => 'required|string',
+            'medical_documents.*.name' => 'nullable|string',
             'photo_url' => 'nullable|string',
         ]);
 

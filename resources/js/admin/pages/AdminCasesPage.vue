@@ -74,7 +74,9 @@
                     <h3 class="font-semibold mt-4">Hujjatlar:</h3>
                     <ul class="list-disc ml-5 text-blue-600">
                         <li v-for="(doc,i) in current.medical_documents" :key="i">
-                            <a :href="doc" target="_blank">Hujjat {{ i+1 }}</a>
+                            <a :href="doc.url" target="_blank">
+                                {{ doc.name }}
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -84,135 +86,143 @@
 
         <!-- ================= FORM ================= -->
         <template v-else>
-            <form class="bg-white p-6 rounded-xl shadow grid grid-cols-1 md:grid-cols-2 gap-4"
-                  @submit.prevent="save">
+            <form @submit.prevent="save" class="space-y-6">
 
-                <!-- ISM -->
-                <input v-model="form.name" class="input" placeholder="Ism" required />
+                <!-- 🔹 1. ASOSIY MA'LUMOT -->
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-4">Asosiy ma'lumotlar</h2>
 
-                <!-- YOSH -->
-                <input v-model.number="form.age" type="number" class="input" placeholder="Yosh" />
+                    <div class="grid md:grid-cols-2 gap-4">
 
-                <!-- JOY -->
-                <input v-model="form.location" class="input" placeholder="Joylashuv" />
+                        <div>
+                            <label class="label">Ism *</label>
+                            <input v-model="form.name" class="input" placeholder="Masalan: Ali Valiyev" required />
+                        </div>
 
-                <!-- HOLAT -->
-                <input v-model="form.condition" class="input" placeholder="Kasallik / holat" />
+                        <div>
+                            <label class="label">Yosh</label>
+                            <input v-model.number="form.age" type="number" class="input" placeholder="Masalan: 12" />
+                        </div>
 
-                <!-- CATEGORY -->
-                <select v-model="form.category" class="input">
-                    <option v-for="c in CASE_CATEGORIES" :key="c" :value="c">{{ c }}</option>
-                </select>
+                        <div>
+                            <label class="label">Joylashuv</label>
+                            <input v-model="form.location" class="input" placeholder="Masalan: Andijon" />
+                        </div>
 
-                <!-- URGENCY -->
-                <select v-model="form.urgency" class="input">
-                    <option v-for="u in CASE_URGENCY" :key="u" :value="u">{{ u }}</option>
-                </select>
+                        <div>
+                            <label class="label">Kasallik / holat</label>
+                            <input v-model="form.condition" class="input" placeholder="Masalan: Yurak operatsiyasi" />
+                        </div>
 
-                <!-- STATUS -->
-                <select v-model="form.status" class="input">
-                    <option value="new">Yangi</option>
-                    <option value="draft">Qoralama</option>
-                    <option value="active">Faol</option>
-                    <option value="paused">To‘xtatilgan</option>
-                    <option value="completed">Yakunlangan</option>
-                    <option value="closed">Yopilgan</option>
-                </select>
+                    </div>
+                </div>
 
-                <!-- CHECKBOX -->
-                <label class="flex items-center gap-2 text-sm">
-                    <input type="checkbox" v-model="form.is_featured" />
-                    Asosiy (featured)
-                </label>
+                <!-- 🔹 2. MOLIYAVIY -->
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-4">Mablag‘</h2>
 
-                <label class="flex items-center gap-2 text-sm">
-                    <input type="checkbox" v-model="form.is_urgent" />
-                    Shoshilinch
-                </label>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="label">Kerak summa</label>
+                            <input v-model.number="form.goal_amount" type="number" class="input" />
+                        </div>
 
-                <!-- PUL -->
-                <input v-model.number="form.goal_amount" type="number" class="input" placeholder="Kerak summa" />
-                <input v-model.number="form.raised_amount" type="number" class="input" placeholder="Yig‘ilgan summa" />
+                        <div>
+                            <label class="label">Yig‘ilgan summa</label>
+                            <input v-model.number="form.raised_amount" type="number" class="input" />
+                        </div>
+                    </div>
+                </div>
 
-                <!-- RASM -->
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium mb-2">Rasm yuklash</label>
+                <!-- 🔹 3. STATUS -->
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-4">Holati</h2>
 
-                    <div
-                        class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 transition"
-                        @click="$refs.imageInput.click()"
-                    >
-                        <input
-                            ref="imageInput"
-                            type="file"
-                            class="hidden"
-                            accept="image/*"
-                            @change="uploadImage"
-                        />
+                    <div class="grid md:grid-cols-3 gap-4">
+
+                        <div>
+                            <label class="label">Kategoriya</label>
+                            <select v-model="form.category" class="input">
+                                <option v-for="c in CASE_CATEGORIES" :key="c" :value="c">{{ c }}</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="label">Shoshilinchlik</label>
+                            <select v-model="form.urgency" class="input">
+                                <option v-for="u in CASE_URGENCY" :key="u" :value="u">{{ u }}</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="label">Status</label>
+                            <select v-model="form.status" class="input">
+                                <option value="new">Yangi</option>
+                                <option value="active">Faol</option>
+                                <option value="paused">To‘xtatilgan</option>
+                                <option value="completed">Yakunlangan</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="flex gap-6 mt-4">
+                        <label class="checkbox">
+                            <input type="checkbox" v-model="form.is_featured" />
+                            Asosiy case
+                        </label>
+
+                        <label class="checkbox">
+                            <input type="checkbox" v-model="form.is_urgent" />
+                            Shoshilinch
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 🔹 4. RASM -->
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-4">Rasm</h2>
+
+                    <div class="upload-box" @click="$refs.imageInput.click()">
+                        <input ref="imageInput" type="file" class="hidden" @change="uploadImage" />
 
                         <div v-if="!previewUrl">
-                            <p class="text-gray-500">📷 Rasm tanlang yoki bu yerga bosing</p>
+                            📷 Rasm yuklash uchun bosing
                         </div>
 
-                        <img
-                            v-else
-                            :src="previewUrl"
-                            class="mx-auto h-32 object-cover rounded-lg"
-                        />
+                        <img v-else :src="previewUrl" class="preview-img" />
                     </div>
                 </div>
 
-                <img v-if="previewUrl" :src="previewUrl" class="h-24 w-24 rounded-xl object-cover"  alt=""/>
+                <!-- 🔹 5. HUJJATLAR -->
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-4">Hujjatlar</h2>
 
-                <!-- HUJJAT UPLOAD -->
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium mb-2">Hujjatlar</label>
-
-                    <div
-                        class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 transition"
-                        @click="$refs.docsInput.click()"
-                    >
-                        <input
-                            ref="docsInput"
-                            type="file"
-                            multiple
-                            class="hidden"
-                            @change="uploadDocs"
-                        />
-
-                        <p class="text-gray-500">📎 Hujjat yuklash uchun bosing</p>
+                    <div class="upload-box" @click="$refs.docsInput.click()">
+                        <input ref="docsInput" type="file" multiple class="hidden" @change="uploadDocs" />
+                        📎 Hujjat yuklash
                     </div>
-                </div>
 
-                <div v-if="form.medical_documents.length" class="md:col-span-2 mt-3">
-                    <div class="space-y-2">
-                        <div
-                            v-for="(doc, i) in form.medical_documents"
-                            :key="i"
-                            class="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
-                        >
-                            <span class="text-sm truncate">📎 {{ doc.name }}</span>
-
-                            <button
-                                type="button"
-                                class="text-red-500 text-sm"
-                                @click="removeDoc(i)"
-                            >
-                                O‘chirish
-                            </button>
+                    <div v-if="form.medical_documents.length" class="mt-4 space-y-2">
+                        <div v-for="(doc, i) in form.medical_documents" :key="i" class="doc-item">
+                            <span>{{ doc.name }}</span>
+                            <button type="button" @click="removeDoc(i)">❌</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- DESCRIPTION -->
-                <textarea v-model="form.short_description"
-                          class="input md:col-span-2"
-                          placeholder="Qisqa tavsif"></textarea>
+                <!-- 🔹 6. DESCRIPTION -->
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-4">Tavsif</h2>
 
-                <!-- BUTTON -->
-                <div class="md:col-span-2 flex gap-3 mt-3">
-                    <button class="btn-primary">Saqlash</button>
+                    <textarea v-model="form.short_description" class="input" rows="4"
+                              placeholder="Qisqa tushuntirish yozing..."></textarea>
+                </div>
+
+                <!-- 🔹 BUTTON -->
+                <div class="flex justify-end gap-3">
                     <router-link to="/admin/cases" class="btn-secondary">Bekor qilish</router-link>
+                    <button class="btn-primary">Saqlash</button>
                 </div>
 
             </form>
@@ -333,12 +343,13 @@ const uploadDocs = async (e) => {
 
     for (const file of files) {
         const res = await mediaService.upload(file, 'cases/docs')
-
         const url = res?.data?.data?.url
 
         if (url) {
-            // ⚠️ Faqat STRING push qilinadi
-            form.medical_documents.push(url)
+            form.medical_documents.push({
+                url: url,
+                name: file.name
+            })
         }
     }
 }
@@ -364,13 +375,7 @@ const save = async () => {
         medical_documents: form.medical_documents
     }
 
-    const result = isEditMode.value
-        ? await updateCase(route.params.id, payload)
-        : await createCase(payload)
-
-    if (!result.error) {
-        router.push('/admin/cases')
-    }
+    await createCase(payload)
 }
 
 const remove = async (id) => {
@@ -418,5 +423,39 @@ onMounted(async () => {
     border-radius: 16px;
     padding: 16px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: #555;
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.upload-box {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.preview-img {
+    height: 120px;
+    margin: auto;
+    border-radius: 10px;
+}
+
+.doc-item {
+    display: flex;
+    justify-content: space-between;
+    background: #f9fafb;
+    padding: 10px;
+    border-radius: 8px;
 }
 </style>
