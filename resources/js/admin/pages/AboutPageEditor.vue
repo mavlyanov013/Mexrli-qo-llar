@@ -11,12 +11,13 @@
             </button>
         </div>
 
-        <!-- FORM -->
-        <div v-if="showForm" class="card mb-6 space-y-4">
+        <!-- ================= FORM ================= -->
+        <div v-if="showForm" class="bg-white rounded-2xl shadow p-6 space-y-6">
 
+            <!-- HEADER -->
             <div class="flex justify-between items-center">
-                <h3 class="font-semibold">
-                    {{ editingId ? 'Tahrirlash' : 'Yangi bo‘lim' }}
+                <h3 class="text-lg font-semibold">
+                    {{ editingId ? 'Bo‘limni tahrirlash' : 'Yangi bo‘lim yaratish' }}
                 </h3>
 
                 <button @click="closeForm" class="text-gray-400 hover:text-red-500">
@@ -26,145 +27,126 @@
 
             <!-- TYPE -->
             <div>
-                <label class="label">Bo‘lim turi</label>
-                <select v-model="form.type" class="input">
-                    <option value="hero">Hero</option>
-                    <option value="value">Value</option>
-                    <option value="doc">Document</option>
-                    <option value="team">Team</option>
-                    <option value="legal">Legal</option>
+                <label class="text-sm text-gray-600">Bo‘lim turi</label>
+                <select v-model="form.type" class="input mt-1">
+                    <option value="hero">🏠 Biz haqimizda</option>
+                    <option value="value">⭐ Bizning qadriyatlarimiz</option>
+                    <option value="doc">📄 Hujjat</option>
+                    <option value="team">👥 Jamoa</option>
+                    <option value="legal">⚖️ Huquqiy</option>
                 </select>
             </div>
 
             <!-- TITLE -->
             <div>
-                <label class="label">Sarlavha</label>
-                <input v-model="form.title" class="input" />
+                <label class="text-sm text-gray-600">Sarlavha</label>
+                <input
+                    v-model="form.title"
+                    class="input mt-1"
+                    placeholder="Masalan: Bizning maqsadimiz..."
+                />
             </div>
 
             <!-- SUBTITLE -->
             <div>
-                <label class="label">Subtitle</label>
-                <input v-model="form.subtitle" class="input" />
+                <label class="text-sm text-gray-600">Subtitr</label>
+                <input
+                    v-model="form.subtitle"
+                    class="input mt-1"
+                    placeholder="Qisqa tushuntirish..."
+                />
             </div>
 
             <!-- CONTENT -->
             <div>
-                <label class="label">Content</label>
-                <textarea v-model="form.content" class="input"></textarea>
+                <label class="text-sm text-gray-600">Tarkib</label>
+                <textarea
+                    v-model="form.content"
+                    class="input mt-1"
+                    rows="4"
+                    placeholder="Bo‘lim haqida batafsil yozing..."
+                ></textarea>
             </div>
 
             <!-- IMAGE UPLOAD -->
             <div>
-                <label class="label">Rasm (optional)</label>
+                <label class="text-sm text-gray-600">Rasm</label>
 
-                <div class="upload-box" @click="$refs.image.click()">
-                    <input ref="image" type="file" hidden @change="uploadImage" />
+                <div class="upload-box mt-2" @click="triggerImage">
+                    <input ref="imageInput" type="file" hidden @change="uploadImage" />
 
-                    <div v-if="!preview">
-                        📷 Rasm yuklash
+                    <div v-if="!preview" class="text-gray-400">
+                        📷 Rasm yuklash uchun bosing
                     </div>
 
-                    <img v-else :src="preview" class="preview-img" />
+                    <img v-else :src="preview" class="rounded-lg max-h-40 mx-auto" />
                 </div>
             </div>
-
-            <!-- DOC UPLOAD -->
-            <div v-if="form.type === 'doc'" class="card">
-
-                <div class="flex items-center justify-between mb-3">
-                    <label class="label flex items-center gap-2">
-                        <FileText class="w-4 h-4 text-blue-600" />
-                        Hujjat
-                    </label>
-                </div>
-
-                <div
-                    class="doc-upload"
-                    @click="$refs.doc.click()"
-                >
-                    <input ref="doc" type="file" hidden @change="uploadDoc" />
-
-                    <div v-if="!form.file_name" class="text-gray-500">
-                        📎 Hujjat yuklash uchun bosing
-                    </div>
-
-                    <div v-else class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <FileText class="w-5 h-5 text-green-600" />
-                            <span class="font-medium">{{ form.file_name }}</span>
-                        </div>
-
-                        <span class="text-xs text-green-600">Yuklangan ✓</span>
-                    </div>
-                </div>
-
-                <!-- link preview -->
-                <a
-                    v-if="form.file_path"
-                    :href="form.file_path"
-                    target="_blank"
-                    class="text-sm text-blue-600 mt-2 block"
-                >
-                    🔗 Hujjatni ochish
-                </a>
-
-            </div>
-
-            <!-- EXTRA JSON -->
-            <div>
-                <label class="label">Extra JSON</label>
-                <textarea v-model="extraJson" class="input font-mono"></textarea>
-            </div>
-
             <!-- ACTIONS -->
             <div class="flex justify-end gap-3">
-                <button class="btn-secondary" @click="closeForm">Bekor qilish</button>
-                <button class="btn-primary" @click="saveSection">Saqlash</button>
+                <button class="btn-secondary" @click="closeForm">
+                    Bekor qilish
+                </button>
+
+                <button class="btn-primary" @click="saveSection">
+                    Saqlash
+                </button>
             </div>
+
         </div>
 
-        <!-- LIST -->
-        <div class="grid gap-3">
-            <div v-for="(s, idx) in sections" :key="s.id" class="card flex justify-between">
 
-                <!-- LEFT -->
-                <div class="flex gap-3 items-start">
+        <!-- ================= LIST ================= -->
+        <div v-else>
+            <div class="grid gap-3">
 
-                    <div class="icon-box">
-                        <component :is="getIcon(s.type)" class="w-5 h-5" />
-                    </div>
+                <div
+                    v-for="(s, idx) in sections"
+                    :key="s.id"
+                    class="card flex justify-between"
+                >
 
-                    <div>
-                        <div class="font-semibold">
-                            {{ s.title }}
+                    <!-- LEFT -->
+                    <div class="flex gap-3 items-start">
+
+                        <div class="icon-box">
+                            <component :is="getIcon(s.type)" class="w-5 h-5" />
                         </div>
 
-                        <div class="text-xs text-gray-500">
-                            {{ s.type }}
+                        <div>
+                            <div class="font-semibold">
+                                {{ s.title }}
+                            </div>
+
+                            <div class="text-xs text-gray-500">
+                                {{ s.type }}
+                            </div>
+
+                            <p class="text-sm text-gray-600 mt-1">
+                                {{ s.content }}
+                            </p>
                         </div>
 
-                        <p class="text-sm text-gray-600 mt-1">
-                            {{ s.content }}
-                        </p>
                     </div>
+
+                    <!-- ACTIONS -->
+                    <div class="flex gap-2 items-start">
+
+                        <button class="icon-btn" @click="move(idx,-1)">↑</button>
+                        <button class="icon-btn" @click="move(idx,1)">↓</button>
+
+                        <button class="icon-btn text-amber-500" @click="openEdit(s)">
+                            <Pencil class="w-4 h-4" />
+                        </button>
+
+                        <button class="icon-btn text-red-500" @click="remove(s.id)">
+                            <Trash2 class="w-4 h-4" />
+                        </button>
+
+                    </div>
+
                 </div>
 
-                <!-- ACTIONS -->
-                <div class="flex gap-2 items-start">
-
-                    <button class="icon-btn" @click="move(idx,-1)">↑</button>
-                    <button class="icon-btn" @click="move(idx,1)">↓</button>
-
-                    <button class="icon-btn text-amber-500" @click="openEdit(s)">
-                        <Pencil class="w-4 h-4" />
-                    </button>
-
-                    <button class="icon-btn text-red-500" @click="remove(s.id)">
-                        <Trash2 class="w-4 h-4" />
-                    </button>
-
-                </div>
             </div>
         </div>
 
@@ -194,6 +176,7 @@ const form = ref({
 
 const extraJson = ref('{}')
 const preview = ref('')
+const imageInput = ref(null)
 
 const load = async () => {
     const res = await api.get('/admin/pages')
@@ -207,8 +190,24 @@ const load = async () => {
 }
 
 const openCreate = () => {
-    editingId.value = null
+    resetForm()
     showForm.value = true
+}
+const resetForm = () => {
+    form.value = {
+        page_id: pageId.value,
+        type: 'hero',
+        title: '',
+        subtitle: '',
+        content: '',
+        image: '',
+        file_path: '',
+        file_name: ''
+    }
+
+    preview.value = ''
+    extraJson.value = '{}'
+    editingId.value = null
 }
 
 const openEdit = (s) => {
@@ -235,22 +234,46 @@ const closeForm = () => {
 }
 
 const uploadImage = async (e) => {
-    const file = e.target.files[0]
-    const url = URL.createObjectURL(file)
-    preview.value = url
+    const file = e.target.files?.[0]
+    if (!file) return
 
-    const res = await api.upload(file, 'sections/images')
-    form.value.image = res.data.url
+    preview.value = URL.createObjectURL(file)
+
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('directory', 'about/sections')
+
+    const res = await api.post('/admin/media', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    })
+
+    form.value.image = res.data.data.url
+}
+const triggerImage = () => {
+    imageInput.value?.click()
 }
 
 const uploadDoc = async (e) => {
     const file = e.target.files[0]
     if (!file) return
 
-    const res = await api.upload(file, 'sections/docs')
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('directory', 'sections/docs')
 
-    form.value.file_path = res.data.url
-    form.value.file_name = file.name
+    try {
+        const res = await api.post('/admin/media', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+
+        form.value.file_path = res.data.data.url
+        form.value.file_name = file.name
+    } catch (err) {
+        console.error(err)
+        alert('Hujjat yuklashda xatolik')
+    }
 }
 
 const saveSection = async () => {
@@ -296,11 +319,11 @@ const move = async (i, dir) => {
 
 const getIcon = (type) => {
     switch (type) {
-        case 'hero': return Eye
-        case 'value': return Heart
-        case 'team': return Users
-        case 'legal': return Shield
-        case 'doc': return FileText
+        case 'biz haqimizda': return Eye
+        case 'Bizning qadriyatlarimiz': return Heart
+        case 'jamoa': return Users
+        case 'qonuniy': return Shield
+        case 'doc-file': return FileText
         default: return FileText
     }
 }
@@ -377,5 +400,18 @@ onMounted(load)
 .doc-upload:hover {
     border-color: #2A7DE1;
     background: #f0f7ff;
+}
+.input {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 10px 12px;
+    transition: 0.2s;
+}
+
+.input:focus {
+    border-color: #2A7DE1;
+    box-shadow: 0 0 0 2px rgba(42,125,225,0.15);
+    outline: none;
 }
 </style>

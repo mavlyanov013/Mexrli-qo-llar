@@ -11,7 +11,7 @@
                         alt="Mehrli Insonlar"
                         class="w-11 h-11 object-contain rounded-xl"
                     />
-                    <span class="text-xl font-bold text-gray-900 tracking-tight">Mehrli</span>
+                    <span class="text-xl font-bold text-gray-900 tracking-tight">Mehrli Insonlar</span>
                 </RouterLink>
 
                 <div class="hidden lg:flex items-center gap-1">

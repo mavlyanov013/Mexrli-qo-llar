@@ -14,6 +14,6 @@
 defineProps({
     show: { type: Boolean, default: false },
     message: { type: String, default: '' },
-    tone: { type: String, default: 'success' },
+    tone: { type: String, default: 'muvaffaqiyat' },
 })
 </script>

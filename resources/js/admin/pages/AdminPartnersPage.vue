@@ -3,8 +3,11 @@
         <template v-if="isListMode">
         <ListState :loading="loading" :error="error" :empty="partners.length === 0">
             <AdminTable :columns="columns" :rows="partners">
+                <template #cell-type="{ row }">
+                    {{ getTypeLabel(row.type) }}
+                </template>
                 <template #cell-status="{ row }">
-                    <StatusBadge :status="row.is_active ? 'success' : 'pending'" :map="statusMap" />
+                    {{ row.is_active ? 'Faol' : 'Faol emas' }}
                 </template>
                 <template #cell-actions="{ row }">
                     <div class="flex items-center gap-3">
@@ -43,37 +46,136 @@
             <div class="space-y-2 text-sm">
                 <img v-if="current.logo_url" :src="current.logo_url" class="h-24 w-24 rounded-lg object-cover" />
                 <p><strong>{{ t('admin.name') }}:</strong> {{ current.name }}</p>
-                <p><strong>{{ t('admin.type') }}:</strong> {{ current.type }}</p>
-                <p><strong>{{ t('admin.status') }}:</strong>
-                    <StatusBadge
-                        :status="row?.is_active ? 'success' : 'pending'"
-                        :map="statusMap"
-                    />
+                <p><strong>{{ t('admin.type') }}:</strong> {{ getTypeLabel(current?.type) }}</p>
+                <p>
+                    <strong>Status:</strong>
+                    {{ getStatusLabel(current?.is_active) }}
                 </p>
                 <p>{{ current.description || '-' }}</p>
             </div>
         </template>
 
         <template v-else>
-            <form class="grid grid-cols-1 gap-3 md:grid-cols-2" @submit.prevent="save">
-                <input v-model="draft.name" class="h-10 rounded-lg border border-gray-200 px-3 text-sm" :placeholder="t('admin.name')" required />
-                <input v-model="draft.website" class="h-10 rounded-lg border border-gray-200 px-3 text-sm" placeholder="https://..." />
-                <select v-model="draft.type" class="h-10 rounded-lg border border-gray-200 px-3 text-sm">
-                    <option v-for="type in PARTNER_TYPES" :key="type" :value="type">{{ type }}</option>
-                </select>
-                <label class="flex items-center gap-2 text-sm">
-                    <input v-model="draft.is_active" type="checkbox" />
-                    Active
-                </label>
-                <input type="file" accept="image/*" class="h-10 rounded-lg border border-gray-200 px-3 text-sm md:col-span-2" @change="uploadLogo" />
-                <div v-if="previewUrl" class="md:col-span-2 flex items-center gap-3">
-                    <img :src="previewUrl" class="h-20 w-20 rounded-lg object-cover" />
-                    <button type="button" class="text-red-600 text-sm" @click="removeLogo">Delete logo</button>
+            <form
+                class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 space-y-6"
+                @submit.prevent="save"
+            >
+                <!-- TITLE -->
+                <div>
+                    <label class="text-sm font-medium text-gray-700 mb-1 block">
+                        Hamkor nomi
+                    </label>
+                    <input
+                        v-model="draft.name"
+                        type="text"
+                        placeholder="Masalan: Mehr Foundation"
+                        class="w-full h-11 rounded-xl border border-gray-200 px-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+                        required
+                    />
                 </div>
-                <textarea v-model="draft.description" class="rounded-lg border border-gray-200 px-3 py-2 text-sm md:col-span-2" rows="2" placeholder="description" />
-                <div class="md:col-span-2 flex gap-2">
-                    <button class="rounded-lg bg-[#2A7DE1] px-4 py-2 text-sm text-white" type="submit">{{ t('admin.save') }}</button>
-                    <router-link to="/admin/partners" class="rounded-lg border border-gray-300 px-4 py-2 text-sm">{{ t('admin.cancel') }}</router-link>
+
+                <!-- WEBSITE -->
+                <div>
+                    <label class="text-sm font-medium text-gray-700 mb-1 block">
+                        Web sayt (ixtiyoriy)
+                    </label>
+                    <input
+                        v-model="draft.website"
+                        type="text"
+                        placeholder="https://example.uz"
+                        class="w-full h-11 rounded-xl border border-gray-200 px-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+                    />
+                </div>
+
+                <!-- TYPE -->
+                <div>
+                    <label class="text-sm font-medium text-gray-700 mb-1 block">
+                        Hamkor turi
+                    </label>
+                    <select
+                        v-model="draft.type"
+                        class="w-full h-11 rounded-xl border border-gray-200 px-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+                    >
+                        <option value="foundation">🏦 Fond</option>
+                        <option value="ngo">🤝 NNT</option>
+                        <option value="government">🏛 Davlat</option>
+                        <option value="medical">🏥 Tibbiy</option>
+                        <option value="media">📺 Media</option>
+                        <option value="corporate">🏢 Korporativ</option>
+                    </select>
+                </div>
+
+                <!-- STATUS -->
+                <div class="flex items-center gap-3">
+                    <input
+                        v-model="draft.is_active"
+                        type="checkbox"
+                        class="w-4 h-4 text-blue-600 border-gray-300 rounded"
+                    />
+                    <span class="text-sm text-gray-700">
+            Faol holatda bo‘lsin
+        </span>
+                </div>
+
+                <!-- LOGO UPLOAD -->
+                <!-- 🔹 LOGO -->
+                <div class="card md:col-span-2">
+                    <h2 class="text-lg font-semibold mb-4">Logotip</h2>
+
+                    <div class="upload-box" @click="$refs.logoInput.click()">
+                        <input
+                            ref="logoInput"
+                            type="file"
+                            accept="image/*"
+                            class="hidden"
+                            @change="uploadLogo"
+                        />
+
+                        <div v-if="!previewUrl">
+                            🖼 Logotip yuklash uchun bosing
+                        </div>
+
+                        <img v-else :src="previewUrl" class="preview-img" />
+                    </div>
+
+                    <button
+                        v-if="previewUrl"
+                        type="button"
+                        class="mt-2 text-red-600 text-sm"
+                        @click="removeLogo"
+                    >
+                        Logotipni o‘chirish
+                    </button>
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div>
+                    <label class="text-sm font-medium text-gray-700 mb-1 block">
+                        Tavsif
+                    </label>
+                    <textarea
+                        v-model="draft.description"
+                        rows="3"
+                        placeholder="Hamkor haqida qisqacha ma’lumot..."
+                        class="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
+                    />
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="flex items-center justify-end gap-3 pt-4">
+                    <router-link
+                        to="/admin/partners"
+                        class="px-5 py-2 rounded-xl border border-gray-300 text-sm hover:bg-gray-50"
+                    >
+                        Bekor qilish
+                    </router-link>
+
+                    <button
+                        type="submit"
+                        class="px-6 py-2 rounded-xl bg-[#2A7DE1] text-white text-sm font-medium hover:bg-blue-700 transition"
+                    >
+                        Saqlash
+                    </button>
                 </div>
             </form>
         </template>
@@ -95,18 +197,24 @@ import ListState from '@/components/shared/ListState.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import { watch } from 'vue'
 import { Eye, Pencil, Trash2 } from 'lucide-vue-next'
+import { ACTIVE_STATUSES } from '@/constants/statuses'
+import { PARTNER_TYPE_LABELS } from '@/constants/partners'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { partners, loading, error, fetchPartners, createPartner, updatePartner, deletePartner, togglePartnerStatus } = usePartners()
-const statusMap = PAYMENT_STATUSES
+const statusMap = {
+    success: 'Faol',
+    pending: 'Faol emas'
+}
 const current = ref(null)
 const previewUrl = ref('')
 const isListMode = computed(() => route.name === 'admin-partners')
 const isEditMode = computed(() => route.name === 'admin-partners-edit')
 const isViewMode = computed(() => route.name === 'admin-partners-view')
 const title = computed(() => isListMode.value ? t('admin.partners') : isEditMode.value ? 'Edit partner' : route.name === 'admin-partners-create' ? 'Create partner' : 'Partner details')
+const getTypeLabel = (val) => PARTNER_TYPE_LABELS[val] || val
 
 const columns = [
     { key: 'name', label: t('admin.name') },
@@ -123,10 +231,16 @@ const draft = reactive({
     description: '',
     is_active: true,
 })
+const getStatusLabel = (val) => val ? 'Faol' : 'Faol emas'
 
 const loadCurrent = async () => {
-    const result = await partnerService.getById(route.params.id)
+    const id = route.params.id
+
+    if (!id || id === 'create') return  // 🔥 MUHIM
+
+    const result = await partnerService.getById(id)
     current.value = result.data
+
     if (isEditMode.value && result.data) {
         draft.name = result.data.name || ''
         draft.logo_url = result.data.logo_url || ''
@@ -147,21 +261,24 @@ const save = async () => {
     }
 }
 
-const uploadLogo = async (event) => {
-    const file = event.target.files?.[0]
+const uploadLogo = async (e) => {
+    const file = e.target.files?.[0]
     if (!file) return
-    const result = await mediaService.upload(file, 'partners')
-    if (!result.error) {
-        draft.logo_url = result.data.url
-        previewUrl.value = result.data.url
+
+    // preview (frontend)
+    previewUrl.value = URL.createObjectURL(file)
+
+    const res = await mediaService.upload(file, 'partners')
+
+    const url = res?.data?.data?.url
+
+    if (url) {
+        draft.logo_url = url
+        previewUrl.value = url
     }
 }
 
 const removeLogo = async () => {
-    if (draft.logo_url?.includes('/storage/')) {
-        const path = draft.logo_url.split('/storage/')[1]
-        if (path) await mediaService.remove(path)
-    }
     draft.logo_url = ''
     previewUrl.value = ''
 }
@@ -172,24 +289,49 @@ const toggle = async (row) => {
 }
 
 const remove = async (id) => {
-    if (!window.confirm('Delete this partner?')) return
+    if (!window.confirm('Bu hamkorni oʻchirib tashlang?')) return
     await deletePartner(id)
     await fetchPartners({ admin: true, include_inactive: true })
 }
 
 onMounted(async () => {
-    if (isListMode.value) await fetchPartners({ admin: true, include_inactive: true })
-    else await loadCurrent()
+    if (isListMode.value) {
+        await fetchPartners({ admin: true, include_inactive: true })
+    } else if (isEditMode.value || isViewMode.value) {
+        await loadCurrent()
+    }
 })
 watch(
     () => route.fullPath,
     async () => {
         if (isListMode.value) {
             await fetchPartners({ admin: true, include_inactive: true })
-        } else {
+        } else if (isEditMode.value || isViewMode.value) {
             await loadCurrent()
         }
     },
     { immediate: true }
 )
 </script>
+<style scoped>
+.upload-box {
+    border: 2px dashed #d1d5db;
+    padding: 20px;
+    text-align: center;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.upload-box:hover {
+    border-color: #2A7DE1;
+    background: #f9fbff;
+}
+
+.preview-img {
+    height: 120px;
+    margin: auto;
+    border-radius: 10px;
+    object-fit: cover;
+}
+</style>

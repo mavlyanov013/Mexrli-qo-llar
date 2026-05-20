@@ -47,9 +47,9 @@
 
                 <div class="space-y-2">
                     <p><b>Sarlavha:</b> {{ current.title }}</p>
-                    <p><b>Slug:</b> {{ current.slug }}</p>
-                    <p><b>Meta title:</b> {{ current.meta_title }}</p>
-                    <p><b>Meta description:</b> {{ current.meta_description }}</p>
+                    <p><b>Sahifa manzili:</b> {{ current.slug }}</p>
+                    <p><b>Meta sarlavhasi:</b> {{ current.meta_title }}</p>
+                    <p><b>Meta tavsifi:</b> {{ current.meta_description }}</p>
                 </div>
 
                 <div class="bg-gray-50 p-3 rounded">
@@ -146,8 +146,8 @@ const title = computed(() =>
 
 /* ================= TABLE ================= */
 const columns = [
-    { key: 'title', label: 'Title' },
-    { key: 'slug', label: 'Slug' },
+    { key: 'title', label: 'Sarlavha' },
+    { key: 'slug', label: 'Sahifa manzili' },
     { key: 'actions', label: 'Amallar' },
 ]
 

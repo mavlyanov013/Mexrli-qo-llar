@@ -10,7 +10,11 @@ class PaymentService
 {
     public function list(Request $request): LengthAwarePaginator
     {
-        $query = Payment::query()->latest();
+        $query = Payment::query()
+            ->latest()
+            ->with('donation')
+            ->select('*')
+        ;
 
         if ($request->filled('provider')) {
             $query->where('provider', $request->string('provider'));
@@ -25,7 +29,7 @@ class PaymentService
 
     public function findOrFail(int $id): Payment
     {
-        return Payment::query()->findOrFail($id);
+        return Payment::with('donation')->findOrFail($id);
     }
 
     public function update(Payment $payment, array $payload): Payment

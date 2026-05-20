@@ -46,23 +46,24 @@ class PartnerController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', 'string', 'in:ngo,government,medical,media,corporate'],
+            'type' => ['required', 'string', 'in:foundation,ngo,government,medical,media,corporate'],
             'logo_url' => ['nullable', 'string', 'max:500'],
             'website' => ['nullable', 'string', 'max:500'],
             'description' => ['nullable', 'string'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
-        $data['is_active'] = true;
 
-        $partner = Partner::query()->create($validated);
+        $validated['is_active'] = $validated['is_active'] ?? true;
+
+        $partner = Partner::create($validated);
 
         return response()->json([
-            'message' => 'Partner created successfully',
+            'message' => 'Hamkor muvaffaqiyatli yaratildi',
             'data' => $partner,
         ], 201);
     }
 
-    public function show(int $id): JsonResponse
+    public function show($id): JsonResponse
     {
         $partner = Partner::query()->findOrFail($id);
 
@@ -77,7 +78,7 @@ class PartnerController extends Controller
         $partner = Partner::query()->findOrFail($id);
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
-            'type' => ['sometimes', 'string', 'in:ngo,government,medical,media,corporate'],
+            'type' => ['required', 'string', 'in:foundation,ngo,government,medical,media,corporate'],
             'logo_url' => ['nullable', 'string', 'max:500'],
             'website' => ['nullable', 'string', 'max:500'],
             'description' => ['nullable', 'string'],

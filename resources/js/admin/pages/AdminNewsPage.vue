@@ -75,8 +75,13 @@
 
         <template v-else>
             <form class="bg-white p-6 rounded-xl shadow grid grid-cols-1 md:grid-cols-2 gap-4" @submit.prevent="save">
+                <select v-model="form.category" class="input">
+                    <option value="news">Yangilik</option>
+                    <option value="helped_child">Yordam berilgan bola</option>
+                    <option value="success_story">Umid hikoyasi</option>
+                </select>
                 <input v-model="form.title" class="input md:col-span-2" placeholder="Sarlavha" required />
-                <input v-model="form.slug" class="input" placeholder="Slug (ixtiyoriy)" />
+                <input v-model="form.slug" class="input" placeholder="Sahifa manzili (ixtiyoriy)" />
                 <select v-model="form.status" class="input">
                     <option value="draft">Qoralama</option>
                     <option value="published">Chop etish</option>
@@ -125,7 +130,7 @@ import { Pencil, Trash2, Eye } from 'lucide-vue-next'
 const rows = ref([])
 const route = useRoute()
 const router = useRouter()
-const form = reactive({ title: '', slug: '', content: '', cover_image: '', status: 'draft' })
+const form = reactive({ title: '', slug: '', content: '', cover_image: '', status: 'qoralama', category: 'yangiliklar', })
 const isListMode = computed(() => route.name === 'admin-news')
 const isEditMode = computed(() => route.name === 'admin-news-edit')
 const title = computed(() => (isListMode.value ? 'Yangiliklar' : isEditMode.value ? 'Yangilikni tahrirlash' : 'Yangi yangilik yaratish'))
@@ -147,7 +152,7 @@ const closeMessage = () => {
 }
 
 const resetForm = () => {
-    Object.assign(form, { title: '', slug: '', content: '', cover_image: '', status: 'draft' })
+    Object.assign(form, { title: '', slug: '', content: '', cover_image: '', status: 'qoralama' })
 }
 const uploading = ref(false)
 
@@ -183,7 +188,8 @@ const loadCurrent = async () => {
         slug: row.slug || '',
         content: row.content || '',
         cover_image: row.cover_image || '',
-        status: row.status || 'draft'
+        status: row.status || 'draft',
+        category: row.category || 'news'
     })
 }
 

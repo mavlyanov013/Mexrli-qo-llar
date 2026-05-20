@@ -1,8 +1,24 @@
 <template>
-    <section class="rounded-xl border border-gray-200 bg-white p-6">
-        <h2 class="mb-4 text-xl font-semibold">{{ t('admin.usersModule.editUser') }}</h2>
-        <UserForm v-if="user" :initial-values="user" is-edit @submit="handleSubmit" />
-        <p v-else class="text-sm text-gray-500">{{ t('admin.loading') }}</p>
+    <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-6">
+            <UserCog class="w-5 h-5 text-amber-600" />
+            <h2 class="text-xl font-semibold text-gray-900">
+                {{ t('admin.usersModule.editUser') }}
+            </h2>
+        </div>
+
+        <div v-if="user">
+            <UserForm
+                :initial-values="user"
+                is-edit
+                @submit="handleSubmit"
+            />
+        </div>
+
+        <div v-else class="flex items-center gap-2 text-sm text-gray-500">
+            <Loader2 class="w-4 h-4 animate-spin" />
+            {{ t('admin.loading') }}
+        </div>
     </section>
 </template>
 
@@ -10,12 +26,14 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { UserCog, Loader2 } from 'lucide-vue-next'
 import userService from '@/services/userService'
 import UserForm from './components/UserForm.vue'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+
 const user = ref(null)
 
 onMounted(async () => {

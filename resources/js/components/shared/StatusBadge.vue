@@ -26,7 +26,28 @@ const toneClasses = {
     neutral: 'bg-gray-100 text-gray-700',
 }
 
-const meta = computed(() => props.map?.[String(props.status || '').toLowerCase()] || null)
-const toneClass = computed(() => toneClasses[meta.value?.tone] || toneClasses.neutral)
-const label = computed(() => (meta.value?.labelKey ? t(meta.value.labelKey) : props.status || t('common.unknown')))
+const meta = computed(() =>
+    props.map?.[String(props.status || '').toLowerCase()] || null
+)
+
+const toneClass = computed(() =>
+    toneClasses[meta.value?.tone] || toneClasses.neutral
+)
+
+// 🔥 FIX HERE
+const label = computed(() => {
+    if (!meta.value) return props.status || t('common.unknown')
+
+    // i18n system
+    if (meta.value.labelKey) {
+        return t(meta.value.labelKey)
+    }
+
+    // static label system (seniki)
+    if (meta.value.label) {
+        return meta.value.label
+    }
+
+    return props.status
+})
 </script>

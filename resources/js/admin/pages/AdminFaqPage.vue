@@ -4,8 +4,6 @@
             <AdminTable :columns="columns" :rows="rows">
                 <template #cell-actions="{ row }">
                     <div class="flex items-center gap-3">
-                        <button class="text-gray-500" @click="move(row, -1)">↑</button>
-                        <button class="text-gray-500" @click="move(row, 1)">↓</button>
                         <router-link :to="`/admin/faq/${row.id}/edit`" class="p-2 rounded-md hover:bg-amber-50 text-amber-600" title="Tahrirlash">
                             <Pencil class="w-5 h-5" />
                         </router-link>

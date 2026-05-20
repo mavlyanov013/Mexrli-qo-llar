@@ -49,12 +49,11 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
                 <a
-                    v-for="(doc, index) in docs"
-                    :key="index"
+                    v-for="doc in docs"
                     :href="doc.href"
+                    download
                     target="_blank"
-                    rel="noopener noreferrer"
-                    class="flex items-center gap-5 bg-white rounded-2xl p-6 border border-gray-100 hover:border-[#2A7DE1]/30 hover:shadow-md transition-all group"
+                    class="cursor-pointer flex items-center gap-5 bg-white rounded-2xl p-6 border hover:shadow-md transition group"
                 >
                     <IconBadge
                         :icon="doc.icon"
@@ -219,7 +218,7 @@ const fetchPage = async () => {
     try {
         const res = await pageService.getBySlug('about')
 
-        page.value = res.data
+        page.value = res.data.data
 
     } catch (e) {
         error.value = e.message
@@ -243,9 +242,7 @@ const safeExtra = (extra) => {
 
 /* ================= SECTIONS ================= */
 const sections = computed(() => {
-    return page.value?.sections?.length
-        ? page.value.sections
-        : []
+    return page.value?.sections ?? []
 })
 
 const byType = (type) => {
@@ -282,29 +279,22 @@ const values = computed(() => {
 
 /* ================= DOCS ================= */
 const docs = computed(() => {
-    const items = byType('doc')
+    const items = byType('doc') || []
 
-    if (!items.length) {
-        return tm('aboutPage.docs').map((d) => ({
-            title: d.title,
-            desc: d.desc,
-            href: '#',
-            icon: FileText,
-            tone: 'blue',
-        }))
-    }
+    return items
+        .filter(item => item?.file_url)
+        .map((item) => {
+            const extra = safeExtra(item.extra)
 
-    return items.map((item) => {
-        const extra = safeExtra(item.extra)
+            return {
+                title: item.title || 'Document',
+                desc: item.content || '',
+                href: item.file_url, // backend URL
 
-        return {
-            title: item.title,
-            desc: item.content,
-            href: extra.href || '#',
-            icon: iconMap[extra.icon] || FileText,
-            tone: extra.tone || 'blue',
-        }
-    })
+                icon: iconMap[extra.icon] || FileText,
+                tone: extra.tone || 'blue'
+            }
+        })
 })
 
 /* ================= LEGAL (FIXED ORDER ISSUE) ================= */

@@ -1,30 +1,77 @@
 <template>
-    <AdminCrudShell :title="t('admin.users')" create-to="/admin/users/create">
-        <div class="mb-4 flex gap-3">
+    <AdminCrudShell
+        :title="t('admin.users')"
+        create-to="/admin/users/create"
+    >
+        <!-- SEARCH -->
+        <div class="mb-5 flex items-center gap-3">
+            <Search class="w-4 h-4 text-gray-400" />
+
             <input
                 v-model="search"
                 :placeholder="t('admin.searchPlaceholder')"
-                class="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm"
+                class="h-10 w-full rounded-xl border border-gray-200 px-3 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none"
                 @input="fetchUsers(1)"
             />
         </div>
 
+        <!-- TABLE -->
         <AdminTable :columns="columns" :rows="users">
+
             <template #cell-role="{ value }">
-                <span class="rounded-full bg-blue-50 px-2 py-1 text-xs text-blue-700">{{ value }}</span>
+                <span class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs text-blue-700">
+                    <Shield class="w-3 h-3" />
+                    {{ value }}
+                </span>
             </template>
+
             <template #cell-actions="{ row }">
-                <div class="flex gap-2">
-                    <router-link :to="`/admin/users/${row.id}`" class="text-blue-600">{{ t('admin.view') }}</router-link>
-                    <router-link :to="`/admin/users/${row.id}/edit`" class="text-amber-600">{{ t('admin.edit') }}</router-link>
-                    <button class="text-red-600" @click="removeUser(row.id)">{{ t('admin.delete') }}</button>
+                <div class="flex items-center gap-2">
+
+                    <!-- KO‘RISH -->
+                    <router-link
+                        :to="`/admin/users/${row.id}`"
+                        class="p-2 rounded-md hover:bg-blue-50 text-blue-600"
+                        title="Ko‘rish"
+                    >
+                        <Eye class="w-5 h-5" />
+                    </router-link>
+
+                    <!-- EDIT -->
+                    <router-link
+                        :to="`/admin/users/${row.id}/edit`"
+                        class="p-2 rounded-md hover:bg-amber-50 text-amber-600"
+                        title="Tahrirlash"
+                    >
+                        <Pencil class="w-5 h-5" />
+                    </router-link>
+
+                    <!-- DELETE -->
+                    <button
+                        @click="removeUser(row.id)"
+                        class="p-2 rounded-md hover:bg-red-50 text-red-600"
+                        title="O‘chirish"
+                    >
+                        <Trash2 class="w-5 h-5" />
+                    </button>
+
                 </div>
             </template>
         </AdminTable>
 
-        <AdminEmptyState v-if="!loading && users.length === 0" :message="t('admin.noData')" />
-        <p v-if="loading" class="text-sm text-gray-500">{{ t('admin.loading') }}</p>
+        <!-- EMPTY -->
+        <AdminEmptyState
+            v-if="!loading && users.length === 0"
+            :message="t('admin.noData')"
+        />
 
+        <!-- LOADING -->
+        <div v-if="loading" class="flex items-center gap-2 text-sm text-gray-500 mt-4">
+            <Loader2 class="w-4 h-4 animate-spin" />
+            {{ t('admin.loading') }}
+        </div>
+
+        <!-- PAGINATION -->
         <AdminPagination
             v-if="meta"
             :current-page="meta.current_page || 1"
@@ -39,12 +86,24 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import userService from '@/services/userService'
+
+
+import {
+    Search,
+    Shield,
+    Eye,
+    Pencil,
+    Trash2,
+    Loader2
+} from 'lucide-vue-next'
+
 import AdminCrudShell from '@/admin/components/common/AdminCrudShell.vue'
 import AdminTable from '@/admin/components/common/AdminTable.vue'
 import AdminEmptyState from '@/admin/components/common/AdminEmptyState.vue'
 import AdminPagination from '@/admin/components/common/AdminPagination.vue'
 
 const { t } = useI18n()
+
 const users = ref([])
 const loading = ref(false)
 const search = ref('')

@@ -6,6 +6,7 @@
     "loading": "Yuklanmoqda...",
     "refresh": "Yangilash",
     "status": {
+        "approved": "Tasdiqlangan",
       "pending": "Kutilmoqda",
       "success": "Muvaffaqiyatli",
       "failed": "Xatolik",
@@ -21,6 +22,15 @@
       "rejected": "Rad etilgan"
     }
   },
+    "todayDonations": {
+        "live": "Jonli",
+        "title": "Bugungi xayriyalar",
+        "updatedAt": "Yangilangan vaqt",
+        "cashAmount": "Naqd pul",
+        "onlineAmount": "Onlayn summa",
+        "uniqueDonors": "xayriya qilganlar",
+        "totalDonations": "Jami xayriyalar"
+    },
   "auth": {
     "login": {
       "title": "Tizimga kirish",
@@ -103,7 +113,7 @@
     "messages": "Xabarlar",
     "payments": "To'lovlar",
     "donations": "Ehsonlar",
-    "cases": "Keyslar",
+    "cases": "Bemorlarlarning holatlari",
     "volunteers": "Ko'ngillilar",
     "provider": "Provayder",
     "amount": "Miqdor",

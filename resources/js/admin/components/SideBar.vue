@@ -43,15 +43,15 @@ const navItems = computed(() => [
     { to: '/admin/donations', label: t('admin.donations'), icon: HandCoins },
     { to: '/admin/cases', label: t('admin.cases'), icon: HeartPulse },
     { to: '/admin/help-requests', label: "Yordam so‘rovlari", icon: ClipboardList },
-    { to: '/admin/about-sections', label: "About bo‘limlari", icon: FileText },
+    { to: '/admin/about-sections', label: "Biz haqimizda bo‘limlari", icon: FileText },
     { to: '/admin/news', label: "Yangiliklar", icon: Newspaper },
-    { to: '/admin/faq', label: "FAQ", icon: CircleHelp },
-    { to: '/admin/blog', label: t('admin.blog'), icon: Newspaper },
+    { to: '/admin/faq', label: "FAQ-Ko‘p so‘raladigan savollar", icon: CircleHelp },
+    // { to: '/admin/blog', label: t('admin.blog'), icon: Newspaper },
     { to: '/admin/volunteers', label: t('admin.volunteers'), icon: Users },
     { to: '/admin/messages', label: t('admin.messages'), icon: Mail },
-    { to: '/admin/pages', label: t('admin.pages'), icon: FileText },
-    { to: '/admin/reports', label: t('admin.reports'), icon: BarChart3 },
-    { to: '/admin/settings', label: t('admin.settings'), icon: Settings },
+    // { to: '/admin/pages', label: t('admin.pages'), icon: FileText },
+    // { to: '/admin/reports', label: t('admin.reports'), icon: BarChart3 },
+    // { to: '/admin/settings', label: t('admin.settings'), icon: Settings },
 ])
 </script>
 

@@ -18,7 +18,7 @@ const { t } = useI18n()
 const props = defineProps({
     activeTab: {
         type: String,
-        default: 'overview'
+        default: 'umumiy koʻrinish'
     }
 })
 

@@ -23,5 +23,16 @@ api.interceptors.response.use(
         return Promise.reject(error)
     }
 )
+api.upload = (file, directory = 'admin') => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('directory', directory)
+
+    return api.post('/admin/media', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    })
+}
 
 export default api

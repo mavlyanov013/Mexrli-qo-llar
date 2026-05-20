@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Enums\SectionType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class SectionResource extends JsonResource
 {
@@ -16,7 +17,13 @@ class SectionResource extends JsonResource
             'title' => $this->title,
             'subtitle' => $this->subtitle,
             'content' => $this->content,
-            'image' => $this->image,
+            'file_name' => $this->file_name,
+            'file_url' => $this->file_path
+                ? Storage::disk('public')->url($this->file_path)
+                : null,
+            'image_url' => $this->image
+                ? Storage::disk('public')->url($this->image)
+                : null,
             'sort_order' => $this->sort_order,
             'extra' => is_array($this->extra)
                 ? $this->extra

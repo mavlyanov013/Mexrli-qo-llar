@@ -56,6 +56,8 @@ class CaseController extends Controller
             'medical_documents.*.url' => 'required|string',
             'medical_documents.*.name' => 'nullable|string',
             'photo_url' => 'nullable|string',
+            'age' => 'nullable|integer|min:0|max:120',
+            'condition' => 'nullable|string|max:255',
         ]);
 
         $validated['medical_documents'] = $validated['medical_documents'] ?? [];
@@ -106,6 +108,8 @@ class CaseController extends Controller
             'medical_documents' => 'nullable|array',
             'medical_documents.*' => 'string',
             'photo_url' => 'nullable|string',
+            'age' => 'nullable|integer|min:0|max:120',
+            'condition' => 'nullable|string|max:255',
         ]);
 
         if (!isset($validated['medical_documents'])) {

@@ -21,6 +21,15 @@
       "rejected": "Отклонено"
     }
   },
+    "todayDonations": {
+        "live": "Прямой эфир",
+        "title": "Пожертвования сегодня",
+        "updatedAt": "Обновлено в",
+        "cashAmount": "Наличные",
+        "onlineAmount": "Онлайн сумма",
+        "uniqueDonors": "доноры",
+        "totalDonations": "Общие пожертвования"
+    },
   "auth": {
     "login": {
       "title": "Вход в систему",

@@ -30,7 +30,30 @@ use App\Http\Controllers\Api\Admin\MediaController as AdminMediaController;
 use App\Http\Controllers\Api\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Api\Admin\NewsController as AdminNewsController;
 
+
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
+
 Route::prefix('v1')->group(function () {
+
+
+    Route::get('/download', function (Request $request) {
+
+        $url = $request->get('file');
+
+        if (!$url) {
+            abort(404);
+        }
+
+        // faqat pathni ajratamiz
+        $path = str_replace('/storage/', '', parse_url($url, PHP_URL_PATH));
+
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404, 'File not found');
+        }
+
+        return Storage::disk('public')->download($path);
+    });
 
     /*
     |--------------------------------------------------------------------------

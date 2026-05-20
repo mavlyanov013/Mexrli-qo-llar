@@ -47,30 +47,17 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RefreshCw, Wallet, Banknote, Users } from 'lucide-vue-next'
-import donationService from '@/services/donationService'
+import api from '@/services/api'
 import IconBadge from '../shared/IconBadge.vue'
 
 const { t, locale } = useI18n()
 
-const cashAmount = ref(0)
 const donations = ref([])
 const updatedAtRaw = ref(null)
 
 let intervalId = null
 
-const todayKey = computed(() => {
-    const d = new Date()
-    const yyyy = d.getFullYear()
-    const mm = String(d.getMonth() + 1).padStart(2, '0')
-    const dd = String(d.getDate()).padStart(2, '0')
-    return `cash_donations_${yyyy}-${mm}-${dd}`
-})
-
-const loadCash = () => {
-    const saved = localStorage.getItem(todayKey.value)
-    cashAmount.value = saved ? Number(saved) : 0
-}
-
+// 🔥 DATE CHECK
 const isTodayDate = (value) => {
     if (!value) return false
 
@@ -84,47 +71,54 @@ const isTodayDate = (value) => {
     )
 }
 
+// 🔥 FETCH FROM DONATIONS (NOT PAYMENTS)
 const fetchData = async () => {
     try {
-        const data = await donationService.getCompletedDonations()
+        const res = await api.get('/donations') // ✅ ONLY THIS
 
-        donations.value = Array.isArray(data?.data)
-            ? data.data
-            : Array.isArray(data)
-                ? data
-                : []
+        const list = res.data.data ?? []
 
+        donations.value = list
         updatedAtRaw.value = new Date().toISOString()
+
     } catch (error) {
-        console.error('Today donations fetch error:', error)
+        console.error(error)
         donations.value = []
     }
 }
 
-const stats = computed(() => {
-    const donationList = Array.isArray(donations.value) ? donations.value : []
+// 🔥 TODAY FILTER (CASH IS INSIDE DONATIONS NOW)
+const todayCash = computed(() => {
+    const list = Array.isArray(donations.value) ? donations.value : []
 
-    const todayDonations = donationList.filter((item) =>
-        isTodayDate(item.created_at || item.created_date)
-    )
+    return list.filter(item => {
+        const date = new Date(item.created_at)
 
-    const total = todayDonations.reduce((sum, item) => {
-        return sum + Number(item.amount || 0)
-    }, 0)
-
-    const donors = new Set(
-        todayDonations
-            .map((item) => item.donor_email)
-            .filter(Boolean)
-    ).size
-
-    return {
-        total,
-        count: todayDonations.length,
-        donors,
-    }
+        return (
+            item.provider === 'cash' &&
+            item.status === 'completed' &&
+            isTodayDate(item.created_at)
+        )
+    })
 })
 
+// 🔥 TOTAL CASH
+const cashAmount = computed(() => {
+    return todayCash.value.reduce((sum, item) => {
+        return sum + Number(item.amount || 0)
+    }, 0)
+})
+
+// 🔥 UNIQUE DONORS
+const donors = computed(() => {
+    return new Set(
+        todayCash.value
+            .map(item => item.donor_phone || item.donor_name)
+            .filter(Boolean)
+    ).size
+})
+
+// 🔥 UPDATED TIME
 const updatedAt = computed(() => {
     if (!updatedAtRaw.value) return '—'
 
@@ -134,27 +128,25 @@ const updatedAt = computed(() => {
         ru: 'ru-RU',
     }
 
-    return new Date(updatedAtRaw.value).toLocaleString(localeMap[locale.value] || 'en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    })
+    return new Date(updatedAtRaw.value).toLocaleString(
+        localeMap[locale.value] || 'en-US',
+        {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        }
+    )
 })
 
 const formatNumber = (value) => {
     return Number(value || 0).toLocaleString()
 }
 
+// 🔥 CARDS
 const cards = computed(() => [
-    {
-        label: t('todayDonations.onlineAmount'),
-        value: `${formatNumber(stats.value.total)} UZS`,
-        tone: 'green',
-        icon: Wallet,
-    },
     {
         label: t('todayDonations.cashAmount'),
         value: `${formatNumber(cashAmount.value)} UZS`,
@@ -163,14 +155,19 @@ const cards = computed(() => [
     },
     {
         label: t('todayDonations.uniqueDonors'),
-        value: stats.value.donors,
+        value: donors.value,
         tone: 'orange',
         icon: Users,
+    },
+    {
+        label: t('todayDonations.totalDonations'),
+        value: `${donations.value.length}`,
+        tone: 'green',
+        icon: Wallet,
     },
 ])
 
 onMounted(async () => {
-    loadCash()
     await fetchData()
     intervalId = setInterval(fetchData, 60000)
 })

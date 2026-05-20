@@ -9,6 +9,7 @@
             :cases="cases"
             :donations="donations"
             :volunteers="volunteers"
+            :posts="posts"
         />
 
         <ServicesSection />
@@ -21,7 +22,10 @@
             :posts="posts"
         />
 
-        <SuccessStoriesSection :success-image="successImage" />
+        <SuccessStoriesSection
+            :success-image="successImage"
+            :posts="posts"
+        />
         <FinalCtaSection />
     </div>
 </template>

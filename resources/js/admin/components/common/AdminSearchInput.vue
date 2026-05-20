@@ -6,7 +6,7 @@ defineProps({
     },
     placeholder: {
         type: String,
-        default: 'Search...',
+        default: 'Qidiruv...',
     },
 })
 

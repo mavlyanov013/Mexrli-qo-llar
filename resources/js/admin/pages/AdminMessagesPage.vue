@@ -182,7 +182,7 @@ const closeMessage = () => {
 
 /* MARK READ */
 const markRead = async (id) => {
-    const res = await updateMessage(id, { status: 'read' })
+    const res = await updateMessage(id, { status: 'o\'qing' })
     if (!res.error) await fetchMessages()
 }
 

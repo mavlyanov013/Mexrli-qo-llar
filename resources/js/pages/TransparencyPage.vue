@@ -27,9 +27,9 @@
                     </div>
                 </div>
 
-                <div class="mt-8">
-                    <PublishedReportsSection :reports="reports" :t="t" />
-                </div>
+<!--                <div class="mt-8">-->
+<!--                    <PublishedReportsSection :reports="reports" :t="t" />-->
+<!--                </div>-->
             </ListState>
         </div>
     </div>

@@ -1,7 +1,7 @@
 <template>
     <footer class="bg-gray-900 text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-30">
                 <div>
                     <div class="flex items-center gap-3 mb-5">
                         <img
@@ -9,7 +9,7 @@
                             alt="Mehrli Insonlar"
                             class="w-11 h-11 object-contain rounded-xl"
                         />
-                        <span class="text-xl font-bold tracking-tight">Mehrli</span>
+                        <span class="text-xl font-bold tracking-tight">Mehrli Insonlar</span>
                     </div>
 
                     <p class="text-gray-400 text-sm leading-relaxed mb-6">
@@ -82,30 +82,30 @@
                     </ul>
                 </div>
 
-                <div>
-                    <h4 class="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-5">
-                        {{ t('footer.stayUpdated') }}
-                    </h4>
+<!--                <div>-->
+<!--                    <h4 class="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-5">-->
+<!--                        {{ t('footer.stayUpdated') }}-->
+<!--                    </h4>-->
 
-                    <p class="text-sm text-gray-400 mb-4">
-                        {{ t('footer.stayUpdatedText') }}
-                    </p>
+<!--                    <p class="text-sm text-gray-400 mb-4">-->
+<!--                        {{ t('footer.stayUpdatedText') }}-->
+<!--                    </p>-->
 
-                    <div class="flex gap-2">
-                        <input
-                            v-model="email"
-                            type="email"
-                            :placeholder="t('footer.emailPlaceholder')"
-                            class="bg-gray-800 border border-gray-700 text-white placeholder:text-gray-500 rounded-xl px-4 py-2 w-full outline-none"
-                        />
-                        <button
-                            class="bg-[#2A7DE1] hover:bg-[#1E6BC9] rounded-xl px-3 shrink-0 inline-flex items-center justify-center"
-                            type="button"
-                        >
-                            <ArrowRight class="w-4 h-4 text-white" />
-                        </button>
-                    </div>
-                </div>
+<!--                    <div class="flex gap-2">-->
+<!--                        <input-->
+<!--                            v-model="email"-->
+<!--                            type="email"-->
+<!--                            :placeholder="t('footer.emailPlaceholder')"-->
+<!--                            class="bg-gray-800 border border-gray-700 text-white placeholder:text-gray-500 rounded-xl px-4 py-2 w-full outline-none"-->
+<!--                        />-->
+<!--                        <button-->
+<!--                            class="bg-[#2A7DE1] hover:bg-[#1E6BC9] rounded-xl px-3 shrink-0 inline-flex items-center justify-center"-->
+<!--                            type="button"-->
+<!--                        >-->
+<!--                            <ArrowRight class="w-4 h-4 text-white" />-->
+<!--                        </button>-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
 
             <div class="mt-16 pt-8 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">

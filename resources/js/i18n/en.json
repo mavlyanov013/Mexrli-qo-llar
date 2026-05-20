@@ -21,6 +21,16 @@
       "rejected": "Rejected"
     }
   },
+    "todayDonations": {
+        "live": "Live",
+        "title": "Today's Donations",
+        "updatedAt": "Updated at",
+        "cashAmount": "Cash amount",
+        "onlineAmount": "Online amount",
+        "uniqueDonors": "donors",
+        "totalDonations": "Total donations"
+    },
+
   "auth": {
     "login": {
       "title": "Sign in",

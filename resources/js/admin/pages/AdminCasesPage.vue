@@ -51,34 +51,156 @@
 
         <!-- ================= VIEW ================= -->
         <template v-else-if="isViewMode && current">
-            <div class="space-y-4 bg-white p-5 rounded-xl shadow">
+            <div class="grid lg:grid-cols-3 gap-6">
 
-                <img v-if="current.photo_url"
-                     :src="current.photo_url"
-                     class="w-48 h-48 object-cover rounded-xl" />
+                <!-- LEFT: MAIN INFO -->
+                <div class="lg:col-span-2 space-y-6">
 
-                <div class="grid grid-cols-2 gap-3 text-sm">
-                    <p><b>Ism:</b> {{ current.name }}</p>
-                    <p><b>Yosh:</b> {{ current.age }}</p>
-                    <p><b>Joylashuv:</b> {{ current.location }}</p>
-                    <p><b>Holati:</b> {{ current.condition }}</p>
-                    <p><b>Maqsad:</b> {{ current.goal_amount }}</p>
-                    <p><b>Yig‘ilgan:</b> {{ current.raised_amount }}</p>
-                    <p><b>Status:</b> <StatusBadge :status="current.status" :map="CASE_STATUSES" /></p>
+                    <!-- HERO CARD -->
+                    <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+
+                        <img
+                            v-if="current.photo_url"
+                            :src="current.photo_url"
+                            class="w-full h-64 object-cover"
+                        />
+
+                        <div class="p-5">
+
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h1 class="text-2xl font-bold text-gray-900">
+                                        {{ current.name }}
+                                    </h1>
+
+                                    <p class="text-sm text-gray-500 mt-1">
+                                        📍 {{ current.location ?? '-' }}
+                                    </p>
+                                </div>
+
+                                <StatusBadge
+                                    :status="current.status"
+                                    :map="CASE_STATUSES"
+                                />
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 mt-5 text-sm">
+
+                                <div class="info-box">
+                                    <span>Yosh</span>
+                                    <b>{{ current.age ?? '-' }}</b>
+                                </div>
+
+                                <div class="info-box">
+                                    <span>Kasallik</span>
+                                    <b>{{ current.condition ?? '-' }}</b>
+                                </div>
+
+                                <div class="info-box">
+                                    <span>Maqsad</span>
+                                    <b>{{ current.goal_amount ?? 0 }}</b>
+                                </div>
+
+                                <div class="info-box">
+                                    <span>Yig‘ilgan</span>
+                                    <b>{{ current.raised_amount ?? 0 }}</b>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- DESCRIPTION -->
+                    <div class="bg-white rounded-2xl shadow-sm p-5">
+                        <h3 class="font-semibold mb-3">📄 Tavsif</h3>
+                        <p class="text-gray-600 leading-relaxed whitespace-pre-wrap">
+                            {{ current.short_description ?? '-' }}
+                        </p>
+                    </div>
+
+                    <!-- DOCUMENTS -->
+                    <div class="bg-white rounded-2xl shadow-sm p-5" v-if="current.medical_documents?.length">
+                        <h3 class="font-semibold mb-3">📎 Hujjatlar</h3>
+
+                        <div class="space-y-2">
+                            <a
+                                v-for="(doc,i) in current.medical_documents"
+                                :key="i"
+                                :href="doc.url"
+                                target="_blank"
+                                class="flex items-center justify-between p-3 rounded-xl border hover:bg-gray-50 transition"
+                            >
+                        <span class="text-sm text-gray-700">
+                            {{ doc.name }}
+                        </span>
+                                <span class="text-blue-500 text-sm">⬇</span>
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
 
-                <p class="text-gray-600">{{ current.short_description }}</p>
+                <!-- RIGHT: INFO SIDEBAR -->
+                <div class="space-y-4">
 
-                <!-- HUJJATLAR -->
-                <div v-if="current.medical_documents?.length">
-                    <h3 class="font-semibold mt-4">Hujjatlar:</h3>
-                    <ul class="list-disc ml-5 text-blue-600">
-                        <li v-for="(doc,i) in current.medical_documents" :key="i">
-                            <a :href="doc.url" target="_blank">
-                                {{ doc.name }}
-                            </a>
-                        </li>
-                    </ul>
+                    <div class="bg-white rounded-2xl shadow-sm p-5">
+                        <h3 class="font-semibold mb-4">📊 Qisqa ma’lumot</h3>
+
+                        <div class="space-y-3 text-sm">
+
+                            <div class="side-row">
+                                <span>ID</span>
+                                <b>#{{ current.id }}</b>
+                            </div>
+
+                            <div class="side-row">
+                                <span>Status</span>
+                                <StatusBadge :status="current.status" :map="CASE_STATUSES" />
+                            </div>
+
+                            <div class="side-row">
+                                <span>Yosh</span>
+                                <b>{{ current.age ?? '-' }}</b>
+                            </div>
+
+                            <div class="side-row">
+                                <span>Kasallik</span>
+                                <b class="text-right max-w-[60%]">
+                                    {{ current.condition ?? '-' }}
+                                </b>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm p-5">
+                        <h3 class="font-semibold mb-3">💰 Moliyaviy</h3>
+
+                        <div class="space-y-3 text-sm">
+
+                            <div class="side-row">
+                                <span>Maqsad</span>
+                                <b>{{ current.goal_amount ?? 0 }}</b>
+                            </div>
+
+                            <div class="side-row">
+                                <span>Yig‘ilgan</span>
+                                <b class="text-green-600">
+                                    {{ current.raised_amount ?? 0 }}
+                                </b>
+                            </div>
+
+                            <div class="side-row">
+                                <span>Qoldi</span>
+                                <b class="text-orange-500">
+                                    {{ (current.goal_amount ?? 0) - (current.raised_amount ?? 0) }}
+                                </b>
+                            </div>
+
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
@@ -143,19 +265,31 @@
                         <div>
                             <label class="label">Kategoriya</label>
                             <select v-model="form.category" class="input">
-                                <option v-for="c in CASE_CATEGORIES" :key="c" :value="c">{{ c }}</option>
+                                <option
+                                    v-for="c in CASE_CATEGORIES"
+                                    :key="c.value"
+                                    :value="c.value"
+                                >
+                                    {{ c.label }}
+                                </option>
                             </select>
                         </div>
 
                         <div>
                             <label class="label">Shoshilinchlik</label>
                             <select v-model="form.urgency" class="input">
-                                <option v-for="u in CASE_URGENCY" :key="u" :value="u">{{ u }}</option>
+                                <option
+                                    v-for="u in CASE_URGENCY"
+                                    :key="u.value"
+                                    :value="u.value"
+                                >
+                                    {{ u.label }}
+                                </option>
                             </select>
                         </div>
 
                         <div>
-                            <label class="label">Status</label>
+                            <label class="label">Holati</label>
                             <select v-model="form.status" class="input">
                                 <option value="new">Yangi</option>
                                 <option value="active">Faol</option>
@@ -169,7 +303,7 @@
                     <div class="flex gap-6 mt-4">
                         <label class="checkbox">
                             <input type="checkbox" v-model="form.is_featured" />
-                            Asosiy case
+                            Asosiy holat
                         </label>
 
                         <label class="checkbox">
@@ -270,9 +404,9 @@ const form = reactive({
     short_description: '',
     goal_amount: 0,
     raised_amount: 0,
-    urgency: 'medium',
-    category: 'illness',
-    status: 'active',
+    urgency: 'o\'rta',
+    category: 'kasallik',
+    status: 'faol',
     is_featured: false,
     is_urgent: false,
 
@@ -286,9 +420,9 @@ const form = reactive({
 const columns = [
     { key: 'id', label: 'ID' },
     { key: 'name', label: 'Ism' },
-    { key: 'status', label: 'Status' },
+    { key: 'status', label: 'Holati' },
     { key: 'goal_amount', label: 'Maqsad' },
-    { key: 'actions', label: 'Actions' },
+    { key: 'actions', label: 'Harakatlar' },
 ]
 
 const loadCurrent = async () => {
@@ -308,9 +442,9 @@ const loadCurrent = async () => {
             short_description: res.data.short_description ?? '',
             goal_amount: Number(res.data.goal_amount ?? 0),
             raised_amount: Number(res.data.raised_amount ?? 0),
-            urgency: res.data.urgency ?? 'medium',
-            category: res.data.category ?? 'illness',
-            status: res.data.status ?? 'active',
+            urgency: res.data.urgency ?? 'o\'rta',
+            category: res.data.category ?? 'kasallik',
+            status: res.data.status ?? 'faol',
             is_featured: Boolean(res.data.is_featured),
             is_urgent: Boolean(res.data.is_urgent),
             photo_url: res.data.photo_url ?? '',
@@ -375,7 +509,11 @@ const save = async () => {
         medical_documents: form.medical_documents
     }
 
-    await createCase(payload)
+    const res = await createCase(payload)
+
+    if (res?.error) return
+
+    router.push('/admin/cases')
 }
 
 const remove = async (id) => {
@@ -457,5 +595,33 @@ onMounted(async () => {
     background: #f9fafb;
     padding: 10px;
     border-radius: 8px;
+}
+.info-box {
+    background: #f9fafb;
+    padding: 10px;
+    border-radius: 12px;
+}
+
+.info-box span {
+    display: block;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.info-box b {
+    font-size: 14px;
+    color: #111827;
+}
+
+.side-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.side-row:last-child {
+    border-bottom: none;
 }
 </style>

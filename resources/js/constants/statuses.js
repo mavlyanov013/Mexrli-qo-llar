@@ -35,7 +35,23 @@ export const MESSAGE_STATUSES = {
     read: { labelKey: 'common.status.read', tone: 'warning' },
     replied: { labelKey: 'common.status.replied', tone: 'success' },
 }
-
+export const ACTIVE_STATUSES = {
+    success: 'Faol',
+    pending: 'Faol emas'
+}
+export const HELP_REQUEST_STATUS = {
+    pending: { label: 'Kutilmoqda', tone: 'warning' },
+    approved: { label: 'Tasdiqlangan', tone: 'success' },
+    rejected: { label: 'Rad etilgan', tone: 'danger' },
+}
+export const HELP_REQUEST_CATEGORIES = {
+    medical_treatment: 'Tibbiy davolanish',
+    surgery: 'Jarrohlik',
+    rehabilitation: 'Reabilitatsiya',
+    medication: 'Dori-darmon',
+    family_support: 'Oilaviy yordam',
+    other: 'Boshqa',
+}
 export const CASE_STATUS_OPTIONS = ['new','draft','active','paused','completed','closed']
 export const PAYMENT_STATUS_OPTIONS = ['pending', 'success', 'failed', 'cancelled', 'completed']
 export const VOLUNTEER_STATUS_OPTIONS = ['new', 'reviewed', 'accepted', 'rejected']

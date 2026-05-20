@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Donation;
 use App\Services\Admin\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
@@ -36,13 +38,11 @@ class PaymentController extends Controller
             'amount' => ['required', 'numeric', 'min:0'],
             'currency' => ['nullable', 'string', 'max:10'],
             'donation_id' => ['nullable', 'integer', 'exists:donations,id'],
-
-            // YANGI
             'donor_name' => ['required', 'string', 'max:255'],
             'donor_phone' => ['nullable', 'string', 'max:50'],
         ]);
 
-        // CASH uchun avtomatik
+
         if ($validated['provider'] === 'cash') {
             $validated['status'] = 'completed';
             $validated['transaction_id'] = 'CASH_' . time();
@@ -55,6 +55,17 @@ class PaymentController extends Controller
                 'donor_phone' => $validated['donor_phone'] ?? null,
             ]
         ]);
+
+        if (!empty($validated['donation_id'])) {
+            $donation = \App\Models\Donation::find($validated['donation_id']);
+
+            if ($donation) {
+                $donation->update([
+                    'status' => 'completed',
+                    'amount' => $validated['amount'],
+                ]);
+            }
+        }
 
         return response()->json([
             'message' => 'Payment created successfully',

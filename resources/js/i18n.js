@@ -141,7 +141,7 @@ const messages = {
         volunteer: 'Volunteer',
         admin: {
 
-            panel: 'Admin Panel',
+            panel: 'Bosharuv paneli',
             management: 'Management',
             dashboard: 'Admin Dashboard',
             overview: 'Overview',
@@ -909,7 +909,7 @@ const messages = {
             subtitle: 'Xayriyalar, to‘lovlar tarixi va bugungi jonli faollikni kuzating.',
             onlineAmount: 'Bugungi summa (onlayn)',
             cashToday: 'Bugungi naqd',
-            activeDonorsToday: 'Faol donorlar',
+            activeDonorsToday: 'Faol xayriya qilganlar',
             enterAmount: 'Summani kiriting',
             setCash: 'Kiritish',
             totalToday: 'Bugungi jami',
@@ -1212,7 +1212,7 @@ const messages = {
         homeStats: {
             topText: 'Har bir raqam o‘zgargan haqiqiy hayotdir',
             totalRaised: 'Jami yig‘ilgan',
-            activeDonors: 'Faol donorlar',
+            activeDonors: 'Faol xayriya qilganlar',
             childrenHelped: 'Yordam berilgan bolalar',
             activeProjects: 'Faol loyihalar',
             volunteers: 'Ko‘ngillilar',

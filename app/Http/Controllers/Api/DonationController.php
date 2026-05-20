@@ -15,29 +15,36 @@ class DonationController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Donation::query()->latest();
+        $query = Donation::query()
+            ->with('payment') // 🔥 provider olish uchun MUHIM
+            ->latest();
 
+        // 🔎 STATUS FILTER
         if ($request->filled('status')) {
             $query->where('status', $request->string('status'));
         }
 
+        // 🔎 TYPE FILTER
         if ($request->filled('type')) {
             $query->where('type', $request->string('type'));
         }
 
+        // 🔎 SEARCH FILTER
         if ($request->filled('search')) {
             $search = $request->string('search');
+
             $query->where(function ($q) use ($search) {
                 $q->where('donor_name', 'like', "%{$search}%")
-                    ->orWhere('donor_email', 'like', "%{$search}%");
+                    ->orWhere('donor_phone', 'like', "%{$search}%");
             });
         }
 
+        // 📦 FINAL PAGINATION (FAKAT 1 MARTA)
         $donations = $query->paginate((int) $request->input('per_page', 20));
 
         return response()->json([
             'message' => 'Donations fetched successfully',
-            'data' => DonationResource::collection($donations->items()),
+            'data' => DonationResource::collection($donations),
             'meta' => [
                 'current_page' => $donations->currentPage(),
                 'last_page' => $donations->lastPage(),

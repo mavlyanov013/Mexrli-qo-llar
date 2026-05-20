@@ -21,6 +21,9 @@ class DonationResource extends JsonResource
             'is_anonymous' => $this->is_anonymous,
             'status' => $this->status,
             'created_at' => $this->created_at,
+            'provider' => $this->payment?->provider ?? null,
+            'transaction_id' => $this->payment?->transaction_id ?? null,
+            'payment_status' => $this->payment?->status ?? null,
         ];
     }
 }

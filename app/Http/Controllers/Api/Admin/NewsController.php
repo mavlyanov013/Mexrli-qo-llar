@@ -42,6 +42,7 @@ class NewsController extends Controller
             'cover_image' => ['nullable', 'string'],
             'status' => ['required', 'in:draft,published'],
             'published_at' => ['nullable', 'date'],
+            'category' => ['required', 'in:news,helped_child,success_story'],
         ]);
 
         $validated['slug'] = $validated['slug'] ?: Str::slug($validated['title']) . '-' . Str::random(5);
@@ -75,6 +76,7 @@ class NewsController extends Controller
             'cover_image' => ['nullable', 'string'],
             'status' => ['sometimes', 'in:draft,published'],
             'published_at' => ['nullable', 'date'],
+            'category' => ['required', 'in:news,helped_child,success_story'],
         ]);
 
         if (array_key_exists('title', $validated) && empty($validated['slug']) && empty($item->slug)) {

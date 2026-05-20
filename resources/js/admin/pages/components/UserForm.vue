@@ -16,8 +16,8 @@
             <select v-model="form.role" class="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm">
                 <option value="super_admin">super_admin</option>
                 <option value="admin">admin</option>
-                <option value="editor">editor</option>
-                <option value="finance">finance</option>
+                <option value="editor">muharrir</option>
+                <option value="finance">moliya</option>
             </select>
         </AdminFormField>
 
@@ -44,14 +44,14 @@ const props = defineProps({
     },
 })
 
-const emit = defineEmits(['submit'])
+const emit = defineEmits(['topshirish'])
 const { t } = useI18n()
 
 const form = reactive({
     name: props.initialValues.name || '',
     email: props.initialValues.email || '',
     password: '',
-    role: props.initialValues.role || 'editor',
+    role: props.initialValues.role || 'muharrir',
 })
 
 const submit = () => {
@@ -59,6 +59,6 @@ const submit = () => {
     if (props.isEdit && !payload.password) {
         delete payload.password
     }
-    emit('submit', payload)
+    emit('topshirish', payload)
 }
 </script>

@@ -1,6 +1,16 @@
 <template>
     <AdminCrudShell title="Yordam so‘rovlari">
         <AdminTable :columns="columns" :rows="rows">
+            <template #cell-category="{ row }">
+                {{ HELP_REQUEST_CATEGORIES[row.category] ?? row.category }}
+            </template>
+
+            <template #cell-status="{ row }">
+                <StatusBadge
+                    :status="row.status"
+                    :map="HELP_REQUEST_STATUS"
+                />
+            </template>
             <template #cell-actions="{ row }">
                 <div class="flex items-center gap-3">
                     <button
@@ -30,6 +40,8 @@ import { onMounted, ref } from 'vue'
 import AdminCrudShell from '@/admin/components/common/AdminCrudShell.vue'
 import AdminTable from '@/admin/components/common/AdminTable.vue'
 import helpRequestService from '@/services/helpRequestService'
+import StatusBadge from "../../components/shared/StatusBadge.vue";
+import {HELP_REQUEST_CATEGORIES, HELP_REQUEST_STATUS} from "../../constants/statuses.js";
 
 const rows = ref([])
 const columns = [

@@ -23,27 +23,28 @@ class SectionController extends Controller
             'content' => ['nullable', 'string'],
 
             'file' => ['nullable', 'file', 'max:10240'],
-            'image' => ['nullable', 'file', 'max:10240'],
+            'image' => ['nullable', 'file', 'image', 'max:5120'],
 
             'sort_order' => ['nullable', 'integer'],
             'extra' => ['nullable', 'array'],
         ]);
 
-        // 🔥 file upload
+        // 📁 FILE
         if ($request->hasFile('file')) {
             $file = $request->file('file');
 
-            $path = $file->store('sections/files', 'public');
+            $path = $file->store('uploads/sections/files', 'public');
 
+            // ❗ PATH SAQLANADI, URL EMAS
             $validated['file_path'] = $path;
             $validated['file_name'] = $file->getClientOriginalName();
         }
 
-        // 🔥 image upload (optional)
+        // 🖼 IMAGE
         if ($request->hasFile('image')) {
             $image = $request->file('image');
 
-            $path = $image->store('sections/images', 'public');
+            $path = $image->store('uploads/sections/images', 'public');
 
             $validated['image'] = $path;
         }
@@ -61,16 +62,34 @@ class SectionController extends Controller
         $section = Section::findOrFail($id);
 
         $validated = $request->validate([
-            'type' => ['sometimes', new Enum(SectionType::class)],
-
+            'type' => ['sometimes'],
             'title' => ['nullable', 'string'],
             'subtitle' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
-            'image' => ['nullable', 'string'],
+
+            'file' => ['nullable', 'file', 'max:10240'],
+            'image' => ['nullable', 'file', 'image', 'max:5120'],
 
             'sort_order' => ['nullable', 'integer'],
             'extra' => ['nullable', 'array'],
         ]);
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+
+            $path = $file->store('uploads/sections/files', 'public');
+
+            $validated['file_path'] = $path;
+            $validated['file_name'] = $file->getClientOriginalName();
+        }
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+
+            $path = $image->store('uploads/sections/images', 'public');
+
+            $validated['image'] = $path;
+        }
 
         $section->update($validated);
 

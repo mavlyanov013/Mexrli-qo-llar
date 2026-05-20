@@ -55,6 +55,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    posts: {
+        type: Array,
+        default: () => [],
+    },
 })
 
 const { t } = useI18n()
@@ -65,19 +69,24 @@ const totalRaised = computed(() => {
 
 const activeDonorsCount = computed(() => {
     return new Set(
-        props.donations.map((item) => item.donor_email).filter(Boolean)
+        props.donations
+            .map((item) => `${item?.donor_name || ''}-${item?.donor_phone || ''}`)
+            .filter(Boolean)
     ).size
 })
 
 const helpedChildrenCount = computed(() => {
-    return props.cases.filter((item) =>
-        ['completed', 'funded', 'closed'].includes(String(item.status || '').toLowerCase())
+    return props.posts.filter(item =>
+        item.category === 'success_story' &&
+        item.status === 'published'
     ).length
 })
 
 const activeCasesCount = computed(() => {
     return props.cases.filter((item) =>
-        ['active', 'open', 'in_progress'].includes(String(item.status || '').toLowerCase())
+        ['active', 'open', 'in_progress'].includes(
+            String(item?.status || '').toLowerCase()
+        )
     ).length
 })
 

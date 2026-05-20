@@ -9,12 +9,11 @@
 
                     <!-- DONOR NAME -->
                     <template #cell-donor_name="{ row }">
-                        {{ row.payload?.donor_name || '-' }}
+                        {{ row.payload?.donor_name || row.donation?.donor_name || '-' }}
                     </template>
 
-                    <!-- DONOR PHONE -->
                     <template #cell-donor_phone="{ row }">
-                        {{ row.payload?.donor_phone || '-' }}
+                        {{ row.payload?.donor_phone || row.donation?.donor_phone || '-' }}
                     </template>
 
                     <!-- STATUS -->
@@ -60,12 +59,12 @@
                 <p><strong>{{ t('admin.provider') }}:</strong> {{ current.provider }}</p>
                 <p>
                     <strong>{{ t('admin.donorName') }}:</strong>
-                    {{ current.payload?.donor_name }}
+                    {{ current.payload?.donor_name || current.donation?.donor_name || '-' }}
                 </p>
 
                 <p>
                     <strong>{{ t('admin.donorPhone') }}:</strong>
-                    {{ current.payload?.donor_phone }}
+                    {{ current.payload?.donor_phone || current.donation?.donor_phone || '-' }}
                 </p>
                 <p><strong>{{ t('admin.amount') }}:</strong> {{ current.amount }} {{ current.currency }}</p>
                 <p>
@@ -81,7 +80,7 @@
 
                 <!-- ONLY CASH (NAQT) -->
                 <select v-model="form.provider" class="h-10 rounded-lg border px-3 text-sm">
-                    <option value="cash">cash</option>
+                    <option value="cash">naqd pul</option>
                 </select>
 
                 <input v-model.number="form.amount" type="number" min="0" step="0.01"
@@ -222,7 +221,7 @@ const loadCurrent = async () => {
 
 
 const remove = async (id) => {
-    if (!confirm('Delete this payment?')) return
+    if (!confirm('Ushbu toʻlovni oʻchirib tashlang?')) return
     await deletePayment(id)
     await fetchPayments()
 }

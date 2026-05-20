@@ -33,4 +33,8 @@ class Donation extends Model
     {
         return $this->belongsTo(CaseItem::class, 'case_id');
     }
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
 }

@@ -22,8 +22,9 @@ export default {
     async getCaseById(id) {
         try {
             const response = await api.get(`/admin/cases/${id}`)
+
             return {
-                data: response.data.data ?? null,
+                data: response.data.data,
                 error: null
             }
         } catch (error) {

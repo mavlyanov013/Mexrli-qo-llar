@@ -32,7 +32,7 @@ defineProps({
     currentPage: { type: Number, default: 1 },
     lastPage: { type: Number, default: 1 },
     summary: { type: String, default: '' },
-    previousLabel: { type: String, default: 'Previous' },
-    nextLabel: { type: String, default: 'Next' },
+    previousLabel: { type: String, default: 'Oldingi' },
+    nextLabel: { type: String, default: 'Keyingisi' },
 })
 </script>

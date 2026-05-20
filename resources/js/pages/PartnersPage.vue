@@ -72,10 +72,10 @@ const formatType = (value) => (value || 'corporate').replace(/_/g, ' ')
 
 const typeClass = (type) => {
     if (!PARTNER_TYPES.includes(type)) return 'bg-blue-50 text-[#2A7DE1]'
-    if (type === 'ngo') return 'bg-green-50 text-[#4CAF50]'
-    if (type === 'government') return 'bg-purple-50 text-purple-600'
-    if (type === 'medical') return 'bg-red-50 text-red-600'
-    if (type === 'media') return 'bg-orange-50 text-[#FF9800]'
+    if (type === 'Nodavlat Notijorat Tashkiloti') return 'bg-green-50 text-[#4CAF50]'
+    if (type === 'hukumat') return 'bg-purple-50 text-purple-600'
+    if (type === 'tibbiy') return 'bg-red-50 text-red-600'
+    if (type === 'ommaviy axborot vositalari') return 'bg-orange-50 text-[#FF9800]'
     return 'bg-blue-50 text-[#2A7DE1]'
 }
 </script>
