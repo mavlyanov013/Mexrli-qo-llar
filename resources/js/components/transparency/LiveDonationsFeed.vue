@@ -12,9 +12,7 @@
                 :key="donation.id"
                 class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors"
             >
-                <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                    <Heart class="w-5 h-5 text-[#2A7DE1]" />
-                </div>
+                <IconBadge :icon="Heart" tone="red" size="sm" class="shrink-0" />
 
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium text-gray-900">
@@ -36,7 +34,7 @@
             </div>
 
             <div v-if="donations.length === 0" class="text-center py-8 text-gray-400">
-                <Heart class="w-8 h-8 mx-auto mb-2 opacity-30" />
+                <IconBadge :icon="Heart" tone="red" size="md" class="mx-auto mb-2 opacity-40" />
                 <p class="text-sm">{{ t('transparencyPage.noRecentDonations') }}</p>
             </div>
         </div>

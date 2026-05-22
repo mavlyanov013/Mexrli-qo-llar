@@ -16,7 +16,7 @@ class StoreHelpRequestRequest extends FormRequest
     {
         return [
             'full_name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:50'],
+            'phone' => ['required', 'regex:/^\+998[0-9]{9}$/'],
             'description' => ['nullable', 'string'],
             'city' => ['nullable', 'string', 'max:255'],
             'situation_description' => ['required', 'string'],

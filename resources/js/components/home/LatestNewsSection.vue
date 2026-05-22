@@ -31,11 +31,11 @@
                         </div>
 
                         <h3 class="font-bold text-gray-900 group-hover:text-[#2A7DE1] transition-colors line-clamp-2">
-                            {{ post.title }}
+                            {{ content(post, 'title') }}
                         </h3>
 
                         <p class="text-sm text-gray-500 mt-2 line-clamp-2">
-                            {{ post.excerpt }}
+                            {{ content(post, 'excerpt') }}
                         </p>
                     </div>
                 </RouterLink>
@@ -58,10 +58,12 @@
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useLocalizedDisplay } from '@/composables/useLocalizedDisplay'
 import SectionHeader from '../shared/SectionHeader.vue'
 import { Clock3 } from 'lucide-vue-next'
 
 const { t, locale } = useI18n()
+const { content } = useLocalizedDisplay()
 
 const props = defineProps({
     posts: {
@@ -83,12 +85,12 @@ const formatDate = (value) => {
     const date = new Date(value)
 
     const localeMap = {
-        en: 'en-US',
         uz: 'uz-UZ',
+        uz_cyrl: 'uz-UZ',
         ru: 'ru-RU',
     }
 
-    return date.toLocaleDateString(localeMap[locale.value] || 'en-US', {
+    return date.toLocaleDateString(localeMap[locale.value] || 'uz-UZ', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',

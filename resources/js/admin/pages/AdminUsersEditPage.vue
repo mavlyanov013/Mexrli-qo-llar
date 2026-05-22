@@ -7,9 +7,12 @@
             </h2>
         </div>
 
+        <p v-if="error" class="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ error }}</p>
+
         <div v-if="user">
             <UserForm
                 :initial-values="user"
+                :submitting="submitting"
                 is-edit
                 @submit="handleSubmit"
             />
@@ -35,14 +38,36 @@ const route = useRoute()
 const router = useRouter()
 
 const user = ref(null)
+const error = ref('')
+const submitting = ref(false)
+
+const extractError = (err) => {
+    const data = err?.response?.data
+    if (data?.errors) {
+        return Object.values(data.errors).flat().join('\n')
+    }
+    return data?.message || err?.message || 'Saqlashda xatolik yuz berdi'
+}
 
 onMounted(async () => {
-    const res = await userService.getById(route.params.id)
-    user.value = res.data
+    try {
+        const res = await userService.getById(route.params.id)
+        user.value = res.data
+    } catch (err) {
+        error.value = extractError(err)
+    }
 })
 
 const handleSubmit = async (payload) => {
-    await userService.update(route.params.id, payload)
-    await router.push('/admin/users')
+    error.value = ''
+    submitting.value = true
+    try {
+        await userService.update(route.params.id, payload)
+        await router.push('/admin/users')
+    } catch (err) {
+        error.value = extractError(err)
+    } finally {
+        submitting.value = false
+    }
 }
 </script>

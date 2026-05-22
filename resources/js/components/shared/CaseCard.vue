@@ -3,7 +3,7 @@
         <div class="relative overflow-hidden" style="aspect-ratio: 4/3">
             <img
                 :src="caseData.photo_url || fallbackImage"
-                :alt="caseData.name"
+                :alt="content(caseData, 'name')"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
 
@@ -36,14 +36,14 @@
         <div class="p-5 flex flex-col flex-1">
             <div class="flex items-start justify-between mb-2 gap-3">
                 <div>
-                    <h3 class="font-bold text-lg text-gray-900">{{ caseData.name }}</h3>
+                    <h3 class="font-bold text-lg text-gray-900">{{ content(caseData, 'name') }}</h3>
 
                     <p
-                        v-if="caseData.location"
+                        v-if="content(caseData, 'location')"
                         class="text-xs text-gray-400 flex items-center gap-1 mt-0.5"
                     >
                         <MapPin class="w-3.5 h-3.5 text-red-400" />
-                        {{ caseData.location }}
+                        {{ content(caseData, 'location') }}
                     </p>
                 </div>
 
@@ -51,7 +51,7 @@
             </div>
 
             <p class="text-sm text-gray-600 line-clamp-2 mb-4 flex-1">
-                {{ caseData.short_description }}
+                {{ content(caseData, 'short_description') }}
             </p>
 
             <div class="mb-4">
@@ -93,9 +93,9 @@
 
                 <RouterLink :to="`/donate?caseId=${caseData.id}`">
                     <button
-                        class="rounded-xl bg-[#FF9800] hover:bg-[#F57C00] text-white gap-1.5 font-semibold px-4 py-2 inline-flex items-center"
+                        class="rounded-xl bg-[#FF9800] hover:bg-[#F57C00] text-white gap-2 font-semibold px-4 py-2 inline-flex items-center"
                     >
-                        <Heart class="w-4 h-4" />
+                        <IconBadge :icon="Heart" tone="red" size="xs" class="shrink-0" />
                         {{ t('caseCard.donate') }}
                     </button>
                 </RouterLink>
@@ -107,11 +107,14 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useLocalizedDisplay } from '@/composables/useLocalizedDisplay'
 import { RouterLink } from 'vue-router'
 import { Heart, MapPin } from 'lucide-vue-next'
+import IconBadge from './IconBadge.vue'
 import ProgressRing from './ProgressRing.vue'
 
 const { t } = useI18n()
+const { content } = useLocalizedDisplay()
 
 const props = defineProps({
     caseData: {

@@ -16,11 +16,14 @@
                 <div
                     v-for="(role, index) in roles"
                     :key="index"
-                    class="bg-white rounded-2xl p-6 border border-gray-100"
+                    class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm"
                 >
-                    <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mb-4 text-[#2A7DE1] text-2xl">
-                        {{ role.icon }}
-                    </div>
+                    <IconBadge
+                        :icon="role.icon"
+                        :tone="role.tone"
+                        size="md"
+                        class="mb-4"
+                    />
                     <h3 class="font-bold text-gray-900 mb-2">{{ role.title }}</h3>
                     <p class="text-sm text-gray-500">{{ role.desc }}</p>
                 </div>
@@ -31,7 +34,7 @@
                     v-if="submitted"
                     class="text-center py-12 bg-white rounded-2xl border border-gray-100"
                 >
-                    <div class="text-6xl text-[#4CAF50] mx-auto mb-4">✓</div>
+                    <IconBadge :icon="CircleCheck" tone="green" size="lg" class="mx-auto mb-4" />
                     <h2 class="text-2xl font-bold text-gray-900 mb-2">
                         {{ t('volunteerPage.successTitle') }}
                     </h2>
@@ -61,11 +64,11 @@
                                 class="rounded-xl border border-gray-300 px-4 py-3 w-full outline-none"
                                 required
                             />
-                            <input
+                            <PhoneInput
+                                ref="phoneInputRef"
                                 v-model="form.phone"
-                                type="text"
-                                :placeholder="t('volunteerPage.form.phone')"
-                                class="rounded-xl border border-gray-300 px-4 py-3 w-full outline-none"
+                                required
+                                input-class="rounded-xl border border-gray-300 px-4 py-3 w-full outline-none"
                             />
                             <input
                                 v-model="form.city"
@@ -130,50 +133,68 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import {
+    CircleCheck,
+    Heart,
+    Megaphone,
+    Calendar,
+    Languages,
+    Share2,
+    Users,
+} from 'lucide-vue-next'
 import SectionHeader from '../components/shared/SectionHeader.vue'
+import IconBadge from '../components/shared/IconBadge.vue'
 import { useVolunteerApplications } from '@/composables/useVolunteerApplications'
+import PhoneInput from '../components/shared/PhoneInput.vue'
 
 const { t } = useI18n()
 
 const submitted = ref(false)
+const phoneInputRef = ref(null)
 const { loading: submitting, submitApplication } = useVolunteerApplications()
 
 const roles = computed(() => [
     {
-        icon: '❤',
+        icon: Heart,
+        tone: 'blue',
         title: t('volunteerPage.roles.medicalSupport.title'),
         desc: t('volunteerPage.roles.medicalSupport.desc'),
-        value: 'medical_support'
+        value: 'medical_support',
     },
     {
-        icon: '📣',
+        icon: Megaphone,
+        tone: 'orange',
         title: t('volunteerPage.roles.fundraising.title'),
         desc: t('volunteerPage.roles.fundraising.desc'),
-        value: 'fundraising'
+        value: 'fundraising',
     },
     {
-        icon: '📅',
+        icon: Calendar,
+        tone: 'green',
         title: t('volunteerPage.roles.events.title'),
         desc: t('volunteerPage.roles.events.desc'),
-        value: 'events'
+        value: 'events',
     },
     {
-        icon: '🌍',
+        icon: Languages,
+        tone: 'yellow',
         title: t('volunteerPage.roles.translation.title'),
         desc: t('volunteerPage.roles.translation.desc'),
-        value: 'translation'
+        value: 'translation',
     },
     {
-        icon: '📚',
+        icon: Share2,
+        tone: 'red',
         title: t('volunteerPage.roles.socialMedia.title'),
         desc: t('volunteerPage.roles.socialMedia.desc'),
-        value: 'social_media'
+        value: 'social_media',
     },
     {
-        icon: '👥',
+        icon: Users,
+        tone: 'blue',
         title: t('volunteerPage.roles.mentoring.title'),
         desc: t('volunteerPage.roles.mentoring.desc'),
-        value: 'mentoring'
+        value: 'mentoring',
     },
 ])
 
@@ -189,6 +210,10 @@ const form = reactive({
 })
 
 const handleSubmit = async () => {
+    if (!phoneInputRef.value?.validate()) {
+        return
+    }
+
     const result = await submitApplication(form)
     if (!result.error) {
         submitted.value = true

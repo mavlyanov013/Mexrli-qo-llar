@@ -1,20 +1,12 @@
 <template>
-    <AdminCrudShell
-        :title="title"
-        :create-to="isListMode ? '/admin/volunteers/create' : ''"
-    >
-
-        <!-- ================= RO‘YXAT ================= -->
+    <AdminCrudShell :title="title">
         <template v-if="isListMode">
             <ListState
                 :loading="loading"
                 :error="error"
                 :empty="volunteers.length === 0"
             >
-
                 <AdminTable :columns="columns" :rows="volunteers">
-
-                    <!-- HOLAT -->
                     <template #cell-status="{ row }">
                         <StatusBadge
                             :status="row.status"
@@ -22,11 +14,8 @@
                         />
                     </template>
 
-                    <!-- AMALLAR -->
                     <template #cell-actions="{ row }">
                         <div class="flex items-center gap-3">
-
-                            <!-- KO‘RISH -->
                             <router-link
                                 :to="`/admin/volunteers/${row.id}`"
                                 class="p-2 rounded-md hover:bg-blue-50 text-blue-600"
@@ -35,7 +24,6 @@
                                 <Eye class="w-5 h-5" />
                             </router-link>
 
-                            <!-- TAHRIRLASH -->
                             <router-link
                                 :to="`/admin/volunteers/${row.id}/edit`"
                                 class="p-2 rounded-md hover:bg-amber-50 text-amber-600"
@@ -44,90 +32,117 @@
                                 <Pencil class="w-5 h-5" />
                             </router-link>
 
-                            <!-- O‘CHIRISH -->
                             <button
-                                @click="remove(row.id)"
+                                type="button"
                                 class="p-2 rounded-md hover:bg-red-50 text-red-600"
                                 title="O‘chirish"
+                                @click="remove(row.id)"
                             >
                                 <Trash2 class="w-5 h-5" />
                             </button>
-
                         </div>
                     </template>
-
                 </AdminTable>
-
             </ListState>
+
+            <AdminPagination
+                v-if="meta && meta.last_page > 1"
+                :current-page="meta.current_page || 1"
+                :last-page="meta.last_page || 1"
+                :summary="`${meta.total || 0} ta ariza`"
+                @change="fetchPage"
+            />
         </template>
 
-        <!-- ================= KO‘RISH ================= -->
         <template v-else-if="isViewMode && current">
-            <div class="bg-white p-6 rounded-xl shadow space-y-2 text-sm">
+            <div class="bg-white p-6 rounded-xl shadow space-y-4 text-sm">
+                <div class="flex items-center justify-between gap-3">
+                    <h3 class="text-lg font-semibold text-gray-900">Ko‘ngilli ma’lumotlari</h3>
+                    <router-link
+                        :to="`/admin/volunteers/${current.id}/edit`"
+                        class="inline-flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100"
+                    >
+                        <Pencil class="w-4 h-4" />
+                        Tahrirlash
+                    </router-link>
+                </div>
 
                 <p><b>Ism:</b> {{ current.full_name }}</p>
                 <p><b>Email:</b> {{ current.email }}</p>
-                <p><b>Telefon:</b> {{ current.phone }}</p>
-                <p><b>Shahar:</b> {{ current.city }}</p>
-                <p><b>Qiziqish yo‘nalishi:</b> {{ current.role_interest }}</p>
-                <p><b>Tajriba:</b> {{ current.experience }}</p>
-                <p><b>Tavsif:</b> {{ current.motivation }}</p>
+                <p><b>Telefon:</b> {{ current.phone || '—' }}</p>
+                <p><b>Shahar:</b> {{ current.city || '—' }}</p>
+                <p><b>Qiziqish yo‘nalishi:</b> {{ current.role_interest || '—' }}</p>
+                <p><b>Tajriba:</b> {{ current.experience || '—' }}</p>
+                <p><b>Motivatsiya:</b> {{ current.motivation || '—' }}</p>
 
-                <p class="flex items-center gap-2">
-                    <b>Holat:</b>
-                    <StatusBadge
-                        :status="current.status"
-                        :map="VOLUNTEER_STATUSES"
-                    />
-                </p>
-
+                <div class="max-w-xs">
+                    <label class="label">Holat</label>
+                    <select
+                        v-model="viewStatus"
+                        class="input"
+                        :disabled="statusSaving"
+                        @change="saveStatus"
+                    >
+                        <option
+                            v-for="option in VOLUNTEER_STATUS_OPTIONS"
+                            :key="option.value"
+                            :value="option.value"
+                        >
+                            {{ option.label }}
+                        </option>
+                    </select>
+                </div>
             </div>
         </template>
 
-        <!-- ================= FORM ================= -->
-        <template v-else>
+        <template v-else-if="isEditMode">
             <form
                 class="bg-white p-6 rounded-xl shadow grid grid-cols-1 md:grid-cols-2 gap-4"
                 @submit.prevent="save"
             >
-
-                <!-- ISM -->
                 <div>
                     <label class="label">To‘liq ism</label>
-                    <input v-model="form.full_name" class="input" placeholder="Masalan: Ali Valiyev" />
+                    <input v-model="form.full_name" class="input" placeholder="Masalan: Ali Valiyev" required />
                 </div>
 
-                <!-- EMAIL -->
                 <div>
                     <label class="label">Email manzil</label>
-                    <input v-model="form.email" class="input" placeholder="example@mail.com" />
+                    <input v-model="form.email" type="email" class="input" placeholder="example@mail.com" required />
                 </div>
 
-                <!-- TELEFON -->
                 <div>
                     <label class="label">Telefon raqam</label>
-                    <input v-model="form.phone" class="input" placeholder="+998 90 123 45 67" />
+                    <PhoneInput ref="phoneInputRef" v-model="form.phone" input-class="input" />
                 </div>
 
-                <!-- SHAHAR -->
                 <div>
                     <label class="label">Shahar</label>
                     <input v-model="form.city" class="input" placeholder="Masalan: Toshkent" />
                 </div>
 
-                <!-- YO‘NALISH -->
                 <div>
                     <label class="label">Qiziqish yo‘nalishi</label>
                     <input v-model="form.role_interest" class="input" placeholder="Masalan: Tibbiyot" />
                 </div>
 
-                <!-- TAJRIBA -->
                 <div>
                     <label class="label">Tajriba</label>
                     <input v-model="form.experience" class="input" placeholder="Masalan: 2 yil volontyorlik" />
                 </div>
 
-                <!-- MOTIVATSIYA -->
+                <div>
+                    <label class="label">Holat</label>
+                    <select v-model="form.status" class="input">
+                        <option
+                            v-for="option in VOLUNTEER_STATUS_OPTIONS"
+                            :key="option.value"
+                            :value="option.value"
+                        >
+                            {{ option.label }}
+                        </option>
+                    </select>
+                </div>
+
                 <div class="md:col-span-2">
                     <label class="label">Motivatsiya</label>
                     <textarea
@@ -138,50 +153,58 @@
                     />
                 </div>
 
-                <!-- BUTTON -->
                 <div class="md:col-span-2 flex gap-3 mt-2 justify-end">
-                    <button class="btn-primary">Saqlash</button>
+                    <button type="submit" class="btn-primary" :disabled="saving">
+                        {{ saving ? 'Saqlanmoqda...' : 'Saqlash' }}
+                    </button>
 
-                    <router-link to="/admin/volunteers" class="btn-secondary">
+                    <router-link :to="`/admin/volunteers/${route.params.id}`" class="btn-secondary">
                         Bekor qilish
                     </router-link>
                 </div>
-
             </form>
         </template>
-
     </AdminCrudShell>
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useVolunteers } from '@/composables/useVolunteers'
 import volunteerService from '@/services/volunteerService'
+import {
+    VOLUNTEER_STATUSES,
+    VOLUNTEER_STATUS_OPTIONS,
+    normalizeVolunteerStatus,
+} from '@/admin/constants/volunteerStatuses'
 
 import AdminCrudShell from '@/admin/components/common/AdminCrudShell.vue'
 import AdminTable from '@/admin/components/common/AdminTable.vue'
+import AdminPagination from '@/admin/components/common/AdminPagination.vue'
 import ListState from '@/components/shared/ListState.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
-
-import { VOLUNTEER_STATUSES } from '@/constants/statuses'
 import { Eye, Pencil, Trash2 } from 'lucide-vue-next'
+import PhoneInput from '@/components/shared/PhoneInput.vue'
 
 const route = useRoute()
 const router = useRouter()
 
-const { volunteers, loading, error, fetchVolunteers, updateVolunteer, deleteVolunteer, submitVolunteer } = useVolunteers()
+const { volunteers, meta, loading, error, fetchVolunteers, updateVolunteer, deleteVolunteer } = useVolunteers()
+
+const fetchPage = (page = 1) => fetchVolunteers({ page, per_page: 15 })
 
 const current = ref(null)
+const phoneInputRef = ref(null)
+const saving = ref(false)
+const statusSaving = ref(false)
+const viewStatus = ref('rezerv')
 
 const isListMode = computed(() => route.name === 'admin-volunteers')
 const isViewMode = computed(() => route.name === 'admin-volunteers-view')
 const isEditMode = computed(() => route.name === 'admin-volunteers-edit')
-const isCreateMode = computed(() => route.name === 'admin-volunteers-create')
 
 const title = computed(() => {
     if (isListMode.value) return 'Ko‘ngillilar ro‘yxati'
-    if (isCreateMode.value) return 'Yangi ko‘ngilli qo‘shish'
     if (isEditMode.value) return 'Ko‘ngillini tahrirlash'
     return 'Ko‘ngilli ma’lumotlari'
 })
@@ -193,8 +216,8 @@ const form = reactive({
     city: '',
     role_interest: '',
     experience: '',
-    availability: '',
     motivation: '',
+    status: 'rezerv',
 })
 
 const columns = [
@@ -208,51 +231,80 @@ const columns = [
     { key: 'actions', label: 'Amallar' },
 ]
 
+const assignForm = (data) => {
+    Object.assign(form, {
+        full_name: data.full_name || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        city: data.city || '',
+        role_interest: data.role_interest || '',
+        experience: data.experience || '',
+        motivation: data.motivation || '',
+        status: normalizeVolunteerStatus(data.status),
+    })
+}
+
 const loadCurrent = async () => {
     const res = await volunteerService.getById(route.params.id)
     current.value = res.data
 
-    if (isEditMode.value) {
-        Object.assign(form, res.data)
+    if (current.value) {
+        viewStatus.value = normalizeVolunteerStatus(current.value.status)
+    }
+
+    if (isEditMode.value && current.value) {
+        assignForm(current.value)
     }
 }
 
-const save = async () => {
-    const res = isEditMode.value
-        ? await updateVolunteer(route.params.id, form)
-        : await submitVolunteer(form)
+const saveStatus = async () => {
+    if (!current.value) return
 
-    if (!res.error) router.push('/admin/volunteers')
+    statusSaving.value = true
+    const res = await updateVolunteer(route.params.id, { status: viewStatus.value })
+
+    if (!res.error) {
+        current.value = { ...current.value, status: viewStatus.value }
+    }
+
+    statusSaving.value = false
+}
+
+const save = async () => {
+    if (form.phone && !phoneInputRef.value?.validate()) {
+        return
+    }
+
+    saving.value = true
+    const res = await updateVolunteer(route.params.id, { ...form })
+    saving.value = false
+
+    if (!res.error) {
+        router.push(`/admin/volunteers/${route.params.id}`)
+    }
 }
 
 const remove = async (id) => {
     if (!confirm('O‘chirishni tasdiqlaysizmi?')) return
     await deleteVolunteer(id)
-    await fetchVolunteers()
+    await fetchPage(meta.value?.current_page || 1)
 }
 
 watch(
     () => route.fullPath,
     async () => {
-        if (isListMode.value) await fetchVolunteers()
-        else await loadCurrent()
+        if (isListMode.value) {
+            await fetchPage()
+            return
+        }
+
+        await loadCurrent()
     },
     { immediate: true }
 )
-
-onMounted(async () => {
-    if (isListMode.value) await fetchVolunteers()
-})
 </script>
 
 <style scoped>
-.card {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
 .label {
     display: block;
     font-size: 13px;
@@ -285,11 +337,5 @@ onMounted(async () => {
     border: 1px solid #ddd;
     padding: 10px 16px;
     border-radius: 12px;
-}
-
-.icon-btn {
-    padding: 8px;
-    border-radius: 8px;
-    transition: 0.2s;
 }
 </style>

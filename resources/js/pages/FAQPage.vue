@@ -21,7 +21,7 @@
                         class="w-full text-left font-semibold text-gray-900 py-5 flex items-center justify-between"
                         @click="toggle(index)"
                     >
-                        <span>{{ faq.question }}</span>
+                        <span>{{ content(faq, 'question') }}</span>
                         <span class="text-xl text-gray-400">
                             {{ openIndex === index ? '−' : '+' }}
                         </span>
@@ -31,7 +31,7 @@
                         v-if="openIndex === index"
                         class="text-gray-600 pb-5 leading-relaxed"
                     >
-                        {{ faq.answer }}
+                        {{ content(faq, 'answer') }}
                     </div>
                 </div>
             </div>
@@ -43,8 +43,10 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import faqService from '@/services/faqService'
+import { useLocalizedDisplay } from '@/composables/useLocalizedDisplay'
 
 const { t } = useI18n()
+const { content } = useLocalizedDisplay()
 const openIndex = ref(0)
 const faqs = ref([])
 

@@ -120,8 +120,8 @@ const open = ref(false)
 const scrolled = ref(false)
 
 const languages = [
-    { label: 'EN', value: 'en' },
     { label: 'UZ', value: 'uz' },
+    { label: 'ЎЗ', value: 'uz_cyrl' },
     { label: 'RU', value: 'ru' },
 ]
 
@@ -154,6 +154,11 @@ const mobileHelp = () => {
 }
 
 onMounted(() => {
+    if (locale.value === 'en' || !['uz', 'uz_cyrl', 'ru'].includes(locale.value)) {
+        locale.value = 'uz'
+        localStorage.setItem('lang', 'uz')
+    }
+
     window.addEventListener('scroll', onScroll)
 })
 

@@ -24,21 +24,6 @@
                         </div>
                     </div>
 
-                    <div class="inline-flex rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
-                        <button
-                            v-for="lang in languages"
-                            :key="lang"
-                            @click="setLocale(lang)"
-                            :class="[
-                                'px-4 py-2 rounded-lg text-sm font-medium transition',
-                                locale === lang
-                                    ? 'bg-[#2A7DE1] text-white'
-                                    : 'text-gray-600 hover:bg-gray-50'
-                            ]"
-                        >
-                            {{ lang.toUpperCase() }}
-                        </button>
-                    </div>
                 </div>
             </div>
 
@@ -60,8 +45,6 @@ const { locale, t } = useI18n()
 const route = useRoute()
 const authUser = computed(() => JSON.parse(localStorage.getItem('user') || 'null'))
 
-const languages = ['en', 'uz', 'ru']
-
 const pageTitle = computed(() => {
     const map = {
         '/admin/dashboard': t('admin.dashboard'),
@@ -70,9 +53,11 @@ const pageTitle = computed(() => {
         '/admin/donations': t('admin.donations'),
         '/admin/cases': t('admin.cases'),
         '/admin/help-requests': "Yordam so‘rovlari",
-        '/admin/about-sections': "Biz haqimizda bo‘limlari",
+        '/admin/about-sections': 'Biz haqimizda',
+        '/admin/contact-info': "Aloqa ma'lumotlari",
         '/admin/news': "Yangiliklar",
         '/admin/faq': "FAQ-Ko‘p so‘raladigan savollar",
+        '/admin/treatment-processes': 'Davolanish jarayoni',
         '/admin/blog': t('admin.blog'),
         '/admin/volunteers': t('admin.volunteers'),
         '/admin/pages': t('admin.pages'),
@@ -83,15 +68,8 @@ const pageTitle = computed(() => {
     return entry ? entry[1] : t('admin.panel')
 })
 
-const setLocale = (lang) => {
-    locale.value = lang
-    localStorage.setItem('lang', lang)
-}
-
 onMounted(() => {
-    if (locale.value !== 'uz') {
-        locale.value = 'uz'
-        localStorage.setItem('lang', 'uz')
-    }
+    locale.value = 'uz'
+    localStorage.setItem('lang', 'uz')
 })
 </script>

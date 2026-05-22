@@ -17,20 +17,36 @@ class CaseItemFactory extends Factory
         $goal = $faker->numberBetween(5000000, 50000000);
         $raised = $faker->numberBetween(500000, $goal);
 
+        $name = $faker->name();
+        $location = $faker->city();
+        $condition = $faker->randomElement([
+            'Yurak operatsiyasi kerak',
+            'Onkologik davolanish',
+            'Reabilitatsiya',
+            'Shoshilinch operatsiya',
+            'Nogironlik aravachasi kerak',
+        ]);
+        $story = $faker->paragraphs(3, true);
+        $shortDescription = $faker->sentence(12);
+
         return [
-            'name' => $faker->name(),
+            'name' => $name,
+            'name_uz' => $name,
+            'name_oz' => $name,
+            'location' => $location,
+            'location_uz' => $location,
+            'location_oz' => $location,
+            'condition' => $condition,
+            'condition_uz' => $condition,
+            'condition_oz' => $condition,
+            'story' => $story,
+            'story_uz' => $story,
+            'story_oz' => $story,
+            'short_description' => $shortDescription,
+            'short_description_uz' => $shortDescription,
+            'short_description_oz' => $shortDescription,
             'age' => $faker->optional()->numberBetween(1, 75),
             'photo_url' => 'https://picsum.photos/800/600?random=' . rand(1, 9999),
-            'location' => $faker->city(),
-            'condition' => $faker->randomElement([
-                'Yurak operatsiyasi kerak',
-                'Onkologik davolanish',
-                'Reabilitatsiya',
-                'Shoshilinch operatsiya',
-                'Nogironlik aravachasi kerak',
-            ]),
-            'story' => $faker->paragraphs(3, true),
-            'short_description' => $faker->sentence(12),
             'goal_amount' => $goal,
             'raised_amount' => $raised,
             'urgency' => $faker->randomElement(['low', 'medium', 'high']),

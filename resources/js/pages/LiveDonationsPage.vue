@@ -3,7 +3,7 @@
         <div class="max-w-5xl mx-auto px-4 sm:px-6">
             <div class="text-center mb-12">
                 <div class="inline-flex items-center gap-2 bg-red-50 text-red-500 px-4 py-2 rounded-full text-sm font-medium mb-5">
-                    <Radio class="w-4 h-4" />
+                    <IconBadge :icon="Radio" tone="red" size="xs" class="shrink-0" />
                     Jonli
                 </div>
 
@@ -18,9 +18,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
                 <div class="bg-white rounded-2xl p-6 border border-gray-100">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-12 h-12 rounded-2xl bg-green-50 text-[#4CAF50] flex items-center justify-center">
-                            <Wallet class="w-6 h-6" />
-                        </div>
+                        <IconBadge :icon="Wallet" tone="green" size="md" />
                     </div>
                     <p class="text-sm text-gray-500 mb-1">Bugungi summa</p>
                     <p class="text-3xl font-bold text-gray-900">
@@ -30,9 +28,7 @@
 
                 <div class="bg-white rounded-2xl p-6 border border-gray-100">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#2A7DE1] flex items-center justify-center">
-                            <HandHeart class="w-6 h-6" />
-                        </div>
+                        <IconBadge :icon="HandHeart" tone="blue" size="md" />
                     </div>
                     <p class="text-sm text-gray-500 mb-1">Bugungi xayriyalar</p>
                     <p class="text-3xl font-bold text-gray-900">
@@ -42,9 +38,7 @@
 
                 <div class="bg-white rounded-2xl p-6 border border-gray-100">
                     <div class="flex items-center gap-3 mb-3">
-                        <div class="w-12 h-12 rounded-2xl bg-orange-50 text-[#FF9800] flex items-center justify-center">
-                            <Users class="w-6 h-6" />
-                        </div>
+                        <IconBadge :icon="Users" tone="orange" size="md" />
                     </div>
                     <p class="text-sm text-gray-500 mb-1">Noyob donorlar</p>
                     <p class="text-3xl font-bold text-gray-900">
@@ -55,9 +49,7 @@
 
             <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
                 <div class="p-6 border-b border-gray-100 flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center">
-                        <Heart class="w-5 h-5" />
-                    </div>
+                    <IconBadge :icon="Heart" tone="red" size="sm" />
 
                     <h2 class="font-bold text-gray-900 text-lg">
                         So‘nggi xayriyalar
@@ -149,6 +141,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Heart, HandHeart, Radio, Users, Wallet } from 'lucide-vue-next'
+import IconBadge from '@/components/shared/IconBadge.vue'
 import donationService from '../services/donationService'
 
 const donations = ref([])

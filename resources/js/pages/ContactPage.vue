@@ -17,21 +17,22 @@
                         :key="index"
                         class="flex items-start gap-4"
                     >
-                        <div
-                            class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-                            :class="item.color"
-                        >
-                            <component :is="item.icon" class="w-5 h-5" />
-                        </div>
+                        <IconBadge
+                            :icon="item.icon"
+                            :tone="item.tone"
+                            size="md"
+                            class="shrink-0"
+                        />
                         <div>
                             <p class="text-sm text-gray-500">{{ item.label }}</p>
-                            <p class="font-medium text-gray-900">{{ item.value }}</p>
+                            <p class="font-medium text-gray-900 whitespace-pre-wrap">{{ item.value }}</p>
                         </div>
                     </div>
 
                     <div class="rounded-2xl overflow-hidden h-64 mt-6 bg-gray-200">
                         <iframe
-                            src="https://www.openstreetmap.org/export/embed.html?bbox=69.15%2C41.26%2C69.35%2C41.36&layer=mapnik"
+                            v-if="mapUrl"
+                            :src="mapUrl"
                             width="100%"
                             height="100%"
                             style="border: 0"
@@ -45,7 +46,7 @@
                         v-if="submitted"
                         class="text-center py-16 bg-white rounded-2xl border border-gray-100"
                     >
-                        <div class="text-6xl text-[#4CAF50] mb-4">✓</div>
+                        <IconBadge :icon="CircleCheck" tone="green" size="lg" class="mx-auto mb-4" />
                         <h2 class="text-2xl font-bold text-gray-900 mb-2">
                             {{ t('contactPage.successTitle') }}
                         </h2>
@@ -73,11 +74,10 @@
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <input
+                                <PhoneInput
+                                    ref="phoneInputRef"
                                     v-model="form.phone"
-                                    type="text"
-                                    :placeholder="t('contactPage.phoneOptional')"
-                                    class="rounded-xl h-11 border border-gray-300 px-4 w-full outline-none"
+                                    input-class="rounded-xl h-11 border border-gray-300 px-4 w-full outline-none"
                                 />
                                 <input
                                     v-model="form.subject"
@@ -115,21 +115,28 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import contactService from '../services/contactService'
+import contactInfoService from '../services/contactInfoService'
+import PhoneInput from '../components/shared/PhoneInput.vue'
+import { formatUzbekPhoneDisplay } from '@/utils/uzbekPhone'
 import {
+    CircleCheck,
     MapPin,
     Phone,
     Mail,
     Clock,
 } from 'lucide-vue-next'
+import IconBadge from '../components/shared/IconBadge.vue'
 
 const { t } = useI18n()
 
 const submitted = ref(false)
 const submitting = ref(false)
 const errorText = ref('')
+const phoneInputRef = ref(null)
+const info = ref(null)
 
 const form = reactive({
     full_name: '',
@@ -139,34 +146,58 @@ const form = reactive({
     message: '',
 })
 
-const contactInfo = computed(() => [
-    {
-        icon: MapPin,
-        label: t('contactPage.address'),
-        value: '123 Charity Lane, Tashkent, Uzbekistan',
-        color: 'bg-blue-50 text-[#2A7DE1]',
-    },
-    {
-        icon: Phone,
-        label: t('contactPage.phone'),
-        value: '+998 71 123 45 67',
-        color: 'bg-green-50 text-[#4CAF50]',
-    },
-    {
-        icon: Mail,
-        label: t('contactPage.email'),
-        value: 'info@mehrli.uz',
-        color: 'bg-orange-50 text-[#FF9800]',
-    },
-    {
-        icon: Clock,
-        label: t('contactPage.workingHours'),
-        value: t('contactPage.workingHoursValue'),
-        color: 'bg-purple-50 text-purple-600',
-    },
-])
+const displayPhone = (phone) => {
+    if (!phone) return '—'
+    return formatUzbekPhoneDisplay(phone) || phone
+}
+
+const mapUrl = computed(() => info.value?.map_url || '')
+
+const contactInfo = computed(() => {
+    const data = info.value || {}
+
+    return [
+        {
+            icon: MapPin,
+            label: t('contactPage.address'),
+            value: data.address || '—',
+            tone: 'blue',
+        },
+        {
+            icon: Phone,
+            label: t('contactPage.phone'),
+            value: displayPhone(data.phone),
+            tone: 'green',
+        },
+        {
+            icon: Mail,
+            label: t('contactPage.email'),
+            value: data.email || '—',
+            tone: 'orange',
+        },
+        {
+            icon: Clock,
+            label: t('contactPage.workingHours'),
+            value: t('contactPage.workingHoursValue'),
+            tone: 'gray',
+        },
+    ]
+})
+
+const loadContactInfo = async () => {
+    try {
+        info.value = await contactInfoService.get()
+    } catch (error) {
+        console.error('Contact info load error:', error)
+    }
+}
 
 const handleSubmit = async () => {
+    if (form.phone && !phoneInputRef.value?.validate()) {
+        errorText.value = phoneInputRef.value?.getError?.() || "Telefon raqam +998 formatida bo'lishi kerak"
+        return
+    }
+
     submitting.value = true
     errorText.value = ''
 
@@ -183,4 +214,6 @@ const handleSubmit = async () => {
         submitting.value = false
     }
 }
+
+onMounted(loadContactInfo)
 </script>

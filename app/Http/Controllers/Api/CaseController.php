@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CaseResource;
 use App\Models\CaseItem;
+use App\Support\LocalizedContent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -24,6 +25,12 @@ class CaseController extends Controller
             $query->where('status', '!=', 'closed');
         }
 
+        if ($request->boolean('needs_funding', false)) {
+            $query->where('status', 'active')
+                ->where('goal_amount', '>', 0)
+                ->whereColumn('raised_amount', '<', 'goal_amount');
+        }
+
         $cases = $query->paginate((int) $request->input('per_page', 12));
 
         return response()->json([
@@ -37,28 +44,53 @@ class CaseController extends Controller
         ]);
     }
 
+    public function active(): JsonResponse
+    {
+        $cases = CaseItem::query()
+            ->where('status', 'active')
+            ->where('goal_amount', '>', 0)
+            ->whereColumn('raised_amount', '<', 'goal_amount')
+            ->orderByDesc('is_urgent')
+            ->orderByDesc('updated_at')
+            ->get();
+
+        return response()->json([
+            'data' => CaseResource::collection($cases),
+        ]);
+    }
+
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:50',
-            'story' => 'nullable|string',
-            'short_description' => 'nullable|string',
-            'category' => 'nullable|string|max:100',
-            'source' => 'nullable|string|max:100',
-            'created_from_request_id' => 'nullable|integer|exists:help_requests,id',
-            'status' => 'nullable|string|in:new,draft,active,paused,completed,closed',
-            'urgency' => 'nullable|string|max:50',
-            'goal_amount' => 'nullable|numeric|min:0',
-            'raised_amount' => 'nullable|numeric|min:0',
-            'is_urgent' => 'sometimes|boolean',
-            'medical_documents.*.url' => 'required|string',
-            'medical_documents.*.name' => 'nullable|string',
-            'photo_url' => 'nullable|string',
-            'age' => 'nullable|integer|min:0|max:120',
-            'condition' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validate(array_merge(
+            [
+                'phone' => 'nullable|string|max:50',
+                'category' => 'nullable|string|max:100',
+                'source' => 'nullable|string|max:100',
+                'created_from_request_id' => 'nullable|integer|exists:help_requests,id',
+                'status' => 'nullable|string|in:new,draft,active,paused,completed,closed',
+                'urgency' => 'nullable|string|max:50',
+                'goal_amount' => 'nullable|numeric|min:0',
+                'raised_amount' => 'nullable|numeric|min:0',
+                'is_urgent' => 'sometimes|boolean',
+                'medical_documents.*.url' => 'required|string',
+                'medical_documents.*.name' => 'nullable|string',
+                'photo_url' => 'nullable|string|max:2048',
+                'age' => 'nullable|integer|min:0|max:120',
+            ],
+            LocalizedContent::adminValidationRules('name', true, 255),
+            LocalizedContent::adminValidationRules('location', true, 255),
+            LocalizedContent::adminValidationRules('condition', true, 255),
+            LocalizedContent::adminValidationRules('story', false),
+            LocalizedContent::adminValidationRules('short_description', true)
+        ));
+
+        $validated = LocalizedContent::syncLegacyColumns(
+            LocalizedContent::prepareAdminLocalized(
+                $validated,
+                ['name', 'location', 'condition', 'story', 'short_description']
+            ),
+            ['name', 'location', 'condition', 'story', 'short_description']
+        );
 
         $validated['medical_documents'] = $validated['medical_documents'] ?? [];
         $validated['updates'] = $validated['updates'] ?? [];
@@ -91,26 +123,37 @@ class CaseController extends Controller
     {
         $case = CaseItem::query()->findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:50',
-            'story' => 'nullable|string',
-            'short_description' => 'nullable|string',
-            'category' => 'nullable|string|max:100',
-            'source' => 'nullable|string|max:100',
-            'created_from_request_id' => 'nullable|integer|exists:help_requests,id',
-            'status' => 'nullable|string|in:new,draft,active,paused,completed,closed',
-            'urgency' => 'nullable|string|max:50',
-            'goal_amount' => 'nullable|numeric|min:0',
-            'raised_amount' => 'nullable|numeric|min:0',
-            'is_urgent' => 'sometimes|boolean',
-            'medical_documents' => 'nullable|array',
-            'medical_documents.*' => 'string',
-            'photo_url' => 'nullable|string',
-            'age' => 'nullable|integer|min:0|max:120',
-            'condition' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validate(array_merge(
+            [
+                'phone' => 'nullable|string|max:50',
+                'category' => 'nullable|string|max:100',
+                'source' => 'nullable|string|max:100',
+                'created_from_request_id' => 'nullable|integer|exists:help_requests,id',
+                'status' => 'nullable|string|in:new,draft,active,paused,completed,closed',
+                'urgency' => 'nullable|string|max:50',
+                'goal_amount' => 'nullable|numeric|min:0',
+                'raised_amount' => 'nullable|numeric|min:0',
+                'is_urgent' => 'sometimes|boolean',
+                'medical_documents' => 'nullable|array',
+                'medical_documents.*.url' => 'required_with:medical_documents|string|max:2048',
+                'medical_documents.*.name' => 'nullable|string|max:255',
+                'photo_url' => 'nullable|string|max:2048',
+                'age' => 'nullable|integer|min:0|max:120',
+            ],
+            LocalizedContent::adminValidationRules('name', true, 255),
+            LocalizedContent::adminValidationRules('location', true, 255),
+            LocalizedContent::adminValidationRules('condition', true, 255),
+            LocalizedContent::adminValidationRules('story', false),
+            LocalizedContent::adminValidationRules('short_description', true)
+        ));
+
+        $validated = LocalizedContent::syncLegacyColumns(
+            LocalizedContent::prepareAdminLocalized(
+                $validated,
+                ['name', 'location', 'condition', 'story', 'short_description']
+            ),
+            ['name', 'location', 'condition', 'story', 'short_description']
+        );
 
         if (!isset($validated['medical_documents'])) {
             $validated['medical_documents'] = $case->medical_documents ?? [];

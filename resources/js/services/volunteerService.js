@@ -22,7 +22,7 @@ export default {
 
     async update(id, payload) {
         try {
-            const response = await api.put(`/admin/volunteer-applications/${id}`, payload)
+            const response = await api.patch(`/admin/volunteer-applications/${id}`, payload)
             return { data: response.data?.data ?? response.data, error: null }
         } catch (error) {
             return { data: null, error: toServiceError(error, 'Failed to update volunteer application') }

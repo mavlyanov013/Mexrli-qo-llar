@@ -31,15 +31,17 @@ class UserService
     public function create(array $data): User
     {
         return DB::transaction(function () use ($data) {
+            $role = $this->normalizeRole($data['role'] ?? 'editor');
+
             $user = User::query()->create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'password' => $data['password'],
-                'role' => $data['role'],
-                'is_admin' => in_array($data['role'], ['super_admin', 'admin'], true),
+                'password' => bcrypt($data['password']),
+                'role' => $role,
+                'is_admin' => $role === 'super_admin',
             ]);
 
-            $this->syncRole($user, $data['role']);
+            $this->syncRole($user, $role);
             return $user->load('roles');
         });
     }
@@ -47,20 +49,22 @@ class UserService
     public function update(User $user, array $data): User
     {
         return DB::transaction(function () use ($user, $data) {
+            $role = $this->normalizeRole($data['role'] ?? $user->role);
+
             $payload = [
                 'name' => $data['name'] ?? $user->name,
                 'email' => $data['email'] ?? $user->email,
-                'role' => $data['role'] ?? $user->role,
+                'role' => $role,
             ];
 
             if (!empty($data['password'])) {
-                $payload['password'] = $data['password'];
+                $payload['password'] = bcrypt($data['password']);
             }
 
-            $payload['is_admin'] = in_array($payload['role'], ['super_admin', 'admin'], true);
+            $payload['is_admin'] = $role === 'super_admin';
 
             $user->update($payload);
-            $this->syncRole($user, $payload['role']);
+            $this->syncRole($user, $role);
 
             return $user->fresh()->load('roles');
         });
@@ -80,5 +84,10 @@ class UserService
         if ($role) {
             $user->roles()->sync([$role->id]);
         }
+    }
+
+    private function normalizeRole(string $role): string
+    {
+        return $role === 'admin' ? 'super_admin' : $role;
     }
 }

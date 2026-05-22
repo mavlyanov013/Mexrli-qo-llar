@@ -11,20 +11,39 @@ class PaymentService
     public function list(Request $request): LengthAwarePaginator
     {
         $query = Payment::query()
+            ->onlineOnly()
             ->latest()
-            ->with('donation')
-            ->select('*')
-        ;
+            ->with('donation');
 
-        if ($request->filled('provider')) {
-            $query->where('provider', $request->string('provider'));
-        }
+        $query->when($request->filled('provider'), function ($q) use ($request) {
+            $q->where('provider', $request->string('provider'));
+        });
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->string('status'));
-        }
+        $query->when($request->filled('status'), function ($q) use ($request) {
+            $q->where('status', $request->string('status'));
+        });
 
-        return $query->paginate((int) $request->input('per_page', 20));
+        $query->when($request->filled('date_from'), function ($q) use ($request) {
+            $q->whereDate('created_at', '>=', $request->string('date_from'));
+        });
+
+        $query->when($request->filled('date_to'), function ($q) use ($request) {
+            $q->whereDate('created_at', '<=', $request->string('date_to'));
+        });
+
+        $query->when($request->filled('search') || $request->filled('q'), function ($q) use ($request) {
+            $term = '%' . ($request->string('search') ?: $request->string('q')) . '%';
+
+            $q->where(function ($inner) use ($term) {
+                $inner->where('transaction_id', 'like', $term)
+                    ->orWhere('payer_reference', 'like', $term)
+                    ->orWhere('provider', 'like', $term)
+                    ->orWhere('status', 'like', $term)
+                    ->orWhere('external_id', 'like', $term);
+            });
+        });
+
+        return $query->paginate(20);
     }
 
     public function findOrFail(int $id): Payment
@@ -35,6 +54,7 @@ class PaymentService
     public function update(Payment $payment, array $payload): Payment
     {
         $payment->update($payload);
+
         return $payment->fresh();
     }
 }

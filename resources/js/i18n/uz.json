@@ -27,9 +27,10 @@
         "title": "Bugungi xayriyalar",
         "updatedAt": "Yangilangan vaqt",
         "cashAmount": "Naqd pul",
-        "onlineAmount": "Onlayn summa",
-        "uniqueDonors": "xayriya qilganlar",
-        "totalDonations": "Jami xayriyalar"
+        "onlineAmount": "Onlayn to'lovlar",
+        "uniqueDonors": "Jami xayriya qilganlar",
+        "totalDonations": "Jami xayriyalar",
+        "loadError": "Bugungi statistikani yuklab bo'lmadi"
     },
   "auth": {
     "login": {

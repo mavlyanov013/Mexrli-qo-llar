@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Donation;
 use App\Services\Admin\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
@@ -15,8 +13,21 @@ class PaymentController extends Controller
     {
     }
 
+    private function forbidUnlessSuperAdmin(): ?JsonResponse
+    {
+        if (! auth('api')->user()?->hasRole('super_admin')) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        return null;
+    }
+
     public function index(Request $request): JsonResponse
     {
+        if ($response = $this->forbidUnlessSuperAdmin()) {
+            return $response;
+        }
+
         $payments = $this->paymentService->list($request);
 
         return response()->json([
@@ -33,82 +44,45 @@ class PaymentController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'provider' => ['required', 'string', 'in:paycom,click,paynet,uzumbank,cash'],
-            'amount' => ['required', 'numeric', 'min:0'],
-            'currency' => ['nullable', 'string', 'max:10'],
-            'donation_id' => ['nullable', 'integer', 'exists:donations,id'],
-            'donor_name' => ['required', 'string', 'max:255'],
-            'donor_phone' => ['nullable', 'string', 'max:50'],
-        ]);
-
-
-        if ($validated['provider'] === 'cash') {
-            $validated['status'] = 'completed';
-            $validated['transaction_id'] = 'CASH_' . time();
-        }
-
-        $payment = \App\Models\Payment::query()->create([
-            ...$validated,
-            'payload' => [
-                'donor_name' => $validated['donor_name'],
-                'donor_phone' => $validated['donor_phone'] ?? null,
-            ]
-        ]);
-
-        if (!empty($validated['donation_id'])) {
-            $donation = \App\Models\Donation::find($validated['donation_id']);
-
-            if ($donation) {
-                $donation->update([
-                    'status' => 'completed',
-                    'amount' => $validated['amount'],
-                ]);
-            }
+        if ($response = $this->forbidUnlessSuperAdmin()) {
+            return $response;
         }
 
         return response()->json([
-            'message' => 'Payment created successfully',
-            'data' => $payment,
-        ], 201);
+            'message' => 'Payment creation is disabled in admin',
+        ], 405);
     }
 
     public function show(int $id): JsonResponse
     {
-        $payment = $this->paymentService->findOrFail($id);
+        if ($response = $this->forbidUnlessSuperAdmin()) {
+            return $response;
+        }
 
         return response()->json([
-            'message' => 'Payment fetched successfully',
-            'data' => $payment,
-        ]);
+            'message' => 'Payment view is disabled in admin',
+        ], 405);
     }
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $payment = $this->paymentService->findOrFail($id);
-        $validated = $request->validate([
-            'provider' => ['sometimes', 'string', 'in:paycom,click,paynet,uzumbank,cash'],
-            'status' => ['sometimes', 'string', 'in:pending,success,failed,cancelled,completed'],
-            'transaction_id' => ['sometimes', 'string', 'max:255'],
-            'amount' => ['sometimes', 'numeric', 'min:0'],
-            'currency' => ['sometimes', 'string', 'max:10'],
-        ]);
-
-        $updated = $this->paymentService->update($payment, $validated);
+        if ($response = $this->forbidUnlessSuperAdmin()) {
+            return $response;
+        }
 
         return response()->json([
-            'message' => 'Payment updated successfully',
-            'data' => $updated,
-        ]);
+            'message' => 'Payment editing is disabled in admin',
+        ], 405);
     }
 
     public function destroy(int $id): JsonResponse
     {
-        $payment = $this->paymentService->findOrFail($id);
-        $payment->delete();
+        if ($response = $this->forbidUnlessSuperAdmin()) {
+            return $response;
+        }
 
         return response()->json([
-            'message' => 'Payment deleted successfully',
-        ]);
+            'message' => 'Payment deletion is disabled in admin',
+        ], 405);
     }
 }

@@ -16,7 +16,7 @@
                         {{ t('footer.description') }}
                     </p>
 
-                    <div class="flex gap-3">
+                    <div v-if="socialLinks.length" class="flex gap-3">
                         <a
                             v-for="item in socialLinks"
                             :key="item.key"
@@ -114,7 +114,7 @@
                 </p>
                 <p class="text-sm text-gray-500 flex items-center gap-1.5">
                     {{ t('footer.madeWithLovePrefix') }}
-                    <Heart class="w-4 h-4 text-red-400 fill-red-400" />
+                    <IconBadge :icon="Heart" tone="red" size="xs" class="inline-flex shrink-0" />
                     {{ t('footer.madeWithLoveSuffix') }}
                 </p>
             </div>
@@ -123,22 +123,25 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import contactInfoService from '@/services/contactInfoService'
+import IconBadge from '../shared/IconBadge.vue'
 import {
-    ArrowRight,
     Facebook,
     Heart,
     Instagram,
     Mail,
     MapPin,
     Phone,
+    Send,
     Youtube,
 } from 'lucide-vue-next'
 
 const { t } = useI18n()
 const email = ref('')
+const contactInfo = ref(null)
 
 const quickLinks = computed(() => [
     { label: t('nav.about'), to: '/about' },
@@ -153,24 +156,54 @@ const supportLinks = computed(() => [
     { label: t('nav.contact'), to: '/contact' },
 ])
 
-const socialLinks = [
-    {
-        key: 'facebook',
-        label: 'Facebook',
-        icon: Facebook,
-        href: '#',
-    },
-    {
-        key: 'instagram',
-        label: 'Instagram',
-        icon: Instagram,
-        href: '#',
-    },
-    {
-        key: 'youtube',
-        label: 'YouTube',
-        icon: Youtube,
-        href: '#',
-    },
-]
+const socialLinks = computed(() => {
+    const data = contactInfo.value || {}
+    const links = []
+
+    if (data.facebook_url) {
+        links.push({
+            key: 'facebook',
+            label: 'Facebook',
+            icon: Facebook,
+            href: data.facebook_url,
+        })
+    }
+
+    if (data.instagram_url) {
+        links.push({
+            key: 'instagram',
+            label: 'Instagram',
+            icon: Instagram,
+            href: data.instagram_url,
+        })
+    }
+
+    if (data.youtube_url) {
+        links.push({
+            key: 'youtube',
+            label: 'YouTube',
+            icon: Youtube,
+            href: data.youtube_url,
+        })
+    }
+
+    if (data.telegram_url) {
+        links.push({
+            key: 'telegram',
+            label: 'Telegram',
+            icon: Send,
+            href: data.telegram_url,
+        })
+    }
+
+    return links
+})
+
+onMounted(async () => {
+    try {
+        contactInfo.value = await contactInfoService.get()
+    } catch (error) {
+        console.error('Footer contact info load error:', error)
+    }
+})
 </script>

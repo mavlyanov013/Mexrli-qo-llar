@@ -20,7 +20,7 @@ class UpdateUserRequest extends FormRequest
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'password' => ['nullable', 'string', 'min:8'],
-            'role' => ['sometimes', 'string', 'in:super_admin,admin,editor,finance'],
+            'role' => ['sometimes', 'string', 'in:super_admin,editor'],
         ];
     }
 }

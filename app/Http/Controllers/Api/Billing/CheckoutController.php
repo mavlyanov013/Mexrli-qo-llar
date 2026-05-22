@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Billing;
 
 use App\Http\Controllers\Controller;
+use App\Models\CaseItem;
 use App\Models\Donation;
 use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
@@ -46,6 +47,21 @@ class CheckoutController extends Controller
 
         $amount = (float) $data['amount'];
         $provider = $data['payment_method'];
+
+        if (! empty($data['case_id'])) {
+            $caseIsValid = CaseItem::query()
+                ->where('id', $data['case_id'])
+                ->where('status', 'active')
+                ->where('goal_amount', '>', 0)
+                ->whereColumn('raised_amount', '<', 'goal_amount')
+                ->exists();
+
+            if (! $caseIsValid) {
+                return response()->json([
+                    'message' => 'Tanlangan holat topilmadi yoki pul yig‘ish yakunlangan',
+                ], 422);
+            }
+        }
 
         $donation = Donation::create([
             'case_id' => $data['case_id'] ?? null,

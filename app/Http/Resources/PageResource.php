@@ -9,6 +9,12 @@ class PageResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $sections = collect($this->whenLoaded('sections'));
+
+        if ($request->user()?->hasRole('editor')) {
+            $sections = $sections->reject(fn ($section) => $section->isPaid())->values();
+        }
+
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -16,7 +22,7 @@ class PageResource extends JsonResource
             'content' => $this->content,
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,
-            'sections' => SectionResource::collection($this->whenLoaded('sections')),
+            'sections' => SectionResource::collection($sections),
         ];
     }
 }

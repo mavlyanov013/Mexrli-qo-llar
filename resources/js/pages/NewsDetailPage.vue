@@ -29,7 +29,7 @@
                 </div>
 
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                    {{ post.title }}
+                    {{ content(post, 'title') }}
                 </h1>
 
                 <p v-if="post.author" class="text-sm text-gray-500 mb-6">
@@ -39,13 +39,13 @@
                 <img
                     v-if="post.cover_image"
                     :src="post.cover_image"
-                    :alt="post.title"
+                    :alt="content(post, 'title')"
                     class="w-full rounded-2xl mb-8 aspect-video object-cover"
                 />
 
                 <div class="prose prose-gray prose-lg max-w-none">
                     <div class="text-gray-700 leading-8 whitespace-pre-line">
-                        {{ post.content || post.excerpt || '' }}
+                        {{ content(post, 'content') || content(post, 'excerpt') || '' }}
                     </div>
                 </div>
 
@@ -81,7 +81,8 @@
                                 v-if="linkedCase.location"
                                 class="text-xs text-gray-400 flex items-center gap-1 mt-0.5"
                             >
-                                <span>📍</span>{{ linkedCase.location }}
+                                <MapPin class="w-3.5 h-3.5 text-red-400 shrink-0" />
+                                {{ linkedCase.location }}
                             </p>
                         </div>
 
@@ -89,7 +90,7 @@
                             :to="`/cases/${linkedCase.id}`"
                             class="shrink-0 inline-flex items-center gap-2 bg-[#FF9800] hover:bg-[#F57C00] text-white rounded-xl px-4 py-2 text-sm font-medium"
                         >
-                            <span>❤</span>
+                            <IconBadge :icon="Heart" tone="red" size="xs" class="shrink-0" />
                             {{ t('newsDetailPage.help') }}
                         </RouterLink>
                     </div>
@@ -109,7 +110,7 @@
                         class="inline-flex items-center justify-center w-10 h-10 rounded-xl hover:bg-gray-100"
                         @click="sharePost"
                     >
-                        ↗
+                        <Share2 class="w-4 h-4" />
                     </button>
                 </div>
             </template>
@@ -125,10 +126,14 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
+import { Heart, MapPin, Share2 } from 'lucide-vue-next'
+import IconBadge from '../components/shared/IconBadge.vue'
 import newsService from '../services/newsService'
+import { useLocalizedDisplay } from '@/composables/useLocalizedDisplay'
 import caseService from '../services/caseService'
 
 const { t, locale } = useI18n()
+const { content } = useLocalizedDisplay()
 const route = useRoute()
 
 const loading = ref(false)
@@ -162,12 +167,12 @@ const formatDate = (value) => {
     if (!value) return ''
 
     const localeMap = {
-        en: 'en-US',
         uz: 'uz-UZ',
+        uz_cyrl: 'uz-UZ',
         ru: 'ru-RU',
     }
 
-    return new Date(value).toLocaleDateString(localeMap[locale.value] || 'en-US', {
+    return new Date(value).toLocaleDateString(localeMap[locale.value] || 'uz-UZ', {
         month: 'long',
         day: 'numeric',
         year: 'numeric',

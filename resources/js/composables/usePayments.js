@@ -14,10 +14,7 @@ export function usePayments() {
 
         const result = await paymentService.fetchList(params)
 
-        payments.value = (result.data || []).filter(
-            (p) => ['pending', 'success', 'completed'].includes(p.status)
-        )
-
+        payments.value = result.data || []
         meta.value = result.meta
         error.value = result.error
         loading.value = false
@@ -29,10 +26,6 @@ export function usePayments() {
         if (!error.value) error.value = result.error
     }
 
-    const updatePayment = async (id, payload) => paymentService.update(id, payload)
-    const createPayment = async (payload) => paymentService.create(payload)
-    const deletePayment = async (id) => paymentService.remove(id)
-
     return {
         payments,
         meta,
@@ -41,8 +34,5 @@ export function usePayments() {
         error,
         fetchPayments,
         fetchProviders,
-        createPayment,
-        updatePayment,
-        deletePayment,
     }
 }

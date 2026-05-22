@@ -18,7 +18,11 @@ class NewsController extends Controller
             $query->where('status', 'published');
         }
 
-        $items = $query->paginate((int) $request->input('per_page', 9));
+        if ($request->filled('type') && $request->string('type') !== 'all') {
+            $query->where('category', $request->string('type'));
+        }
+
+        $items = $query->paginate((int) $request->input('per_page', 12));
 
         return response()->json([
             'data' => NewsResource::collection($items->items()),

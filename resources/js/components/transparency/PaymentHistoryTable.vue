@@ -27,14 +27,13 @@
                     <th class="text-left p-4 font-semibold text-gray-600">{{ t('transparencyPage.donor') }}</th>
                     <th class="text-left p-4 font-semibold text-gray-600">{{ t('transparencyPage.amount') }}</th>
                     <th class="text-left p-4 font-semibold text-gray-600">{{ t('transparencyPage.supportedCase') }}</th>
-                    <th class="text-left p-4 font-semibold text-gray-600">{{ t('transparencyPage.type') }}</th>
                     <th class="text-left p-4 font-semibold text-gray-600">{{ t('transparencyPage.date') }}</th>
                 </tr>
                 </thead>
 
                 <tbody class="divide-y divide-gray-100">
                 <tr v-if="paginatedDonations.length === 0">
-                    <td colspan="5" class="text-center py-8 text-gray-500">
+                    <td colspan="4" class="text-center py-8 text-gray-500">
                         {{ t('transparencyPage.noDonationsFound') }}
                     </td>
                 </tr>
@@ -52,11 +51,6 @@
                     </td>
                     <td class="p-4">
                         {{ getCaseName(donation.case_id) }}
-                    </td>
-                    <td class="p-4">
-                        <span class="inline-flex rounded-full bg-blue-50 text-[#2A7DE1] px-3 py-1 text-xs font-medium">
-                            {{ donation.type === 'one_time' ? t('transparencyPage.oneTime') : t('transparencyPage.monthly') }}
-                        </span>
                     </td>
                     <td class="p-4 text-gray-500">
                         {{ formatDate(donation.created_at) }}

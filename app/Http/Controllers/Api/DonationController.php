@@ -13,8 +13,21 @@ use Illuminate\Support\Str;
 
 class DonationController extends Controller
 {
+    private function forbidUnlessSuperAdmin(): ?JsonResponse
+    {
+        if (! auth('api')->user()?->hasRole('super_admin')) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        return null;
+    }
+
     public function index(Request $request): JsonResponse
     {
+        if ($response = $this->forbidUnlessSuperAdmin()) {
+            return $response;
+        }
+
         $query = Donation::query()
             ->with('payment') // 🔥 provider olish uchun MUHIM
             ->latest();
@@ -66,8 +79,15 @@ class DonationController extends Controller
     }
     public function store(StoreDonationRequest $request): JsonResponse
     {
-        $payload = $request->validated();
         $isAdminRoute = $request->is('api/v1/admin/*');
+
+        if ($isAdminRoute) {
+            if ($response = $this->forbidUnlessSuperAdmin()) {
+                return $response;
+            }
+        }
+
+        $payload = $request->validated();
         $isManualCash = $isAdminRoute && ($request->boolean('is_manual_cash') || ($payload['type'] ?? null) === 'manual');
 
         if ($isManualCash) {
@@ -116,6 +136,10 @@ class DonationController extends Controller
 
     public function show(int $id): JsonResponse
     {
+        if ($response = $this->forbidUnlessSuperAdmin()) {
+            return $response;
+        }
+
         $donation = Donation::query()->findOrFail($id);
 
         return response()->json([
@@ -125,6 +149,10 @@ class DonationController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
+        if ($response = $this->forbidUnlessSuperAdmin()) {
+            return $response;
+        }
+
         $donation = Donation::query()->findOrFail($id);
         $validated = $request->validate([
             'status' => ['nullable', 'string', 'max:100'],
@@ -142,6 +170,10 @@ class DonationController extends Controller
 
     public function destroy(int $id): JsonResponse
     {
+        if ($response = $this->forbidUnlessSuperAdmin()) {
+            return $response;
+        }
+
         $donation = Donation::query()->findOrFail($id);
         $donation->delete();
 

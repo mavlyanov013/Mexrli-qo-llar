@@ -2,9 +2,7 @@
     <div class="pt-24 pb-20">
         <div class="max-w-3xl mx-auto px-4 sm:px-6">
             <div class="text-center mb-10">
-                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-blue-50 flex items-center justify-center text-[#2A7DE1] text-3xl">
-                    ❤
-                </div>
+                <IconBadge :icon="Heart" tone="red" size="lg" class="mx-auto mb-4" />
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
                     {{ t('helpRequestPage.title') }}
                 </h1>
@@ -17,7 +15,7 @@
                 v-if="submitted"
                 class="max-w-2xl mx-auto text-center py-20"
             >
-                <div class="text-6xl text-[#4CAF50] mx-auto mb-6">✓</div>
+                <IconBadge :icon="CircleCheck" tone="green" size="lg" class="mx-auto mb-6" />
                 <h2 class="text-3xl font-bold text-gray-900 mb-3">
                     {{ t('helpRequestPage.successTitle') }}
                 </h2>
@@ -51,11 +49,12 @@
                         <label class="block text-sm font-medium text-gray-700">
                             {{ t('helpRequestPage.phone') }}
                         </label>
-                        <input
+                        <PhoneInput
+                            ref="phoneInputRef"
                             v-model="form.phone"
-                            type="text"
-                            class="rounded-xl mt-2 border border-gray-300 px-4 py-3 w-full outline-none"
                             required
+                            input-class="rounded-xl mt-2 border border-gray-300 px-4 py-3 w-full outline-none"
+                            class="mt-2"
                         />
                     </div>
                 </div>
@@ -107,7 +106,7 @@
                         {{ t('helpRequestPage.medicalDocuments') }}
                     </label>
                     <div class="mt-2 border-2 border-dashed border-gray-200 rounded-xl p-6 text-center">
-                        <div class="text-3xl text-gray-400 mx-auto mb-2">📄</div>
+                        <IconBadge :icon="FileText" tone="gray" size="md" class="mx-auto mb-2" />
                         <p class="text-sm text-gray-500 mb-3">Fayllar ixtiyoriy</p>
                         <input
                             type="file"
@@ -174,12 +173,16 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { CircleCheck, FileText, Heart } from 'lucide-vue-next'
 import helpRequestService from '../services/helpRequestService'
+import PhoneInput from '../components/shared/PhoneInput.vue'
+import IconBadge from '../components/shared/IconBadge.vue'
 
 const { t } = useI18n()
 
 const submitted = ref(false)
 const submitting = ref(false)
+const phoneInputRef = ref(null)
 
 const form = reactive({
     full_name: '',
@@ -203,6 +206,10 @@ const handleLocalFiles = (event, field) => {
 const handleSubmit = async () => {
     if (!form.consent_given) {
         alert(t('helpRequestPage.consentAlert'))
+        return
+    }
+
+    if (!phoneInputRef.value?.validate()) {
         return
     }
 

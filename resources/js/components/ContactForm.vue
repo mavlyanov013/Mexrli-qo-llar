@@ -1,7 +1,7 @@
 <template>
     <form @submit.prevent="submit">
         <input v-model="form.full_name" :placeholder="t('forms.fullName')" />
-        <input v-model="form.phone" :placeholder="t('forms.phone')" />
+        <PhoneInput ref="phoneInputRef" v-model="form.phone" input-class="w-full" />
         <input v-model="form.email" :placeholder="t('forms.email')" />
         <textarea v-model="form.message" :placeholder="t('forms.message')"></textarea>
 
@@ -16,6 +16,7 @@
 import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { sendContact } from '../services/contactService'
+import PhoneInput from './shared/PhoneInput.vue'
 
 const { t } = useI18n()
 
@@ -28,10 +29,16 @@ const form = reactive({
 
 const success = ref(null)
 const error = ref(null)
+const phoneInputRef = ref(null)
 
 const submit = async () => {
     success.value = null
     error.value = null
+
+    if (form.phone && !phoneInputRef.value?.validate()) {
+        error.value = phoneInputRef.value?.getError?.() || "Telefon raqam +998 formatida bo'lishi kerak"
+        return
+    }
 
     try {
         await sendContact(form)

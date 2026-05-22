@@ -30,4 +30,9 @@ class Section extends Model
     {
         return $this->belongsTo(Page::class);
     }
+
+    public function isPaid(): bool
+    {
+        return filter_var(data_get($this->extra, 'paid'), FILTER_VALIDATE_BOOLEAN);
+    }
 }

@@ -1,6 +1,13 @@
 <template>
     <AdminCrudShell :title="title" :create-to="isListMode ? '/admin/cases/create' : ''">
 
+        <p
+            v-if="isListMode && route.query.success"
+            class="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700"
+        >
+            {{ route.query.success }}
+        </p>
+
         <!-- ================= LIST ================= -->
         <template v-if="isListMode">
             <ListState :loading="loading" :error="error" :empty="cases.length === 0">
@@ -47,6 +54,14 @@
                 </AdminTable>
 
             </ListState>
+
+            <AdminPagination
+                v-if="meta && meta.last_page > 1"
+                :current-page="meta.current_page || 1"
+                :last-page="meta.last_page || 1"
+                :summary="`${meta.total || 0} ta holat`"
+                @change="fetchPage"
+            />
         </template>
 
         <!-- ================= VIEW ================= -->
@@ -214,29 +229,15 @@
                 <div class="card">
                     <h2 class="text-lg font-semibold mb-4">Asosiy ma'lumotlar</h2>
 
-                    <div class="grid md:grid-cols-2 gap-4">
-
-                        <div>
-                            <label class="label">Ism *</label>
-                            <input v-model="form.name" class="input" placeholder="Masalan: Ali Valiyev" required />
-                        </div>
-
-                        <div>
-                            <label class="label">Yosh</label>
-                            <input v-model.number="form.age" type="number" class="input" placeholder="Masalan: 12" />
-                        </div>
-
-                        <div>
-                            <label class="label">Joylashuv</label>
-                            <input v-model="form.location" class="input" placeholder="Masalan: Andijon" />
-                        </div>
-
-                        <div>
-                            <label class="label">Kasallik / holat</label>
-                            <input v-model="form.condition" class="input" placeholder="Masalan: Yurak operatsiyasi" />
-                        </div>
-
+                    <div class="mb-4">
+                        <label class="label">Yosh</label>
+                        <input v-model.number="form.age" type="number" class="input" placeholder="Masalan: 12" />
                     </div>
+
+                    <LocalizedFieldTabs
+                        v-model="form"
+                        :fields="caseLocalizedFields"
+                    />
                 </div>
 
                 <!-- 🔹 2. MOLIYAVIY -->
@@ -345,14 +346,6 @@
                     </div>
                 </div>
 
-                <!-- 🔹 6. DESCRIPTION -->
-                <div class="card">
-                    <h2 class="text-lg font-semibold mb-4">Tavsif</h2>
-
-                    <textarea v-model="form.short_description" class="input" rows="4"
-                              placeholder="Qisqa tushuntirish yozing..."></textarea>
-                </div>
-
                 <!-- 🔹 BUTTON -->
                 <div class="flex justify-end gap-3">
                     <router-link to="/admin/cases" class="btn-secondary">Bekor qilish</router-link>
@@ -374,6 +367,7 @@ import mediaService from '@/services/mediaService'
 
 import AdminCrudShell from '@/admin/components/common/AdminCrudShell.vue'
 import AdminTable from '@/admin/components/common/AdminTable.vue'
+import AdminPagination from '@/admin/components/common/AdminPagination.vue'
 import ListState from '@/components/shared/ListState.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 
@@ -381,11 +375,22 @@ import { CASE_STATUSES } from '@/constants/statuses'
 import { CASE_CATEGORIES, CASE_URGENCY } from '@/constants/cases'
 import { watch } from 'vue'
 import { Eye, Pencil, Trash2 } from 'lucide-vue-next'
+import LocalizedFieldTabs from '@/admin/components/common/LocalizedFieldTabs.vue'
+import { emptyLocalizedFields, assignLocalizedFromRow, validateAdminLocalizedFields, buildAdminPayload } from '@/utils/localizedContent'
+
+const caseLocalizedFields = [
+    { name: 'name', label: 'Ism', type: 'input' },
+    { name: 'location', label: 'Joylashuv', type: 'input' },
+    { name: 'condition', label: 'Kasallik / holat', type: 'input' },
+    { name: 'short_description', label: 'Qisqa tavsif', type: 'textarea', rows: 4 },
+]
 
 const route = useRoute()
 const router = useRouter()
 
-const { cases, loading, error, fetchCases, createCase, updateCase, deleteCase } = useCases()
+const { cases, meta, loading, error, fetchCases, createCase, updateCase, deleteCase } = useCases()
+
+const fetchPage = (page = 1) => fetchCases({ admin: true, page, per_page: 15 })
 
 const current = ref(null)
 const previewUrl = ref('')
@@ -397,16 +402,13 @@ const isViewMode = computed(() => route.name === 'admin-cases-view')
 const title = computed(() => isListMode.value ? 'Cases' : isEditMode.value ? 'Tahrirlash' : 'Ko‘rish')
 
 const form = reactive({
-    name: '',
+    ...emptyLocalizedFields(['name', 'location', 'condition', 'short_description']),
     age: null,
-    location: '',
-    condition: '',
-    short_description: '',
     goal_amount: 0,
     raised_amount: 0,
-    urgency: 'o\'rta',
-    category: 'kasallik',
-    status: 'faol',
+    urgency: 'medium',
+    category: 'illness',
+    status: 'active',
     is_featured: false,
     is_urgent: false,
 
@@ -434,12 +436,9 @@ const loadCurrent = async () => {
     current.value = res.data
 
     if (isEditMode.value && res.data) {
+        assignLocalizedFromRow(form, res.data, ['name', 'location', 'condition', 'short_description'])
         Object.assign(form, {
-            name: res.data.name ?? '',
             age: res.data.age ?? null,
-            location: res.data.location ?? '',
-            condition: res.data.condition ?? '',
-            short_description: res.data.short_description ?? '',
             goal_amount: Number(res.data.goal_amount ?? 0),
             raised_amount: Number(res.data.raised_amount ?? 0),
             urgency: res.data.urgency ?? 'o\'rta',
@@ -459,16 +458,19 @@ const uploadImage = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // preview
     previewUrl.value = URL.createObjectURL(file)
 
-    const res = await mediaService.upload(file, 'cases/images')
+    const { data, error } = await mediaService.upload(file, 'cases/images')
 
-    const url = res?.data?.data?.url
+    if (error) {
+        window.alert(error.message)
+        previewUrl.value = form.photo_url || ''
+        return
+    }
 
-    if (url) {
-        form.photo_url = url
-        previewUrl.value = url
+    if (data?.url) {
+        form.photo_url = data.url
+        previewUrl.value = data.url
     }
 }
 
@@ -476,13 +478,17 @@ const uploadDocs = async (e) => {
     const files = Array.from(e.target.files || [])
 
     for (const file of files) {
-        const res = await mediaService.upload(file, 'cases/docs')
-        const url = res?.data?.data?.url
+        const { data, error } = await mediaService.upload(file, 'cases/docs')
 
-        if (url) {
+        if (error) {
+            window.alert(`${file.name}: ${error.message}`)
+            continue
+        }
+
+        if (data?.url) {
             form.medical_documents.push({
-                url: url,
-                name: file.name
+                url: data.url,
+                name: file.name,
             })
         }
     }
@@ -491,7 +497,7 @@ watch(
     () => route.fullPath,
     async () => {
         if (isListMode.value) {
-            await fetchCases({ admin: true })
+            await fetchPage()
         } else {
             await loadCurrent()
         }
@@ -504,12 +510,20 @@ const removeDoc = (i) => {
 }
 
 const save = async () => {
-    const payload = {
-        ...form,
-        medical_documents: form.medical_documents
+    const fields = ['name', 'location', 'condition', 'short_description']
+    const missing = validateAdminLocalizedFields(form, fields)
+    if (missing.length) {
+        alert(`To‘ldiring: ${missing.join(', ')}`)
+        return
     }
 
-    const res = await createCase(payload)
+    const payload = buildAdminPayload(form, fields, {
+        medical_documents: form.medical_documents,
+    })
+
+    const res = isEditMode.value
+        ? await updateCase(route.params.id, payload)
+        : await createCase(payload)
 
     if (res?.error) return
 
@@ -519,7 +533,7 @@ const save = async () => {
 const remove = async (id) => {
     if (!confirm('O‘chirishni tasdiqlaysizmi?')) return
     await deleteCase(id)
-    fetchCases({ admin: true })
+    await fetchPage(meta.value?.current_page || 1)
 }
 
 onMounted(async () => {

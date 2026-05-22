@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVolunteerApplicationRequest;
+use App\Http\Requests\UpdateVolunteerApplicationRequest;
 use App\Http\Resources\VolunteerApplicationResource;
 use App\Models\VolunteerApplication;
 use Illuminate\Http\JsonResponse;
@@ -37,7 +38,7 @@ class VolunteerApplicationController extends Controller
         $payload = $request->validated();
 
         if (!isset($payload['status'])) {
-            $payload['status'] = 'new';
+            $payload['status'] = 'rezerv';
         }
 
         $application = VolunteerApplication::create($payload);
@@ -57,25 +58,10 @@ class VolunteerApplicationController extends Controller
         ]);
     }
 
-    public function update(Request $request, int $id): JsonResponse
+    public function update(UpdateVolunteerApplicationRequest $request, int $id): JsonResponse
     {
         $application = VolunteerApplication::query()->findOrFail($id);
-
-        $validated = $request->validate([
-            'full_name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|max:255',
-            'phone' => 'nullable|string|max:255',
-            'city' => 'nullable|string|max:255',
-            'role_interest' => 'sometimes|string|max:100',
-            'message' => 'nullable|string',
-            'experience' => 'nullable|string',
-            'motivation' => 'nullable|string',
-            'availability' => 'nullable|string|max:100',
-            'status' => 'sometimes|string|in:new,reviewed,accepted,rejected',
-            'admin_notes' => 'nullable|string',
-        ]);
-
-        $application->update($validated);
+        $application->update($request->validated());
 
         return response()->json([
             'message' => 'Volunteer application yangilandi',

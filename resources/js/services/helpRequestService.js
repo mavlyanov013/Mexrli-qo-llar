@@ -1,4 +1,5 @@
 import api from './api'
+import { normalizeList, normalizeMeta, toServiceError } from './serviceHelpers'
 
 export default {
     async createHelpRequest(payload) {
@@ -6,9 +7,28 @@ export default {
         return response.data.data ?? response.data
     },
 
+    async fetchList(params = {}) {
+        try {
+            const response = await api.get('/admin/help-requests', { params })
+            return { data: normalizeList(response), meta: normalizeMeta(response), error: null }
+        } catch (error) {
+            return { data: [], meta: null, error: toServiceError(error, 'Yordam so‘rovlarini yuklab bo‘lmadi') }
+        }
+    },
+
     async getAll() {
-        const response = await api.get('/admin/help-requests')
-        return response.data.data ?? response.data
+        const result = await this.fetchList()
+        return result.data
+    },
+
+    async getById(id) {
+        const response = await api.get(`/admin/help-requests/${id}`)
+        return response.data
+    },
+
+    async updateStatus(id, payload) {
+        const response = await api.patch(`/admin/help-requests/${id}/status`, payload)
+        return response.data
     },
 
     async update(id, payload) {

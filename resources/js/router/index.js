@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import i18n from '../i18n'
 import HomePage from '../pages/HomePage.vue'
 import LoginPage from '../pages/LoginPage.vue'
 import RegisterPage from '../pages/RegisterPage.vue'
@@ -10,7 +11,7 @@ import NewsPage from '../pages/NewsPage.vue'
 import NewsDetailPage from '../pages/NewsDetailPage.vue'
 import DonatePage from '../pages/DonatePage.vue'
 import TransparencyPage from '../pages/TransparencyPage.vue'
-import { canAccessAdmin } from '@/admin/utils/permissions'
+import { canAccessAdmin, canAccessAdminRoute, normalizeRole } from '@/admin/utils/permissions'
 
 const routes = [
     {
@@ -132,73 +133,55 @@ const routes = [
                 path: 'users',
                 name: 'admin-users',
                 component: () => import('@/admin/pages/AdminUsersListPage.vue'),
-                meta: { requiresAuth: true, admin: true }
+                meta: { requiresAuth: true, admin: true, superAdminOnly: true }
             },
             {
                 path: 'users/create',
                 name: 'admin-users-create',
                 component: () => import('@/admin/pages/AdminUsersCreatePage.vue'),
-                meta: { requiresAuth: true, admin: true }
+                meta: { requiresAuth: true, admin: true, superAdminOnly: true }
             },
             {
                 path: 'users/:id/edit',
                 name: 'admin-users-edit',
                 component: () => import('@/admin/pages/AdminUsersEditPage.vue'),
-                meta: { requiresAuth: true, admin: true }
+                meta: { requiresAuth: true, admin: true, superAdminOnly: true }
             },
             {
                 path: 'users/:id',
                 name: 'admin-users-view',
                 component: () => import('@/admin/pages/AdminUsersViewPage.vue'),
-                meta: { requiresAuth: true, admin: true }
+                meta: { requiresAuth: true, admin: true, superAdminOnly: true }
             },
             {
                 path: 'payments',
                 name: 'admin-payments',
                 component: () => import('@/admin/pages/AdminPaymentsPage.vue'),
-                meta: { requiresAuth: true, admin: true }
-            },
-            {
-                path: 'payments/create',
-                name: 'admin-payments-create',
-                component: () => import('@/admin/pages/AdminPaymentsPage.vue'),
-                meta: { requiresAuth: true, admin: true }
-            },
-            {
-                path: 'payments/:id/edit',
-                name: 'admin-payments-edit',
-                component: () => import('@/admin/pages/AdminPaymentsPage.vue'),
-                meta: { requiresAuth: true, admin: true }
-            },
-            {
-                path: 'payments/:id',
-                name: 'admin-payments-view',
-                component: () => import('@/admin/pages/AdminPaymentsPage.vue'),
-                meta: { requiresAuth: true, admin: true }
+                meta: { requiresAuth: true, admin: true, superAdminOnly: true }
             },
             {
                 path: 'donations',
                 name: 'admin-donations',
                 component: () => import('@/admin/pages/AdminDonationsPage.vue'),
-                meta: { requiresAuth: true, admin: true }
+                meta: { requiresAuth: true, admin: true, superAdminOnly: true }
             },
             {
                 path: 'donations/create',
                 name: 'admin-donations-create',
                 component: () => import('@/admin/pages/AdminDonationsPage.vue'),
-                meta: { requiresAuth: true, admin: true }
+                meta: { requiresAuth: true, admin: true, superAdminOnly: true }
             },
             {
                 path: 'donations/:id/edit',
                 name: 'admin-donations-edit',
                 component: () => import('@/admin/pages/AdminDonationsPage.vue'),
-                meta: { requiresAuth: true, admin: true }
+                meta: { requiresAuth: true, admin: true, superAdminOnly: true }
             },
             {
                 path: 'donations/:id',
                 name: 'admin-donations-view',
                 component: () => import('@/admin/pages/AdminDonationsPage.vue'),
-                meta: { requiresAuth: true, admin: true }
+                meta: { requiresAuth: true, admin: true, superAdminOnly: true }
             },
             {
                 path: 'cases',
@@ -228,6 +211,12 @@ const routes = [
                 path: 'about-sections',
                 name: 'admin-about-sections',
                 component: () => import('@/admin/pages/AboutPageEditor.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'contact-info',
+                name: 'admin-contact-info',
+                component: () => import('@/admin/pages/AdminContactInfoPage.vue'),
                 meta: { requiresAuth: true, admin: true }
             },
             {
@@ -273,8 +262,38 @@ const routes = [
                 meta: { requiresAuth: true, admin: true }
             },
             {
+                path: 'treatment-processes',
+                name: 'admin-treatment-processes',
+                component: () => import('@/admin/pages/AdminTreatmentProcessPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'treatment-processes/:caseId',
+                name: 'admin-treatment-processes-case',
+                component: () => import('@/admin/pages/AdminTreatmentProcessPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'treatment-processes/:caseId/create',
+                name: 'admin-treatment-processes-create',
+                component: () => import('@/admin/pages/AdminTreatmentProcessPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'treatment-processes/:caseId/edit/:processId',
+                name: 'admin-treatment-processes-edit',
+                component: () => import('@/admin/pages/AdminTreatmentProcessPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
                 path: 'help-requests',
                 name: 'admin-help-requests',
+                component: () => import('@/admin/pages/AdminHelpRequestsPage.vue'),
+                meta: { requiresAuth: true, admin: true }
+            },
+            {
+                path: 'help-requests/:id',
+                name: 'admin-help-requests-view',
                 component: () => import('@/admin/pages/AdminHelpRequestsPage.vue'),
                 meta: { requiresAuth: true, admin: true }
             },
@@ -307,12 +326,6 @@ const routes = [
             {
                 path: 'volunteers/:id',
                 name: 'admin-volunteers-view',
-                component: () => import('@/admin/pages/AdminVolunteersPage.vue'),
-                meta: { requiresAuth: true, admin: true }
-            },
-            {
-                path: 'volunteers/create',
-                name: 'admin-volunteers-create',
                 component: () => import('@/admin/pages/AdminVolunteersPage.vue'),
                 meta: { requiresAuth: true, admin: true }
             },
@@ -409,6 +422,23 @@ router.beforeEach((to, from, next) => {
 
     if (to.meta.admin && !isAdmin) {
         return next('/')
+    }
+
+    if (to.meta.admin && !canAccessAdminRoute(user, to.path)) {
+        return next('/admin/dashboard')
+    }
+
+    if (to.meta.superAdminOnly && normalizeRole(user) !== 'super_admin') {
+        return next({ name: 'admin-dashboard' })
+    }
+
+    if (/^\/admin\/(payments|donations|users)(\/|$)/.test(to.path) && normalizeRole(user) !== 'super_admin') {
+        return next({ name: 'admin-dashboard' })
+    }
+
+    if (to.meta.admin || to.path.startsWith('/admin')) {
+        i18n.global.locale.value = 'uz'
+        localStorage.setItem('lang', 'uz')
     }
 
     next()

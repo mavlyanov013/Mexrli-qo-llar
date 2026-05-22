@@ -22,16 +22,25 @@
                     </select>
 
                     <button
-                        class="h-10 bg-gray-900 text-white rounded-lg text-sm"
+                        type="button"
+                        class="h-10 bg-[#2A7DE1] text-white rounded-lg text-sm px-4"
+                        @click="applyFilters"
+                    >
+                        Filtrlash
+                    </button>
+
+                    <button
+                        type="button"
+                        class="h-10 border rounded-lg text-sm px-4"
                         @click="resetFilters"
                     >
-                        Qayta tiklash
+                        Tozalash
                     </button>
 
                 </div>
 
                 <!-- TABLE -->
-                <AdminTable :columns="columns" :rows="filteredDonations">
+                <AdminTable :columns="columns" :rows="donations">
 
                     <template #cell-status="{ row }">
                         <StatusBadge :status="row.status" :map="DONATION_STATUSES" />
@@ -68,6 +77,14 @@
                 </AdminTable>
 
             </ListState>
+
+            <AdminPagination
+                v-if="meta && meta.last_page > 1"
+                :current-page="meta.current_page || 1"
+                :last-page="meta.last_page || 1"
+                :summary="`${meta.total || 0} ta xayriya`"
+                @change="fetchPage"
+            />
         </template>
 
         <!-- VIEW -->
@@ -88,7 +105,18 @@
         <template v-else>
             <form class="grid grid-cols-1 md:grid-cols-2 gap-3" @submit.prevent="save">
 
-                <select v-model="form.type" class="h-10 border rounded-lg px-3 text-sm">
+                <div
+                    v-if="isCreateMode"
+                    class="md:col-span-2 flex h-10 items-center rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm font-medium text-gray-700"
+                >
+                    Naqt pul
+                </div>
+
+                <select
+                    v-else
+                    v-model="form.type"
+                    class="h-10 border rounded-lg px-3 text-sm"
+                >
                     <option value="manual">naqd pul (qo'lda)</option>
                     <option value="online">onlayn</option>
                 </select>
@@ -109,10 +137,11 @@
                     required
                 />
 
-                <input
+                <PhoneInput
+                    v-if="!isCreateMode"
+                    ref="phoneInputRef"
                     v-model="form.donor_phone"
-                    class="h-10 border rounded-lg px-3 text-sm"
-                    placeholder="Telefon"
+                    input-class="h-10 border rounded-lg px-3 text-sm w-full"
                 />
 
                 <input
@@ -121,7 +150,11 @@
                     placeholder="UZS"
                 />
 
-                <select v-model="form.status" class="h-10 border rounded-lg px-3 text-sm">
+                <select
+                    v-if="!isCreateMode"
+                    v-model="form.status"
+                    class="h-10 border rounded-lg px-3 text-sm"
+                >
                     <option value="completed">yakunlandi</option>
                     <option value="pending">kutilmoqda</option>
                     <option value="failed">muvaffaqiyatsiz</option>
@@ -153,9 +186,11 @@ import { useI18n } from 'vue-i18n'
 
 import { useDonations } from '@/composables/useDonations'
 import donationService from '@/services/donationService'
+import PhoneInput from '@/components/shared/PhoneInput.vue'
 
 import AdminCrudShell from '@/admin/components/common/AdminCrudShell.vue'
 import AdminTable from '@/admin/components/common/AdminTable.vue'
+import AdminPagination from '@/admin/components/common/AdminPagination.vue'
 import ListState from '@/components/shared/ListState.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 
@@ -168,15 +203,20 @@ const router = useRouter()
 
 const {
     donations,
+    meta,
     loading,
     error,
     fetchDonations,
     deleteDonation,
 } = useDonations()
 
+const currentPage = ref(1)
+
 const current = ref(null)
+const phoneInputRef = ref(null)
 
 const isListMode = computed(() => route.name === 'admin-donations')
+const isCreateMode = computed(() => route.name === 'admin-donations-create')
 const isEditMode = computed(() => route.name === 'admin-donations-edit')
 const isViewMode = computed(() => route.name === 'admin-donations-view')
 
@@ -206,7 +246,7 @@ const columns = [
 ]
 
 const form = reactive({
-    type: 'manual',
+    type: 'naxt',
     donor_name: '',
     donor_phone: '',
     amount: 0,
@@ -214,30 +254,51 @@ const form = reactive({
     currency: 'UZS',
 })
 
-const filteredDonations = computed(() => {
-    return donations.value.filter(item => {
-        const matchSearch =
-            !filters.search ||
-            item.donor_name?.toLowerCase().includes(filters.search.toLowerCase())
+const buildParams = (page = 1) => {
+    const params = { admin: true, page, per_page: 15 }
+    if (filters.search.trim()) params.search = filters.search.trim()
+    if (filters.status) params.status = filters.status
+    return params
+}
 
-        const matchStatus =
-            !filters.status || item.status === filters.status
+const fetchPage = async (page = 1) => {
+    currentPage.value = page
+    await fetchDonations(buildParams(page))
+}
 
-        return matchSearch && matchStatus
-    })
-})
+const applyFilters = () => fetchPage(1)
+
+const resetFilters = () => {
+    filters.search = ''
+    filters.status = ''
+    fetchPage(1)
+}
 
 const save = async () => {
-    const payload = {
-        type: form.type,
-        amount: form.amount,
-        donor_name: form.donor_name,
-        donor_phone: form.donor_phone,
-        currency: form.currency,
-        status: form.status,
+    if (!isCreateMode.value && form.donor_phone && !phoneInputRef.value?.validate()) {
+        return
     }
 
-    const res = await donationService.create(payload)
+    const payload = isCreateMode.value
+        ? {
+            type: 'naxt',
+            amount: form.amount,
+            donor_name: form.donor_name,
+            currency: form.currency,
+            is_manual_cash: true,
+        }
+        : {
+            type: form.type,
+            amount: form.amount,
+            donor_name: form.donor_name,
+            donor_phone: form.donor_phone,
+            currency: form.currency,
+            status: form.status,
+        }
+
+    const res = isCreateMode.value
+        ? await donationService.create(payload)
+        : await donationService.update(route.params.id, payload)
 
     if (!res.error) {
         router.push('/admin/donations')
@@ -265,16 +326,16 @@ const loadCurrent = async () => {
 const remove = async (id) => {
     if (!confirm('Delete donation?')) return
     await deleteDonation(id)
-    await fetchDonations()
+    await fetchPage(currentPage.value)
 }
 
 watch(() => route.fullPath, async () => {
-    if (isListMode.value) await fetchDonations()
+    if (isListMode.value) await fetchPage(currentPage.value)
     else await loadCurrent()
 }, { immediate: true })
 
 onMounted(async () => {
-    if (isListMode.value) await fetchDonations()
+    if (isListMode.value) await fetchPage(1)
     else await loadCurrent()
 })
 </script>

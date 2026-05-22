@@ -32,20 +32,20 @@
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <div v-for="partner in partners" :key="partner.id" class="rounded-2xl border border-gray-100 bg-white p-6">
                         <div class="flex items-start gap-4">
-                            <img v-if="partner.logo_url" :src="partner.logo_url" :alt="partner.name" class="h-16 w-16 rounded-xl object-contain" />
+                            <img v-if="partner.logo_url" :src="partner.logo_url" :alt="content(partner, 'name')" class="h-16 w-16 rounded-xl object-contain" />
                             <div v-else class="flex h-16 w-16 items-center justify-center rounded-xl bg-gray-100 text-xl font-bold text-gray-400">
-                                {{ partner.name?.[0] }}
+                                {{ content(partner, 'name')?.[0] }}
                             </div>
                             <div class="flex-1">
-                                <h3 class="font-bold text-gray-900">{{ partner.name }}</h3>
+                                <h3 class="font-bold text-gray-900">{{ content(partner, 'name') }}</h3>
                                 <span class="mt-1 inline-flex rounded-full border-0 px-3 py-1 text-sm font-medium" :class="typeClass(partner.type)">
                                     {{ formatType(partner.type) }}
                                 </span>
                             </div>
                         </div>
 
-                        <p v-if="partner.description" class="mt-4 text-sm text-gray-500">
-                            {{ partner.description }}
+                        <p v-if="content(partner, 'description')" class="mt-4 text-sm text-gray-500">
+                            {{ content(partner, 'description') }}
                         </p>
 
                         <ExternalLink v-if="partner.website" :href="partner.website" classes="mt-3 inline-flex items-center gap-1 text-sm text-[#2A7DE1] hover:underline">
@@ -60,12 +60,14 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
+import { useLocalizedDisplay } from '@/composables/useLocalizedDisplay'
 import ListState from '@/components/shared/ListState.vue'
 import ExternalLink from '@/components/shared/ExternalLink.vue'
 import { PARTNER_TYPES } from '@/constants/partners'
 import { usePartners } from '@/composables/usePartners'
 
 const { t } = useI18n()
+const { content } = useLocalizedDisplay()
 const { partners, loading, error } = usePartners()
 
 const formatType = (value) => (value || 'corporate').replace(/_/g, ' ')

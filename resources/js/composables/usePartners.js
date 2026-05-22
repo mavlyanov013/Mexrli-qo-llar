@@ -3,6 +3,7 @@ import partnerService from '@/services/partnerService'
 
 export function usePartners() {
     const partners = ref([])
+    const meta = ref(null)
     const loading = ref(false)
     const error = ref(null)
 
@@ -14,6 +15,7 @@ export function usePartners() {
         partners.value = shouldFilterOnlyActive
             ? (result.data || []).filter((item) => item.is_active !== false)
             : (result.data || [])
+        meta.value = result.meta
         error.value = result.error
         loading.value = false
     }
@@ -29,6 +31,7 @@ export function usePartners() {
 
     return {
         partners,
+        meta,
         loading,
         error,
         fetchPartners,

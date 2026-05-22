@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\NewsResource;
 use App\Models\BlogPost;
+use App\Support\LocalizedContent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -19,7 +20,7 @@ class NewsController extends Controller
             $query->where('status', $request->string('status'));
         }
 
-        $items = $query->paginate((int) $request->input('per_page', 20));
+        $items = $query->paginate((int) $request->input('per_page', 12));
 
         return response()->json([
             'data' => NewsResource::collection($items->items()),
@@ -34,18 +35,24 @@ class NewsController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255', 'unique:blog_posts,slug'],
-            'content' => ['required', 'string'],
-            'excerpt' => ['nullable', 'string'],
-            'cover_image' => ['nullable', 'string'],
-            'status' => ['required', 'in:draft,published'],
-            'published_at' => ['nullable', 'date'],
-            'category' => ['required', 'in:news,helped_child,success_story'],
-        ]);
+        $validated = $request->validate(array_merge(
+            [
+                'slug' => ['nullable', 'string', 'max:255', 'unique:blog_posts,slug'],
+                'cover_image' => ['nullable', 'string', 'max:2048'],
+                'status' => ['required', 'in:draft,published'],
+                'published_at' => ['nullable', 'date'],
+                'category' => ['required', 'in:news,success_story,announcement,helped_child'],
+            ],
+            LocalizedContent::adminValidationRules('title', true, 255),
+            LocalizedContent::adminValidationRules('content', true),
+            LocalizedContent::adminValidationRules('excerpt', true)
+        ));
 
-        $validated['slug'] = $validated['slug'] ?: Str::slug($validated['title']) . '-' . Str::random(5);
+        $validated = LocalizedContent::syncLegacyColumns(
+            LocalizedContent::prepareAdminLocalized($validated, ['title', 'excerpt', 'content']),
+            ['title', 'excerpt', 'content']
+        );
+        $validated['slug'] = $validated['slug'] ?: Str::slug($validated['title_uz']) . '-' . Str::random(5);
         if ($validated['status'] === 'published' && empty($validated['published_at'])) {
             $validated['published_at'] = now();
         }
@@ -68,19 +75,26 @@ class NewsController extends Controller
     public function update(Request $request, int $id): JsonResponse
     {
         $item = BlogPost::query()->findOrFail($id);
-        $validated = $request->validate([
-            'title' => ['sometimes', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255', 'unique:blog_posts,slug,' . $id],
-            'content' => ['sometimes', 'string'],
-            'excerpt' => ['nullable', 'string'],
-            'cover_image' => ['nullable', 'string'],
-            'status' => ['sometimes', 'in:draft,published'],
-            'published_at' => ['nullable', 'date'],
-            'category' => ['required', 'in:news,helped_child,success_story'],
-        ]);
+        $validated = $request->validate(array_merge(
+            [
+                'slug' => ['nullable', 'string', 'max:255', 'unique:blog_posts,slug,' . $id],
+                'cover_image' => ['nullable', 'string', 'max:2048'],
+                'status' => ['sometimes', 'in:draft,published'],
+                'published_at' => ['nullable', 'date'],
+                'category' => ['sometimes', 'required', 'in:news,success_story,announcement,helped_child'],
+            ],
+            LocalizedContent::adminValidationRules('title', true, 255),
+            LocalizedContent::adminValidationRules('content', true),
+            LocalizedContent::adminValidationRules('excerpt', true)
+        ));
 
-        if (array_key_exists('title', $validated) && empty($validated['slug']) && empty($item->slug)) {
-            $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(5);
+        $validated = LocalizedContent::syncLegacyColumns(
+            LocalizedContent::prepareAdminLocalized($validated, ['title', 'excerpt', 'content']),
+            ['title', 'excerpt', 'content']
+        );
+
+        if (! empty($validated['title_uz']) && empty($validated['slug']) && empty($item->slug)) {
+            $validated['slug'] = Str::slug($validated['title_uz']) . '-' . Str::random(5);
         }
         if (($validated['status'] ?? $item->status) === 'published' && empty($validated['published_at']) && empty($item->published_at)) {
             $validated['published_at'] = now();

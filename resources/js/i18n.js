@@ -1,16 +1,18 @@
 import { createI18n } from 'vue-i18n'
-import enJson from './i18n/en.json'
 import uzJson from './i18n/uz.json'
 import ruJson from './i18n/ru.json'
+import { transliterateDeep } from './utils/uzbekTransliterate'
 
 const savedLocale = localStorage.getItem('lang')
 const browserLocale = navigator.language?.split('-')[0]
-const supportedLocales = ['en', 'uz', 'ru']
+const supportedLocales = ['uz', 'uz_cyrl', 'ru']
 
 const getDefaultLocale = () => {
+    if (savedLocale === 'en') return 'uz'
     if (savedLocale && supportedLocales.includes(savedLocale)) return savedLocale
-    if (browserLocale && supportedLocales.includes(browserLocale)) return browserLocale
-    return 'en'
+    if (browserLocale === 'ru') return 'ru'
+    if (browserLocale === 'uz') return 'uz'
+    return 'uz'
 }
 
 const messages = {
@@ -254,6 +256,10 @@ const messages = {
                 audit: 'Audit'
             },
             monthlyOverview: 'Monthly overview',
+            year: 'Year',
+            chartLoading: 'Loading chart...',
+            chartError: 'Failed to load chart data',
+            noChartData: 'No chart data for this year',
             received: 'Received',
             spent: 'Spent',
             title: 'Transparency & Live Donations',
@@ -350,6 +356,8 @@ const messages = {
             featured: 'Featured',
             all: 'All',
             noPosts: 'No posts yet. Check back soon!',
+            loadMore: 'Load more',
+            loadingMore: 'Loading...',
             defaultCategory: 'News',
             categories: {
                 update: 'Update',
@@ -443,6 +451,9 @@ const messages = {
                 },
             ],
             legalTitle: 'Bank details and legal information',
+            bankTitle: 'Bank details',
+            bankSubtitle: 'Payment and transfer information',
+            legalInfoTitle: 'Legal information',
             legalSubtitle: 'Official organization information',
             orgName: 'Organization name',
             inn: 'INN',
@@ -478,6 +489,10 @@ const messages = {
                 home_repair: 'Home Repair Assistance',
                 general: 'General Donation',
             },
+            selectCase: 'Select a case',
+            noCaseSelected: 'General donation (no specific case)',
+            casesLoading: 'Loading active cases...',
+            noActiveCases: 'No active cases needing funding at the moment',
             funded: '{percent}% funded',
             remaining: '{amount} qoldi',
             oneTime: 'One-time',
@@ -597,9 +612,10 @@ const messages = {
             live: 'Live',
             title: 'Today’s Donations',
             updatedAt: 'Updated',
-            onlineAmount: 'Today’s amount (online)',
-            cashAmount: 'Cash today',
-            uniqueDonors: 'Unique donors',
+            cashAmount: 'Cash donations today',
+            onlineAmount: 'Online payments today',
+            uniqueDonors: 'Total unique donors today',
+            loadError: 'Failed to load today stats',
         },
         nav: {
             volunteer: 'Volunteer',
@@ -795,11 +811,21 @@ const messages = {
             dashboard: 'Admin panel',
             overview: 'Umumiy ko‘rinish',
             payments: 'To‘lovlar',
-            provider: 'Provayder',
+            provider: 'To‘lov tizimi',
             transactionId: 'Tranzaksiya ID',
             payer: 'To‘lovchi',
-            noPayments: 'Hali to‘lovlar yo‘q',
+            noPayments: 'Hali onlayn to‘lovlar yo‘q',
             amount: 'Summa',
+            search: 'Qidirish',
+            allStatuses: 'Barcha holatlar',
+            allProviders: 'Barcha to‘lov tizimlari',
+            dateFrom: 'Sanadan',
+            dateTo: 'Sanagacha',
+            filter: 'Filtrlash',
+            reset: 'Tozalash',
+            results: 'ta natija',
+            donorName: 'Donor ismi',
+            donorPhone: 'Telefon',
             cases: 'Holatlar',
             donations: 'Xayriyalar',
             helpRequests: 'Yordam so‘rovlari',
@@ -903,6 +929,10 @@ const messages = {
                 audit: 'Audit'
             },
             monthlyOverview: 'Oylik ko‘rinish',
+            year: 'Yil',
+            chartLoading: 'Grafik yuklanmoqda...',
+            chartError: 'Grafik ma’lumotlarini yuklab bo‘lmadi',
+            noChartData: 'Bu yil uchun grafik ma’lumoti yo‘q',
             received: 'Qabul qilingan',
             spent: 'Sarflangan',
             title: 'Shaffoflik va jonli xayriyalar',
@@ -999,6 +1029,8 @@ const messages = {
             featured: 'Asosiy',
             all: 'Barchasi',
             noPosts: 'Hozircha postlar yo‘q. Keyinroq qayta ko‘ring!',
+            loadMore: "Ko'proq yuklash",
+            loadingMore: 'Yuklanmoqda...',
             defaultCategory: 'Yangilik',
             categories: {
                 update: 'Update',
@@ -1092,6 +1124,9 @@ const messages = {
                 },
             ],
             legalTitle: 'Bank rekvizitlari va yuridik ma’lumotlar',
+            bankTitle: 'Bank rekvizitlari',
+            bankSubtitle: 'To‘lov va o‘tkazma ma’lumotlari',
+            legalInfoTitle: 'Yuridik ma’lumotlar',
             legalSubtitle: 'Tashkilotning rasmiy ma’lumotlari',
             orgName: 'Tashkilot nomi',
             inn: 'STIR',
@@ -1127,6 +1162,10 @@ const messages = {
                 home_repair: 'Uy ta’mirlash yordami',
                 general: 'Umumiy xayriya',
             },
+            selectCase: 'Bemor tanlang',
+            noCaseSelected: 'Umumiy xayriya (bemor tanlanmagan)',
+            casesLoading: 'Faol holatlar yuklanmoqda...',
+            noActiveCases: 'Hozircha pul yig‘ilishi kerak bo‘lgan faol holatlar yo‘q',
             funded: '{percent}% yig‘ilgan',
             remaining: '{amount} qoldi',
             oneTime: 'Bir martalik',
@@ -1246,9 +1285,10 @@ const messages = {
             live: 'Jonli',
             title: 'Bugungi xayriyalar',
             updatedAt: 'Yangilandi',
-            onlineAmount: 'Bugungi summa (onlayn)',
-            cashAmount: 'Bugungi naqd',
-            uniqueDonors: 'Noyob donorlar',
+            cashAmount: 'Naqd pul',
+            onlineAmount: "Onlayn to'lovlar",
+            uniqueDonors: 'Jami xayriya qilganlar',
+            loadError: "Bugungi statistikani yuklab bo'lmadi",
         },
         nav: {
             volunteer: 'Ko‘ngilli',
@@ -1552,6 +1592,10 @@ const messages = {
                 audit: 'Аудит'
             },
             monthlyOverview: 'Месячный обзор',
+            year: 'Год',
+            chartLoading: 'Загрузка графика...',
+            chartError: 'Не удалось загрузить данные графика',
+            noChartData: 'Нет данных графика за этот год',
             received: 'Поступило',
             spent: 'Потрачено',
             title: 'Прозрачность и live-пожертвования',
@@ -1648,6 +1692,8 @@ const messages = {
             featured: 'Главное',
             all: 'Все',
             noPosts: 'Пока постов нет. Загляните позже!',
+            loadMore: 'Загрузить ещё',
+            loadingMore: 'Загрузка...',
             defaultCategory: 'Новости',
             categories: {
                 update: 'обновлять',
@@ -1741,6 +1787,9 @@ const messages = {
                 },
             ],
             legalTitle: 'Банковские реквизиты и юридическая информация',
+            bankTitle: 'Банковские реквизиты',
+            bankSubtitle: 'Информация для платежей и переводов',
+            legalInfoTitle: 'Юридическая информация',
             legalSubtitle: 'Официальная информация об организации',
             orgName: 'Название организации',
             inn: 'ИНН',
@@ -1776,6 +1825,10 @@ const messages = {
                 home_repair: 'Помощь с ремонтом дома',
                 general: 'Общее пожертвование',
             },
+            selectCase: 'Выберите случай',
+            noCaseSelected: 'Общее пожертвование (без случая)',
+            casesLoading: 'Загрузка активных случаев...',
+            noActiveCases: 'Сейчас нет активных случаев, требующих сбора средств',
             funded: 'Собрано {percent}%',
             remaining: 'Осталось {amount}',
             oneTime: 'Разово',
@@ -1895,9 +1948,10 @@ const messages = {
             live: 'Live',
             title: 'Донаты сегодня',
             updatedAt: 'Обновлено',
-            onlineAmount: 'Сумма сегодня (онлайн)',
             cashAmount: 'Наличные сегодня',
-            uniqueDonors: 'Уникальных доноров',
+            onlineAmount: 'Онлайн-платежи сегодня',
+            uniqueDonors: 'Всего уникальных доноров сегодня',
+            loadError: 'Не удалось загрузить статистику за сегодня',
         },
         nav: {
             volunteer: 'Волонтёр',
@@ -1984,22 +2038,32 @@ const deepMerge = (target, source) => {
 }
 
 const externalMessages = {
-    en: enJson,
     uz: uzJson,
     ru: ruJson,
 }
 
 const mergedMessages = Object.keys(messages).reduce((acc, localeKey) => {
+    if (localeKey === 'en') return acc
     acc[localeKey] = deepMerge(messages[localeKey] || {}, externalMessages[localeKey] || {})
     return acc
 }, {})
 
+const websiteMessages = {
+    uz: mergedMessages.uz,
+    uz_cyrl: transliterateDeep(mergedMessages.uz),
+    ru: mergedMessages.ru,
+}
+
 const i18n = createI18n({
     legacy: false,
     locale: getDefaultLocale(),
-    fallbackLocale: 'en',
+    fallbackLocale: {
+        uz_cyrl: ['uz'],
+        ru: ['uz'],
+        default: ['uz'],
+    },
     globalInjection: true,
-    messages: mergedMessages,
+    messages: websiteMessages,
 })
 
 export default i18n

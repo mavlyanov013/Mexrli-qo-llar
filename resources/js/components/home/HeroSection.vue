@@ -64,11 +64,11 @@
 
                     <div class="mt-5 flex items-center gap-4 text-sm text-gray-500 flex-wrap">
                         <span class="flex items-center gap-1.5">
-                            <span class="text-[#4CAF50]">✓</span>
+                            <IconBadge :icon="CircleCheck" tone="green" size="xs" class="shrink-0" />
                             {{ t('hero.transparentSystem') }}
                         </span>
                         <span class="flex items-center gap-1.5">
-                            <span class="text-[#2A7DE1]">✓</span>
+                            <IconBadge :icon="CircleCheck" tone="blue" size="xs" class="shrink-0" />
                             {{ t('hero.trustedDonors') }}
                         </span>
                     </div>
@@ -81,6 +81,8 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { CircleCheck } from 'lucide-vue-next'
+import IconBadge from '../shared/IconBadge.vue'
 
 const { t } = useI18n()
 

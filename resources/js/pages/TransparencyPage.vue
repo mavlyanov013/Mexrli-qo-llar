@@ -10,13 +10,15 @@
                 </p>
             </div>
 
+            <div class="mb-8">
+                <StatsToday variant="plain" />
+            </div>
+
+            <div class="mt-0">
+                <MonthlyOverviewChart :t="t" />
+            </div>
+
             <ListState :loading="loading" :error="error" :empty="false">
-                <TodayStats :donations="donations" :t="t" />
-
-                <div class="mt-8">
-                    <MonthlyOverviewChart :donations="donations" :t="t" />
-                </div>
-
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
                     <div class="lg:col-span-2">
                         <PaymentHistoryTable :donations="donations" :cases="cases" :t="t" />
@@ -37,7 +39,7 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
-import TodayStats from '@/components/transparency/TodayStats.vue'
+import StatsToday from '@/components/shared/StatsToday.vue'
 import MonthlyOverviewChart from '@/components/transparency/MonthlyOverviewChart.vue'
 import PaymentHistoryTable from '@/components/transparency/PaymentHistoryTable.vue'
 import LiveDonationsFeed from '@/components/transparency/LiveDonationsFeed.vue'

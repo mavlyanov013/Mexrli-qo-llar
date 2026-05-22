@@ -15,7 +15,7 @@
                 <div class="relative rounded-2xl overflow-hidden">
                     <img
                         :src="featured.cover_image || '/placeholder.jpg'"
-                        :alt="featured.title"
+                        :alt="content(featured, 'title')"
                         class="w-full h-[400px] object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
@@ -24,10 +24,10 @@
                             {{ t('newsPage.featured') }}
                         </span>
                         <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">
-                            {{ featured.title }}
+                            {{ content(featured, 'title') }}
                         </h2>
                         <p class="text-white/80 line-clamp-2">
-                            {{ featured.excerpt }}
+                            {{ content(featured, 'excerpt') }}
                         </p>
                     </div>
                 </div>
@@ -39,16 +39,16 @@
                     :key="item"
                     type="button"
                     class="rounded-full px-4 py-2 text-sm border transition"
-                    :class="category === item
+                    :class="activeType === item
                         ? 'bg-[#2A7DE1] text-white border-[#2A7DE1]'
                         : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'"
-                    @click="category = item"
+                    @click="changeType(item)"
                 >
                     {{ formatFilterCategory(item) }}
                 </button>
             </div>
 
-            <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div v-if="loading && posts.length === 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div
                     v-for="i in 3"
                     :key="i"
@@ -63,14 +63,14 @@
                 </div>
             </div>
 
-            <div v-else-if="filteredPosts.length === 0" class="text-center py-20">
+            <div v-else-if="posts.length === 0" class="text-center py-20">
                 <div class="text-5xl text-gray-300 mb-4">📰</div>
                 <p class="text-gray-500">{{ t('newsPage.noPosts') }}</p>
             </div>
 
             <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <RouterLink
-                    v-for="post in filteredPosts"
+                    v-for="post in listPosts"
                     :key="post.id"
                     :to="`/news/${post.slug}`"
                     class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group"
@@ -78,7 +78,7 @@
                     <div class="aspect-video overflow-hidden">
                         <img
                             :src="post.cover_image || '/placeholder.jpg'"
-                            :alt="post.title"
+                            :alt="content(post, 'title')"
                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                     </div>
@@ -96,14 +96,25 @@
                         </div>
 
                         <h3 class="font-bold text-gray-900 group-hover:text-[#2A7DE1] transition-colors line-clamp-2">
-                            {{ post.title }}
+                            {{ content(post, 'title') }}
                         </h3>
 
                         <p class="text-sm text-gray-500 mt-2 line-clamp-2">
-                            {{ post.excerpt }}
+                            {{ content(post, 'excerpt') }}
                         </p>
                     </div>
                 </RouterLink>
+            </div>
+
+            <div v-if="hasMore" class="mt-10 text-center">
+                <button
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-xl font-semibold border-2 border-gray-300 px-6 py-3 hover:border-[#2A7DE1] hover:text-[#2A7DE1] transition disabled:opacity-50"
+                    :disabled="loadingMore"
+                    @click="loadMore"
+                >
+                    {{ loadingMore ? t('newsPage.loadingMore') : t('newsPage.loadMore') }}
+                </button>
             </div>
         </div>
     </div>
@@ -114,33 +125,72 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import newsService from '../services/newsService'
+import { useLocalizedDisplay } from '@/composables/useLocalizedDisplay'
 
 const { t, locale } = useI18n()
+const { content } = useLocalizedDisplay()
 
-const categories = ['all', 'news', 'success_story', 'announcement', 'report', 'event']
+const categories = ['all', 'news', 'success_story', 'announcement']
 
 const posts = ref([])
 const loading = ref(false)
-const category = ref('all')
+const loadingMore = ref(false)
+const activeType = ref('all')
+const currentPage = ref(1)
+const lastPage = ref(1)
 
-const fetchPosts = async () => {
-    loading.value = true
-
-    try {
-        posts.value = await newsService.getLatest()
-    } finally {
-        loading.value = false
-    }
-}
-
-const filteredPosts = computed(() => {
-    if (category.value === 'all') return posts.value
-    return posts.value.filter((post) => post.category === category.value)
+const listPosts = computed(() => {
+    if (!featured.value) return posts.value
+    return posts.value.filter((post) => post.id !== featured.value.id)
 })
 
 const featured = computed(() => {
-    return posts.value.find((post) => post.is_featured) || null
+    return posts.value.find((post) => post.is_featured) || posts.value[0] || null
 })
+
+const hasMore = computed(() => currentPage.value < lastPage.value)
+
+const fetchPosts = async ({ page = 1, append = false } = {}) => {
+    if (append) {
+        loadingMore.value = true
+    } else {
+        loading.value = true
+    }
+
+    try {
+        const params = { page }
+
+        if (activeType.value !== 'all') {
+            params.type = activeType.value
+        }
+
+        const res = await newsService.getLatest(params)
+
+        if (append) {
+            posts.value = [...posts.value, ...(res.data ?? [])]
+        } else {
+            posts.value = res.data ?? []
+        }
+
+        currentPage.value = res.meta?.current_page || page
+        lastPage.value = res.meta?.last_page || 1
+    } finally {
+        loading.value = false
+        loadingMore.value = false
+    }
+}
+
+const changeType = (type) => {
+    if (activeType.value === type) return
+    activeType.value = type
+    currentPage.value = 1
+    fetchPosts({ page: 1 })
+}
+
+const loadMore = () => {
+    if (!hasMore.value || loadingMore.value) return
+    fetchPosts({ page: currentPage.value + 1, append: true })
+}
 
 const formatFilterCategory = (value) => {
     return t(`newsPage.categories.${value}`)
@@ -155,17 +205,17 @@ const formatDate = (value) => {
     if (!value) return ''
 
     const localeMap = {
-        en: 'en-US',
         uz: 'uz-UZ',
+        uz_cyrl: 'uz-UZ',
         ru: 'ru-RU',
     }
 
-    return new Date(value).toLocaleDateString(localeMap[locale.value] || 'en-US', {
+    return new Date(value).toLocaleDateString(localeMap[locale.value] || 'uz-UZ', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
     })
 }
 
-onMounted(fetchPosts)
+onMounted(() => fetchPosts())
 </script>

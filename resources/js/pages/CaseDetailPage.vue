@@ -20,7 +20,7 @@
                         <div class="rounded-2xl overflow-hidden">
                             <img
                                 :src="caseData.photo_url || '/placeholder.jpg'"
-                                :alt="caseData.name"
+                                :alt="content(caseData, 'name')"
                                 class="w-full aspect-video object-cover"
                             />
                         </div>
@@ -29,16 +29,16 @@
                             <div class="flex items-start justify-between mb-4">
                                 <div>
                                     <h1 class="text-3xl font-bold text-gray-900">
-                                        {{ caseData.name }}
+                                        {{ content(caseData, 'name') }}
                                     </h1>
 
                                     <div class="flex items-center gap-3 mt-2 flex-wrap">
                                         <span
-                                            v-if="caseData.location"
+                                            v-if="content(caseData, 'location')"
                                             class="text-sm text-gray-500 flex items-center gap-1"
                                         >
-                                            <span>📍</span>
-                                            {{ caseData.location }}
+                                            <MapPin class="w-3.5 h-3.5 text-red-400 shrink-0" />
+                                            {{ content(caseData, 'location') }}
                                         </span>
 
                                         <span
@@ -55,7 +55,7 @@
                                     class="inline-flex items-center justify-center w-10 h-10 rounded-xl hover:bg-gray-100"
                                     @click="shareCase"
                                 >
-                                    ↗
+                                    <Share2 class="w-4 h-4" />
                                 </button>
                             </div>
 
@@ -80,44 +80,47 @@
                             </div>
 
                             <span
-                                v-if="caseData.condition"
+                                v-if="content(caseData, 'condition')"
                                 class="inline-flex bg-blue-50 text-[#2A7DE1] border-0 mb-4 px-3 py-1 rounded-full text-sm font-medium"
                             >
-                                {{ caseData.condition }}
+                                {{ content(caseData, 'condition') }}
                             </span>
 
                             <div class="prose prose-gray max-w-none">
                                 <p class="text-gray-600 leading-relaxed whitespace-pre-wrap">
-                                    {{ caseData.story || caseData.short_description }}
+                                    {{ content(caseData, 'story') || content(caseData, 'short_description') }}
                                 </p>
                             </div>
                         </div>
 
                         <div class="bg-white rounded-2xl p-6 border border-gray-100">
-                            <h3 class="font-bold text-lg mb-4">💰 {{ t('caseDetailPage.expenseBreakdown') }}</h3>
+                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <IconBadge :icon="Wallet" tone="orange" size="sm" />
+                                {{ t('caseDetailPage.expenseBreakdown') }}
+                            </h3>
 
                             <div class="divide-y divide-gray-50">
                                 <div class="flex justify-between py-2.5">
                                     <span class="text-sm text-gray-500">{{ t('caseDetailPage.childName') }}</span>
-                                    <span class="text-sm font-semibold">{{ caseData.name }}</span>
+                                    <span class="text-sm font-semibold">{{ content(caseData, 'name') }}</span>
                                 </div>
 
                                 <div
-                                    v-if="caseData.condition"
+                                    v-if="content(caseData, 'condition')"
                                     class="flex justify-between py-2.5"
                                 >
                                     <span class="text-sm text-gray-500">{{ t('caseDetailPage.diagnosis') }}</span>
                                     <span class="text-sm font-semibold text-right max-w-[60%]">
-                                        {{ caseData.condition }}
+                                        {{ content(caseData, 'condition') }}
                                     </span>
                                 </div>
 
                                 <div
-                                    v-if="caseData.location"
+                                    v-if="content(caseData, 'location')"
                                     class="flex justify-between py-2.5"
                                 >
                                     <span class="text-sm text-gray-500">{{ t('caseDetailPage.region') }}</span>
-                                    <span class="text-sm font-semibold">{{ caseData.location }}</span>
+                                    <span class="text-sm font-semibold">{{ content(caseData, 'location') }}</span>
                                 </div>
 
                                 <div class="flex justify-between py-2.5">
@@ -137,7 +140,10 @@
                         </div>
 
                         <div class="bg-white rounded-2xl p-6 border border-gray-100">
-                            <h3 class="font-bold text-lg mb-4">📄 {{ t('caseDetailPage.supportingDocuments') }}</h3>
+                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <IconBadge :icon="FileText" tone="blue" size="sm" />
+                                {{ t('caseDetailPage.supportingDocuments') }}
+                            </h3>
 
                             <div v-if="medicalDocuments.length === 0" class="text-sm text-gray-400">
                                 {{ t('caseDetailPage.documentsLater') }}
@@ -153,9 +159,7 @@
                                     class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors group border border-gray-100"
                                 >
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center">
-                                            📄
-                                        </div>
+                                        <IconBadge :icon="FileText" tone="red" size="xs" />
 
                                         <div>
                                             <p class="text-sm font-medium text-gray-800">
@@ -164,16 +168,57 @@
                                         </div>
                                     </div>
 
-                                    <span class="text-gray-300 group-hover:text-[#2A7DE1]">↓</span>
+                                    <Download class="w-4 h-4 text-gray-300 group-hover:text-[#2A7DE1]" />
                                 </a>
                             </div>
                         </div>
 
                         <div class="bg-white rounded-2xl p-6 border border-gray-100">
-                            <h3 class="font-bold text-lg mb-5">❤️ {{ t('caseDetailPage.treatmentJourney') }}</h3>
+                            <h3 class="font-bold text-lg mb-5 flex items-center gap-2">
+                                <IconBadge :icon="Heart" tone="red" size="sm" />
+                                {{ t('caseDetailPage.treatmentJourney') }}
+                            </h3>
 
-                            <div v-if="sortedUpdates.length === 0" class="text-sm text-gray-400">
+                            <div v-if="treatmentProcesses.length === 0 && sortedUpdates.length === 0" class="text-sm text-gray-400">
                                 {{ t('caseDetailPage.updatesWillAppear') }}
+                            </div>
+
+                            <div v-else-if="treatmentProcesses.length > 0" class="relative">
+                                <div class="absolute left-3.5 top-0 bottom-0 w-0.5 bg-gray-100" />
+
+                                <div class="space-y-6">
+                                    <div
+                                        v-for="(item, index) in treatmentProcesses"
+                                        :key="item.id"
+                                        class="flex gap-4 relative"
+                                    >
+                                        <div class="w-7 h-7 rounded-full bg-[#2A7DE1] flex items-center justify-center shrink-0 z-10 text-white text-xs font-bold">
+                                            {{ treatmentProcesses.length - index }}
+                                        </div>
+
+                                        <div class="flex-1 bg-gray-50 rounded-xl p-4">
+                                            <p class="font-semibold text-gray-800">
+                                                {{ content(item, 'title') }}
+                                            </p>
+                                            <p class="text-sm text-gray-600 mt-1 whitespace-pre-wrap">
+                                                {{ content(item, 'description') }}
+                                            </p>
+
+                                            <div
+                                                v-if="item.images?.length"
+                                                class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2"
+                                            >
+                                                <img
+                                                    v-for="(image, imageIndex) in item.images"
+                                                    :key="`${item.id}-${imageIndex}`"
+                                                    :src="image"
+                                                    :alt="content(item, 'title')"
+                                                    class="rounded-lg w-full max-h-56 object-cover"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div v-else class="relative">
@@ -194,18 +239,18 @@
                                                 {{ item.date }}
                                             </p>
                                             <p class="font-semibold text-gray-800">
-                                                {{ item.title }}
+                                                {{ content(item, 'title') }}
                                             </p>
                                             <p
                                                 v-if="item.content"
                                                 class="text-sm text-gray-600 mt-1"
                                             >
-                                                {{ item.content }}
+                                                {{ content(item, 'content') }}
                                             </p>
                                             <img
                                                 v-if="item.image_url"
                                                 :src="item.image_url"
-                                                :alt="item.title"
+                                                :alt="content(item, 'title')"
                                                 class="mt-3 rounded-lg w-full max-h-56 object-cover"
                                             />
                                         </div>
@@ -232,13 +277,13 @@
                                     <img
                                         v-if="post.cover_image"
                                         :src="post.cover_image"
-                                        :alt="post.title"
+                                        :alt="content(post, 'title')"
                                         class="w-14 h-14 rounded-lg object-cover shrink-0"
                                     />
 
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm font-semibold text-gray-800 group-hover:text-[#2A7DE1] transition-colors line-clamp-2">
-                                            {{ post.title }}
+                                            {{ content(post, 'title') }}
                                         </p>
 
                                         <p
@@ -290,7 +335,7 @@
                                 :to="`/donate?caseId=${caseData.id}`"
                                 class="w-full inline-flex items-center justify-center h-12 bg-[#FF9800] hover:bg-[#F57C00] text-white rounded-xl gap-2 text-base font-semibold shadow-lg shadow-orange-200/50"
                             >
-                                <span>❤</span>
+                                <IconBadge :icon="Heart" tone="red" size="xs" class="shrink-0" />
                                 {{ t('caseDetailPage.donateNow') }}
                             </RouterLink>
 
@@ -368,29 +413,35 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useLocalizedDisplay } from '@/composables/useLocalizedDisplay'
 import { RouterLink, useRoute } from 'vue-router'
 import caseService from '../services/caseService'
 import donationService from '../services/donationService'
 import newsService from '../services/newsService'
+import treatmentProcessService from '../services/treatmentProcessService'
+import { Download, FileText, Heart, MapPin, Share2, Wallet } from 'lucide-vue-next'
+import IconBadge from '../components/shared/IconBadge.vue'
 import ProgressRing from '../components/shared/ProgressRing.vue'
 
 const { t, locale } = useI18n()
+const { content } = useLocalizedDisplay()
 const route = useRoute()
 
 const loading = ref(false)
 const caseData = ref(null)
 const donations = ref([])
 const relatedNews = ref([])
+const treatmentProcesses = ref([])
 
 const fetchCase = async () => {
     loading.value = true
 
     try {
-        const result = await caseService.getCaseById(route.params.id)
+        const result = await caseService.getCaseById(route.params.id, { admin: false })
         caseData.value = result.data || null
 
         if (caseData.value?.id) {
-            await Promise.all([fetchDonations(), fetchRelatedNews()])
+            await Promise.all([fetchDonations(), fetchRelatedNews(), fetchTreatmentProcesses()])
         }
     } catch (error) {
         console.error('Case detail load error:', error)
@@ -414,9 +465,18 @@ const fetchDonations = async () => {
     }
 }
 
+const fetchTreatmentProcesses = async () => {
+    try {
+        treatmentProcesses.value = await treatmentProcessService.getPublicByCase(caseData.value.id)
+    } catch (error) {
+        console.error('Treatment processes load error:', error)
+        treatmentProcesses.value = []
+    }
+}
+
 const fetchRelatedNews = async () => {
     try {
-        const allPosts = await newsService.getLatest()
+        const { data: allPosts } = await newsService.getLatest({ per_page: 20 })
         relatedNews.value = allPosts.filter(
             (item) => String(item.case_id) === String(caseData.value.id)
         ).slice(0, 5)
@@ -472,12 +532,12 @@ const formatShortDate = (value) => {
     if (!value) return ''
 
     const localeMap = {
-        en: 'en-US',
         uz: 'uz-UZ',
+        uz_cyrl: 'uz-UZ',
         ru: 'ru-RU',
     }
 
-    return new Date(value).toLocaleDateString(localeMap[locale.value] || 'en-US', {
+    return new Date(value).toLocaleDateString(localeMap[locale.value] || 'uz-UZ', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
@@ -498,7 +558,7 @@ const shareCase = async () => {
         if (navigator.share && caseData.value) {
             await navigator.share({
                 url: window.location.href,
-                title: caseData.value.name,
+                title: content(caseData.value, 'name'),
             })
         }
     } catch (error) {

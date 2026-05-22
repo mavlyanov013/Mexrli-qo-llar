@@ -3,10 +3,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
             <div class="text-center max-w-3xl mx-auto mb-16">
                 <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-5">
-                    {{ hero?.title || t('aboutPage.title') }}
+                    {{ t('aboutPage.title') }}
                 </h1>
                 <p class="text-lg text-gray-600 leading-relaxed">
-                    {{ hero?.content || t('aboutPage.subtitle') }}
+                    {{ t('aboutPage.subtitle') }}
                 </p>
             </div>
 
@@ -32,7 +32,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
                 <div
-                    v-for="(item, index) in values"
+                    v-for="(item, index) in staticValues"
                     :key="index"
                     class="bg-white rounded-2xl p-6 border border-gray-100 text-center"
                 >
@@ -48,12 +48,15 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
-                <a
+                <component
+                    :is="doc.file_url ? 'a' : 'div'"
                     v-for="doc in docs"
-                    :href="doc.href"
-                    download
-                    target="_blank"
-                    class="cursor-pointer flex items-center gap-5 bg-white rounded-2xl p-6 border hover:shadow-md transition group"
+                    :key="doc.key"
+                    :href="doc.file_url || undefined"
+                    :download="doc.file_url ? '' : undefined"
+                    :target="doc.file_url ? '_blank' : undefined"
+                    class="flex items-center gap-5 bg-white rounded-2xl p-6 border transition group"
+                    :class="doc.file_url ? 'cursor-pointer hover:shadow-md' : ''"
                 >
                     <IconBadge
                         :icon="doc.icon"
@@ -63,21 +66,66 @@
 
                     <div class="flex-1">
                         <h3 class="font-bold text-gray-900 group-hover:text-[#2A7DE1] transition-colors">
-                            {{ doc.title }}
+                            {{ content(doc, 'title') }}
                         </h3>
-                        <p class="text-sm text-gray-500 mt-1">{{ doc.desc }}</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ content(doc, 'description') }}</p>
                     </div>
 
-                    <ExternalLink class="w-4 h-4 text-gray-300 group-hover:text-[#2A7DE1]" />
-                </a>
+                    <ExternalLink v-if="doc.file_url" class="w-4 h-4 text-gray-300 group-hover:text-[#2A7DE1]" />
+                </component>
             </div>
 
-            <div class="bg-white rounded-2xl p-8 border border-gray-100 mb-20">
+            <!-- Bank rekvizitlari (API) -->
+            <div class="bg-white rounded-2xl p-8 border border-gray-100 mb-8">
                 <div class="flex items-center gap-3 mb-6">
                     <IconBadge :icon="Building2" tone="blue" size="md" />
                     <div>
                         <h2 class="text-xl font-bold text-gray-900">
-                            {{ t('aboutPage.legalTitle') }}
+                            {{ t('aboutPage.bankTitle') }}
+                        </h2>
+                        <p class="text-sm text-gray-500">
+                            {{ t('aboutPage.bankSubtitle') }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
+                            {{ t('aboutPage.bank') }}
+                        </p>
+                        <p class="font-semibold text-gray-800">
+                            {{ content(bank, 'bank') || '—' }}
+                        </p>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
+                            {{ t('aboutPage.accountUzs') }}
+                        </p>
+                        <p class="font-semibold text-gray-800 font-mono">
+                            {{ bank.account_uzs || '—' }}
+                        </p>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-xl p-4 md:col-span-2">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
+                            {{ t('aboutPage.mfoBik') }}
+                        </p>
+                        <p class="font-semibold text-gray-800 font-mono">
+                            {{ bank.mfo_bik || '—' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yuridik ma'lumotlar (API) -->
+            <div class="bg-white rounded-2xl p-8 border border-gray-100 mb-20">
+                <div class="flex items-center gap-3 mb-6">
+                    <IconBadge :icon="FileText" tone="green" size="md" />
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">
+                            {{ t('aboutPage.legalInfoTitle') }}
                         </h2>
                         <p class="text-sm text-gray-500">
                             {{ t('aboutPage.legalSubtitle') }}
@@ -86,71 +134,32 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                    <!-- LEFT SIDE -->
-                    <div class="space-y-4">
-
-                        <div class="bg-gray-50 rounded-xl p-4">
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
-                                {{ t('aboutPage.orgName') }}
-                            </p>
-                            <p class="font-semibold text-gray-800">
-                                {{ legalMap.orgName || '—' }}
-                            </p>
-                        </div>
-
-                        <div class="bg-gray-50 rounded-xl p-4">
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
-                                {{ t('aboutPage.inn') }}
-                            </p>
-                            <p class="font-semibold text-gray-800 font-mono">
-                                {{ legalMap.inn || '—' }}
-                            </p>
-                        </div>
-
-                        <div class="bg-gray-50 rounded-xl p-4">
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
-                                {{ t('aboutPage.legalAddress') }}
-                            </p>
-                            <p class="font-semibold text-gray-800">
-                                {{ legalMap.legalAddress || '—' }}
-                            </p>
-                        </div>
-
-                        <div class="bg-gray-50 rounded-xl p-4">
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
-                                {{ t('aboutPage.bank') }}
-                            </p>
-                            <p class="font-semibold text-gray-800">
-                                {{ legalMap.bank || '—' }}
-                            </p>
-                        </div>
-
+                    <div class="bg-gray-50 rounded-xl p-4 md:col-span-2">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
+                            {{ t('aboutPage.orgName') }}
+                        </p>
+                        <p class="font-semibold text-gray-800">
+                            {{ content(legal, 'org_name') || '—' }}
+                        </p>
                     </div>
 
-                    <!-- RIGHT SIDE -->
-                    <div class="space-y-4">
-
-                        <div class="bg-gray-50 rounded-xl p-4">
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
-                                {{ t('aboutPage.accountUzs') }}
-                            </p>
-                            <p class="font-semibold text-gray-800 font-mono">
-                                {{ legalMap.accountUzs || '—' }}
-                            </p>
-                        </div>
-
-                        <div class="bg-gray-50 rounded-xl p-4">
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
-                                {{ t('aboutPage.mfoBik') }}
-                            </p>
-                            <p class="font-semibold text-gray-800 font-mono">
-                                {{ legalMap.mfoBik || '—' }}
-                            </p>
-                        </div>
-
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
+                            {{ t('aboutPage.inn') }}
+                        </p>
+                        <p class="font-semibold text-gray-800 font-mono">
+                            {{ legal.inn || '—' }}
+                        </p>
                     </div>
 
+                    <div class="bg-gray-50 rounded-xl p-4 md:col-span-2">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">
+                            {{ t('aboutPage.legalAddress') }}
+                        </p>
+                        <p class="font-semibold text-gray-800">
+                            {{ content(legal, 'legal_address') || '—' }}
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -161,15 +170,24 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div
-                    v-for="(member, index) in team"
-                    :key="index"
+                    v-for="member in team"
+                    :key="member.id"
                     class="bg-white rounded-2xl p-6 border border-gray-100 text-center"
                 >
-                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#2A7DE1] to-[#1E5BB8] flex items-center justify-center text-xl font-bold text-white">
+                    <img
+                        v-if="member.photo_url"
+                        :src="member.photo_url"
+                        :alt="member.name"
+                        class="w-20 h-20 mx-auto mb-4 rounded-full object-cover"
+                    />
+                    <div
+                        v-else
+                        class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#2A7DE1] to-[#1E5BB8] flex items-center justify-center text-xl font-bold text-white"
+                    >
                         {{ member.initials }}
                     </div>
-                    <h3 class="font-bold text-gray-900">{{ member.name }}</h3>
-                    <p class="text-sm text-gray-500 mt-1">{{ member.role }}</p>
+                    <h3 class="font-bold text-gray-900">{{ content(member, 'name') }}</h3>
+                    <p class="text-sm text-gray-500 mt-1">{{ content(member, 'position') || '—' }}</p>
                 </div>
             </div>
         </div>
@@ -177,7 +195,7 @@
 </template>
 
 <script setup>
-import {computed, ref, onMounted, watch} from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
     Heart,
@@ -193,140 +211,73 @@ import {
 
 import SectionHeader from '../components/shared/SectionHeader.vue'
 import IconBadge from '../components/shared/IconBadge.vue'
-import pageService from '@/services/pageService'
-
-const page = ref(null)
-const loading = ref(true)
-const error = ref(null)
+import aboutService from '@/services/aboutService'
+import { useLocalizedDisplay } from '@/composables/useLocalizedDisplay'
 
 const { t, tm } = useI18n()
+const { content } = useLocalizedDisplay()
 
-const iconMap = {
-    Heart,
-    Eye,
-    ShieldCheck,
-    Target,
-    Star,
-    FileText,
-    ScrollText,
-    Building2,
+const docs = ref([])
+
+const bank = ref({
+    bank: '',
+    account_uzs: '',
+    mfo_bik: '',
+})
+
+const legal = ref({
+    org_name: '',
+    inn: '',
+    legal_address: '',
+})
+
+const team = ref([])
+
+const valueIcons = [ShieldCheck, Heart, Target, Star]
+const valueTones = ['blue', 'red', 'green', 'yellow']
+const docMeta = {
+    registration_certificate: { icon: FileText, tone: 'blue' },
+    organization_charter: { icon: ScrollText, tone: 'green' },
 }
 
-/* ================= FETCH ================= */
-const fetchPage = async () => {
-    loading.value = true
-    try {
-        const res = await pageService.getBySlug('about')
+const staticValues = computed(() => {
+    const items = tm('aboutPage.values') || []
 
-        page.value = res.data.data
+    return items.map((item, index) => ({
+        icon: valueIcons[index] || ShieldCheck,
+        tone: valueTones[index] || 'blue',
+        title: item.title,
+        desc: item.desc,
+    }))
+})
 
-    } catch (e) {
-        error.value = e.message
-    } finally {
-        loading.value = false
-    }
+const initials = (name) => {
+    return String(name || '')
+        .split(' ')
+        .filter(Boolean)
+        .map((part) => part[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase() || 'T'
 }
 
-/* ================= SAFE PARSE ================= */
-const safeExtra = (extra) => {
-    if (!extra) return {}
-    if (typeof extra === 'string') {
-        try {
-            return JSON.parse(extra)
-        } catch {
-            return {}
-        }
-    }
-    return extra
+const fetchContent = async () => {
+    const data = await aboutService.getContent()
+
+    bank.value = data.bank ?? bank.value
+    legal.value = data.legal ?? legal.value
+
+    docs.value = (data.docs ?? []).map((doc) => ({
+        ...doc,
+        icon: docMeta[doc.key]?.icon || FileText,
+        tone: docMeta[doc.key]?.tone || 'blue',
+    }))
+
+    team.value = (data.team ?? []).map((member) => ({
+        ...member,
+        initials: initials(member.name),
+    }))
 }
 
-/* ================= SECTIONS ================= */
-const sections = computed(() => {
-    return page.value?.sections ?? []
-})
-
-const byType = (type) => {
-    return sections.value.filter(s => String(s?.type) === type)
-}
-
-/* ================= HERO ================= */
-const hero = computed(() => byType('hero')[0] ?? null)
-
-/* ================= VALUES ================= */
-const values = computed(() => {
-    const items = byType('value')
-
-    if (!items.length) {
-        return tm('aboutPage.values').map((v) => ({
-            icon: ShieldCheck,
-            title: v.title,
-            desc: v.desc,
-            tone: 'blue',
-        }))
-    }
-
-    return items.map((item) => {
-        const extra = safeExtra(item.extra)
-
-        return {
-            icon: iconMap[extra.icon] || ShieldCheck,
-            title: item.title,
-            desc: item.content,
-            tone: extra.tone || 'blue',
-        }
-    })
-})
-
-/* ================= DOCS ================= */
-const docs = computed(() => {
-    const items = byType('doc') || []
-
-    return items
-        .filter(item => item?.file_url)
-        .map((item) => {
-            const extra = safeExtra(item.extra)
-
-            return {
-                title: item.title || 'Document',
-                desc: item.content || '',
-                href: item.file_url, // backend URL
-
-                icon: iconMap[extra.icon] || FileText,
-                tone: extra.tone || 'blue'
-            }
-        })
-})
-
-/* ================= LEGAL (FIXED ORDER ISSUE) ================= */
-const legalMap = computed(() => {
-    const map = {}
-    byType('legal').forEach((i) => {
-        map[i.title] = i.content
-    })
-    return map
-})
-
-/* ================= TEAM ================= */
-const team = computed(() => {
-    const items = byType('team')
-
-    return items.map((item) => {
-        const name = item.title || ''
-
-        const initials = name
-            .split(' ')
-            .filter(Boolean)
-            .map(w => w[0])
-            .join('')
-            .toUpperCase()
-
-        return {
-            name,
-            role: item.subtitle || '',
-            initials: initials || 'T'
-        }
-    })
-})
-
-onMounted(fetchPage)
+onMounted(fetchContent)
 </script>

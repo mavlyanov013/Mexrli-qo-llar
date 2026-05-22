@@ -52,6 +52,14 @@
                 </AdminTable>
 
             </ListState>
+
+            <AdminPagination
+                v-if="meta && meta.last_page > 1"
+                :current-page="meta.current_page || 1"
+                :last-page="meta.last_page || 1"
+                :summary="`${meta.total || 0} ta xabar`"
+                @change="fetchPage"
+            />
         </template>
 
         <!-- ================= VIEW ================= -->
@@ -103,6 +111,7 @@ import { useMessages } from '@/composables/useMessages'
 
 import AdminCrudShell from '@/admin/components/common/AdminCrudShell.vue'
 import AdminTable from '@/admin/components/common/AdminTable.vue'
+import AdminPagination from '@/admin/components/common/AdminPagination.vue'
 import ListState from '@/components/shared/ListState.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 
@@ -112,12 +121,19 @@ const { t } = useI18n()
 
 const {
     messages,
+    meta,
     loading,
     error,
     fetchMessages,
     updateMessage,
     deleteMessage
 } = useMessages()
+
+const currentPage = ref(1)
+const fetchPage = (page = 1) => {
+    currentPage.value = page
+    return fetchMessages({ page, per_page: 15 })
+}
 
 /* ================= STATE (ROUTERSIZ) ================= */
 const selectedId = ref(null)
@@ -183,18 +199,18 @@ const closeMessage = () => {
 /* MARK READ */
 const markRead = async (id) => {
     const res = await updateMessage(id, { status: 'o\'qing' })
-    if (!res.error) await fetchMessages()
+    if (!res.error) await fetchPage(currentPage.value)
 }
 
 /* DELETE */
 const remove = async (id) => {
     if (!confirm('Xabar o‘chirilsinmi?')) return
     const res = await deleteMessage(id)
-    if (!res.error) await fetchMessages()
+    if (!res.error) await fetchPage(currentPage.value)
 }
 
 /* INIT */
 onMounted(() => {
-    fetchMessages()
+    fetchPage(1)
 })
 </script>

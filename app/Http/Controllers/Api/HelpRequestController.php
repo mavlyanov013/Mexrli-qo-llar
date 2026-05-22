@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreHelpRequestRequest;
+use App\Http\Requests\UpdateHelpRequestStatusRequest;
 use App\Http\Resources\HelpRequestResource;
 use App\Models\CaseItem;
 use App\Models\HelpRequest;
@@ -67,7 +68,7 @@ class HelpRequestController extends Controller
         $helpRequest = HelpRequest::query()->findOrFail($id);
 
         $validated = $request->validate([
-            'status' => 'sometimes|string|in:pending,approved,rejected',
+            'status' => 'sometimes|string|in:pending,tasdiqlandi,rad_etildi,rezerv,approved,rejected',
             'admin_notes' => 'nullable|string',
             'case_id' => 'nullable|integer|exists:case_items,id',
         ]);
@@ -80,59 +81,69 @@ class HelpRequestController extends Controller
         ]);
     }
 
+    public function updateStatus(UpdateHelpRequestStatusRequest $request, int $id): JsonResponse
+    {
+        $validated = $request->validated();
+
+        return $this->applyStatus(
+            $id,
+            $validated['status'],
+            $validated['admin_notes'] ?? null
+        );
+    }
+
     public function approve(int $id): JsonResponse
     {
-        $helpRequest = DB::transaction(function () use ($id) {
-            $item = HelpRequest::query()->lockForUpdate()->findOrFail($id);
-            $item->update(['status' => 'approved']);
-
-            if (! $item->case_id) {
-                $case = CaseItem::create([
-                    'name' => $item->full_name,
-                    'short_description' => $item->description ?: $item->situation_description,
-                    'story' => $item->description ?: $item->situation_description,
-                    'phone' => $item->phone,
-                    'location' => $item->city,
-                    'category' => $item->category ?: $item->support_type ?: 'other',
-                    'source' => 'help_request',
-                    'created_from_request_id' => $item->id,
-                    'status' => 'new',
-                    'urgency' => 'medium',
-                    'goal_amount' => 0,
-                    'raised_amount' => 0,
-                    'medical_documents' => $item->attachments ?: $item->medical_documents ?: [],
-                ]);
-
-                $item->update([
-                    'case_id' => $case->id,
-                    'admin_notes' => trim(($item->admin_notes ?? '') . ' | Auto CASE #' . $case->id),
-                ]);
-            }
-
-            return $item->fresh();
-        });
-
-        return response()->json([
-            'message' => 'So‘rov tasdiqlandi',
-            'data' => new HelpRequestResource($helpRequest),
-        ]);
+        return $this->applyStatus($id, 'tasdiqlandi');
     }
 
     public function reject(Request $request, int $id): JsonResponse
     {
-        $helpRequest = HelpRequest::query()->findOrFail($id);
         $validated = $request->validate([
             'admin_notes' => ['nullable', 'string'],
         ]);
 
-        $helpRequest->update([
-            'status' => 'rejected',
-            'admin_notes' => $validated['admin_notes'] ?? null,
-        ]);
+        return $this->applyStatus($id, 'rad_etildi', $validated['admin_notes'] ?? null);
+    }
+
+    private function applyStatus(int $id, string $status, ?string $adminNotes = null): JsonResponse
+    {
+        $status = $this->normalizeStatus($status);
+
+        $result = DB::transaction(function () use ($id, $status, $adminNotes) {
+            $item = HelpRequest::query()->lockForUpdate()->findOrFail($id);
+
+            $item->update([
+                'status' => $status,
+                'admin_notes' => $adminNotes ?? $item->admin_notes,
+            ]);
+
+            $caseId = null;
+
+            if ($status === 'tasdiqlandi') {
+                $caseId = $this->createCaseFromHelpRequest($item);
+            }
+
+            $item = $item->fresh();
+
+            return [
+                'help_request' => $item,
+                'case_id' => $caseId ?? $item->case_id,
+            ];
+        });
+
+        $message = match ($status) {
+            'tasdiqlandi' => 'So‘rov tasdiqlandi va holat yaratildi',
+            'rad_etildi' => 'So‘rov rad etildi',
+            'rezerv' => 'So‘rov rezervga olindi',
+            default => 'Holat yangilandi',
+        };
 
         return response()->json([
-            'message' => 'So‘rov rad etildi',
-            'data' => new HelpRequestResource($helpRequest->fresh()),
+            'message' => $message,
+            'data' => new HelpRequestResource($result['help_request']),
+            'case_id' => $result['case_id'],
+            'redirect_to' => $status === 'tasdiqlandi' ? 'cases' : null,
         ]);
     }
 
@@ -147,7 +158,7 @@ class HelpRequestController extends Controller
             ]);
         }
 
-        if ($helpRequest->status !== 'approved') {
+        if (! in_array($helpRequest->status, ['tasdiqlandi', 'approved'], true)) {
             return response()->json(['message' => 'Faqat tasdiqlangan so‘rov case bo‘lishi mumkin'], 422);
         }
 
@@ -179,5 +190,50 @@ class HelpRequestController extends Controller
             'message' => 'So‘rov CASE ga aylantirildi',
             'data' => new HelpRequestResource($helpRequest->fresh()),
         ]);
+    }
+
+    private function normalizeStatus(string $status): string
+    {
+        return match ($status) {
+            'approved' => 'tasdiqlandi',
+            'rejected' => 'rad_etildi',
+            default => $status,
+        };
+    }
+
+    private function createCaseFromHelpRequest(HelpRequest $item): int
+    {
+        if ($item->case_id) {
+            return (int) $item->case_id;
+        }
+
+        $documents = array_values(array_filter(array_merge(
+            $item->attachments ?? [],
+            $item->medical_documents ?? [],
+            $item->photos ?? [],
+        )));
+
+        $case = CaseItem::create([
+            'name' => $item->full_name,
+            'short_description' => $item->description ?: $item->situation_description,
+            'story' => $item->situation_description ?: $item->description,
+            'phone' => $item->phone,
+            'location' => $item->city,
+            'category' => $item->category ?: $item->support_type ?: 'other',
+            'source' => 'help_request',
+            'created_from_request_id' => $item->id,
+            'status' => 'new',
+            'urgency' => 'medium',
+            'goal_amount' => 0,
+            'raised_amount' => 0,
+            'medical_documents' => $documents,
+        ]);
+
+        $item->update([
+            'case_id' => $case->id,
+            'admin_notes' => trim(($item->admin_notes ?? '') . ' | Auto CASE #' . $case->id),
+        ]);
+
+        return $case->id;
     }
 }

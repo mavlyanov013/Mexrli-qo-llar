@@ -9,3 +9,14 @@ export const toServiceError = (error, fallbackMessage = 'Unexpected API error') 
     const status = error?.response?.status || 500
     return { message, status, raw: error }
 }
+
+/** Axios javobidan media upload URL/path ajratadi */
+export const extractUploadedMedia = (response) => {
+    const body = response?.data ?? response ?? {}
+    const payload = body?.data ?? body
+
+    return {
+        path: payload?.path ?? null,
+        url: payload?.url ?? null,
+    }
+}

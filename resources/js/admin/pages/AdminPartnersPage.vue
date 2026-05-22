@@ -40,6 +40,14 @@
                 </template>
             </AdminTable>
         </ListState>
+
+            <AdminPagination
+                v-if="meta && meta.last_page > 1"
+                :current-page="meta.current_page || 1"
+                :last-page="meta.last_page || 1"
+                :summary="`${meta.total || 0} ta hamkor`"
+                @change="fetchPartnersPage"
+            />
         </template>
 
         <template v-else-if="isViewMode && current">
@@ -60,19 +68,13 @@
                 class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 space-y-6"
                 @submit.prevent="save"
             >
-                <!-- TITLE -->
-                <div>
-                    <label class="text-sm font-medium text-gray-700 mb-1 block">
-                        Hamkor nomi
-                    </label>
-                    <input
-                        v-model="draft.name"
-                        type="text"
-                        placeholder="Masalan: Mehr Foundation"
-                        class="w-full h-11 rounded-xl border border-gray-200 px-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
-                        required
-                    />
-                </div>
+                <LocalizedFieldTabs
+                    v-model="draft"
+                    :fields="[
+                        { name: 'name', label: 'Hamkor nomi', type: 'input' },
+                        { name: 'description', label: 'Tavsif', type: 'textarea', rows: 3 },
+                    ]"
+                />
 
                 <!-- WEBSITE -->
                 <div>
@@ -148,19 +150,6 @@
                     </button>
                 </div>
 
-                <!-- DESCRIPTION -->
-                <div>
-                    <label class="text-sm font-medium text-gray-700 mb-1 block">
-                        Tavsif
-                    </label>
-                    <textarea
-                        v-model="draft.description"
-                        rows="3"
-                        placeholder="Hamkor haqida qisqacha ma’lumot..."
-                        class="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
-                    />
-                </div>
-
                 <!-- ACTIONS -->
                 <div class="flex items-center justify-end gap-3 pt-4">
                     <router-link
@@ -193,17 +182,22 @@ import partnerService from '@/services/partnerService'
 import mediaService from '@/services/mediaService'
 import AdminCrudShell from '@/admin/components/common/AdminCrudShell.vue'
 import AdminTable from '@/admin/components/common/AdminTable.vue'
+import AdminPagination from '@/admin/components/common/AdminPagination.vue'
 import ListState from '@/components/shared/ListState.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import { watch } from 'vue'
 import { Eye, Pencil, Trash2 } from 'lucide-vue-next'
 import { ACTIVE_STATUSES } from '@/constants/statuses'
 import { PARTNER_TYPE_LABELS } from '@/constants/partners'
+import LocalizedFieldTabs from '@/admin/components/common/LocalizedFieldTabs.vue'
+import { emptyLocalizedFields, assignLocalizedFromRow, validateAdminLocalizedFields, buildAdminPayload } from '@/utils/localizedContent'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const { partners, loading, error, fetchPartners, createPartner, updatePartner, deletePartner, togglePartnerStatus } = usePartners()
+const { partners, meta, loading, error, fetchPartners, createPartner, updatePartner, deletePartner, togglePartnerStatus } = usePartners()
+
+const fetchPartnersPage = (page = 1) => fetchPartners({ admin: true, include_inactive: true, page, per_page: 15 })
 const statusMap = {
     success: 'Faol',
     pending: 'Faol emas'
@@ -224,11 +218,10 @@ const columns = [
 ]
 
 const draft = reactive({
-    name: '',
+    ...emptyLocalizedFields(['name', 'description']),
     type: PARTNER_TYPES[0],
     logo_url: '',
     website: '',
-    description: '',
     is_active: true,
 })
 const getStatusLabel = (val) => val ? 'Faol' : 'Faol emas'
@@ -242,10 +235,9 @@ const loadCurrent = async () => {
     current.value = result.data
 
     if (isEditMode.value && result.data) {
-        draft.name = result.data.name || ''
+        assignLocalizedFromRow(draft, result.data, ['name', 'description'])
         draft.logo_url = result.data.logo_url || ''
         draft.website = result.data.website || ''
-        draft.description = result.data.description || ''
         draft.type = result.data.type || PARTNER_TYPES[0]
         draft.is_active = result.data.is_active !== false
         previewUrl.value = draft.logo_url
@@ -253,9 +245,18 @@ const loadCurrent = async () => {
 }
 
 const save = async () => {
+    const fields = ['name', 'description']
+    const missing = validateAdminLocalizedFields(draft, fields)
+    if (missing.length) {
+        alert(`To‘ldiring: ${missing.join(', ')}`)
+        return
+    }
+
+    const payload = buildAdminPayload(draft, fields)
+
     const result = isEditMode.value
-        ? await updatePartner(route.params.id, draft)
-        : await createPartner(draft)
+        ? await updatePartner(route.params.id, payload)
+        : await createPartner(payload)
     if (!result.error) {
         router.push('/admin/partners')
     }
@@ -265,16 +266,19 @@ const uploadLogo = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // preview (frontend)
     previewUrl.value = URL.createObjectURL(file)
 
-    const res = await mediaService.upload(file, 'partners')
+    const { data, error } = await mediaService.upload(file, 'partners')
 
-    const url = res?.data?.data?.url
+    if (error) {
+        window.alert(error.message)
+        previewUrl.value = draft.logo_url || ''
+        return
+    }
 
-    if (url) {
-        draft.logo_url = url
-        previewUrl.value = url
+    if (data?.url) {
+        draft.logo_url = data.url
+        previewUrl.value = data.url
     }
 }
 
@@ -285,18 +289,18 @@ const removeLogo = async () => {
 
 const toggle = async (row) => {
     await togglePartnerStatus(row.id, !row.is_active)
-    await fetchPartners({ admin: true, include_inactive: true })
+    await fetchPartnersPage(meta.value?.current_page || 1)
 }
 
 const remove = async (id) => {
     if (!window.confirm('Bu hamkorni oʻchirib tashlang?')) return
     await deletePartner(id)
-    await fetchPartners({ admin: true, include_inactive: true })
+    await fetchPartnersPage(meta.value?.current_page || 1)
 }
 
 onMounted(async () => {
     if (isListMode.value) {
-        await fetchPartners({ admin: true, include_inactive: true })
+        await fetchPartnersPage(1)
     } else if (isEditMode.value || isViewMode.value) {
         await loadCurrent()
     }
@@ -305,7 +309,7 @@ watch(
     () => route.fullPath,
     async () => {
         if (isListMode.value) {
-            await fetchPartners({ admin: true, include_inactive: true })
+            await fetchPartnersPage(1)
         } else if (isEditMode.value || isViewMode.value) {
             await loadCurrent()
         }

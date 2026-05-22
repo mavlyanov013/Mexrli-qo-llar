@@ -1,524 +1,430 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import {
+    HeartPulse,
+    HandCoins,
+    ClipboardList,
+    Mail,
+    CreditCard,
+    Users,
+    ArrowRight,
+    TrendingUp,
+    AlertCircle,
+} from 'lucide-vue-next'
 import caseService from '@/services/caseService'
-import donationService from '@/services/donationService'
 import helpRequestService from '@/services/helpRequestService'
 import volunteerService from '@/services/volunteerService'
 import contactService from '@/services/contactService'
-import blogService from '@/services/blogService'
+import donationService from '@/services/donationService'
 import paymentService from '@/services/paymentService'
-import AdminTable from '@/admin/components/common/AdminTable.vue'
-import AdminEmptyState from '@/admin/components/common/AdminEmptyState.vue'
-import AdminPagination from '@/admin/components/common/AdminPagination.vue'
-import AdminToast from '@/admin/components/common/AdminToast.vue'
-
-const { t } = useI18n()
+import blogService from '@/services/blogService'
+import { usePermissions } from '@/composables/usePermissions'
+import { providerLabel } from '@/constants/payments'
+import { PAYMENT_STATUSES } from '@/constants/statuses'
+import { HELP_REQUEST_STATUS } from '@/constants/statuses'
+import StatusBadge from '@/components/shared/StatusBadge.vue'
 
 const props = defineProps({
     activeTab: {
         type: String,
-        default: 'umumiy koʻrinish'
-    }
+        default: 'overview',
+    },
 })
 
-const cases = ref([])
-const donations = ref([])
-const helpRequests = ref([])
-const volunteers = ref([])
-const messages = ref([])
-const posts = ref([])
-const payments = ref([])
-const loading = ref(false)
-const loadError = ref(false)
-const search = ref('')
-const paymentsMeta = ref(null)
-const paymentsPage = ref(1)
+const { t } = useI18n()
+const { isSuperAdmin } = usePermissions()
 
-const loadPayments = async (page = 1) => {
-    const paymentsRes = await paymentService.getAll({ per_page: 20, page })
-    payments.value = Array.isArray(paymentsRes?.data) ? paymentsRes.data : []
-    paymentsMeta.value = paymentsRes?.meta ?? null
-    paymentsPage.value = page
+const loading = ref(true)
+const loadError = ref(false)
+
+const stats = ref({
+    totalCases: 0,
+    activeCases: 0,
+    pendingHelp: 0,
+    newMessages: 0,
+    totalDonations: 0,
+    onlinePayments: 0,
+    volunteers: 0,
+})
+
+const recentHelp = ref([])
+const recentCases = ref([])
+const recentPayments = ref([])
+const posts = ref([])
+
+const formatMoney = (value) => `${Number(value || 0).toLocaleString('uz-UZ')} so'm`
+
+const formatDate = (value) => {
+    if (!value) return '—'
+    return new Date(value).toLocaleString('uz-UZ', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+    })
 }
 
-const loadData = async () => {
+const progressPercent = (raised, goal) => {
+    const g = Number(goal || 0)
+    const r = Number(raised || 0)
+    if (g <= 0) return 0
+    return Math.min(100, Math.round((r / g) * 100))
+}
+
+const statCards = computed(() => {
+    const cards = [
+        {
+            key: 'cases',
+            label: 'Faol holatlar',
+            value: stats.value.activeCases,
+            hint: `${stats.value.totalCases} ta jami`,
+            icon: HeartPulse,
+            tone: 'blue',
+            to: '/admin/cases',
+        },
+        {
+            key: 'help',
+            label: 'Kutilayotgan so‘rovlar',
+            value: stats.value.pendingHelp,
+            hint: 'Yordam so‘rovlari',
+            icon: ClipboardList,
+            tone: 'amber',
+            to: '/admin/help-requests',
+        },
+        {
+            key: 'messages',
+            label: 'Yangi xabarlar',
+            value: stats.value.newMessages,
+            hint: 'Aloqa xabarlari',
+            icon: Mail,
+            tone: 'violet',
+            to: '/admin/messages',
+        },
+        {
+            key: 'volunteers',
+            label: 'Ko‘ngillilar',
+            value: stats.value.volunteers,
+            hint: 'Arizalar ro‘yxati',
+            icon: Users,
+            tone: 'emerald',
+            to: '/admin/volunteers',
+        },
+    ]
+
+    if (isSuperAdmin.value) {
+        cards.unshift({
+            key: 'donations',
+            label: 'Jami xayriyalar',
+            value: formatMoney(stats.value.totalDonations),
+            hint: 'Barcha xayriyalar',
+            icon: HandCoins,
+            tone: 'orange',
+            to: '/admin/donations',
+            isMoney: true,
+        })
+        cards.push({
+            key: 'payments',
+            label: 'Onlayn to‘lovlar',
+            value: stats.value.onlinePayments,
+            hint: 'To‘lovlar bo‘limi',
+            icon: CreditCard,
+            tone: 'sky',
+            to: '/admin/payments',
+        })
+    }
+
+    return cards
+})
+
+const quickLinks = [
+    { to: '/admin/cases/create', label: 'Yangi holat', desc: 'Bemor kampaniyasi' },
+    { to: '/admin/help-requests', label: 'Yordam so‘rovlari', desc: 'Tekshirish kerak' },
+    { to: '/admin/news', label: 'Yangiliklar', desc: 'Kontent boshqaruvi' },
+    { to: '/admin/contact-info', label: 'Aloqa', desc: 'Sayt ma’lumotlari' },
+]
+
+const toneClasses = {
+    blue: 'from-[#2A7DE1]/10 to-[#2A7DE1]/5 text-[#2A7DE1] border-[#2A7DE1]/20',
+    amber: 'from-amber-50 to-orange-50 text-amber-700 border-amber-200',
+    violet: 'from-violet-50 to-purple-50 text-violet-700 border-violet-200',
+    emerald: 'from-emerald-50 to-green-50 text-emerald-700 border-emerald-200',
+    orange: 'from-orange-50 to-amber-50 text-orange-700 border-orange-200',
+    sky: 'from-sky-50 to-blue-50 text-sky-700 border-sky-200',
+}
+
+const loadOverview = async () => {
     loading.value = true
     loadError.value = false
 
     try {
-        const [
-            casesRes,
-            donationsRes,
-            helpRequestsRes,
-            volunteersRes,
-            messagesRes,
-            postsRes,
-        ] = await Promise.all([
-            caseService.getAllCases(),
-            donationService.getAllDonations(),
-            helpRequestService.getAll(),
-            volunteerService.getAll(),
-            contactService.getAll(),
-            blogService.getAll(),
-            loadPayments(paymentsPage.value),
-        ])
+        const requests = [
+            caseService.fetchList({ admin: true, page: 1, per_page: 6 }),
+            caseService.fetchList({ admin: true, status: 'active', page: 1, per_page: 1 }),
+            helpRequestService.fetchList({ page: 1, per_page: 5 }),
+            helpRequestService.fetchList({ page: 1, per_page: 100 }),
+            contactService.fetchList({ page: 1, per_page: 100 }),
+            volunteerService.fetchList({ page: 1, per_page: 1 }),
+        ]
 
-        cases.value = Array.isArray(casesRes?.data) ? casesRes.data : Array.isArray(casesRes) ? casesRes : []
-        donations.value = Array.isArray(donationsRes?.data) ? donationsRes.data : Array.isArray(donationsRes) ? donationsRes : []
-        helpRequests.value = Array.isArray(helpRequestsRes?.data) ? helpRequestsRes.data : Array.isArray(helpRequestsRes) ? helpRequestsRes : []
-        volunteers.value = Array.isArray(volunteersRes?.data) ? volunteersRes.data : Array.isArray(volunteersRes) ? volunteersRes : []
-        messages.value = Array.isArray(messagesRes?.data) ? messagesRes.data : Array.isArray(messagesRes) ? messagesRes : []
-        posts.value = Array.isArray(postsRes?.data) ? postsRes.data : Array.isArray(postsRes) ? postsRes : []
+        if (isSuperAdmin.value) {
+            requests.push(donationService.fetchList({ admin: true, page: 1, per_page: 100 }))
+            requests.push(paymentService.fetchList({ page: 1, per_page: 5 }))
+        }
+
+        const results = await Promise.all(requests)
+
+        const casesRes = results[0]
+        const activeCasesRes = results[1]
+        const helpRes = results[2]
+        const helpAllRes = results[3]
+        const messagesRes = results[4]
+        const volunteersRes = results[5]
+
+        const caseItems = casesRes.data || []
+        recentCases.value = caseItems
+            .filter((item) => ['active', 'open', 'in_progress'].includes(String(item.status || '').toLowerCase()))
+            .slice(0, 5)
+        stats.value.totalCases = casesRes.meta?.total ?? caseItems.length
+        stats.value.activeCases = activeCasesRes.meta?.total ?? 0
+
+        recentHelp.value = helpRes.data || []
+        const helpAllItems = helpAllRes.data || []
+        stats.value.pendingHelp = helpAllItems.filter((item) =>
+            ['pending', 'new'].includes(String(item.status || '').toLowerCase())
+        ).length
+
+        const messageItems = messagesRes.data || []
+        stats.value.newMessages = messageItems.filter((item) =>
+            String(item.status || '').toLowerCase() === 'new'
+        ).length
+
+        stats.value.volunteers = volunteersRes.meta?.total ?? (volunteersRes.data?.length || 0)
+
+        if (isSuperAdmin.value) {
+            const donationsRes = results[6]
+            const paymentsRes = results[7]
+
+            stats.value.totalDonations = (donationsRes.data || []).reduce(
+                (sum, row) => sum + Number(row.amount || 0),
+                0
+            )
+
+            recentPayments.value = paymentsRes.data || []
+            stats.value.onlinePayments = paymentsRes.meta?.total ?? recentPayments.value.length
+        }
     } catch (error) {
-        console.error('Admin data load error:', error)
+        console.error('Dashboard load error:', error)
         loadError.value = true
-        cases.value = []
-        donations.value = []
-        helpRequests.value = []
-        volunteers.value = []
-        messages.value = []
-        posts.value = []
-        payments.value = []
-        paymentsMeta.value = null
     } finally {
         loading.value = false
     }
 }
 
-onMounted(loadData)
-
-const formatMoney = (value) => `${Number(value || 0).toLocaleString()} UZS`
-
-const badgeClass = (value) => {
-    const status = String(value || '').toLowerCase()
-
-    if (['success', 'completed', 'approved', 'active', 'open', 'new'].includes(status)) {
-        return 'bg-green-50 text-green-700'
-    }
-
-    if (['pending', 'interviewing', 'in_progress'].includes(status)) {
-        return 'bg-yellow-50 text-yellow-700'
-    }
-
-    if (['cancelled', 'canceled', 'failed', 'rejected', 'closed'].includes(status)) {
-        return 'bg-red-50 text-red-700'
-    }
-
-    return 'bg-gray-100 text-gray-700'
-}
-
-const totalDonated = computed(() =>
-    donations.value.reduce((sum, d) => sum + Number(d.amount || 0), 0)
-)
-
-const activeCasesCount = computed(() =>
-    cases.value.filter(c => ['active', 'open', 'in_progress'].includes(String(c.status || '').toLowerCase())).length
-)
-
-const pendingHelpRequests = computed(() =>
-    helpRequests.value.filter(h => h.status === 'pending').length
-)
-
-const newMessages = computed(() =>
-    messages.value.filter(m => m.status === 'new').length
-)
-
-const paymentCount = computed(() => payments.value.length)
-
-const filteredPayments = computed(() => {
-    const q = search.value.trim().toLowerCase()
-    if (!q) return payments.value
-
-    return payments.value.filter((payment) =>
-        String(payment.provider || '').toLowerCase().includes(q) ||
-        String(payment.transaction_id || '').toLowerCase().includes(q) ||
-        String(payment.payer_reference || '').toLowerCase().includes(q) ||
-        String(payment.status || '').toLowerCase().includes(q)
-    )
-})
-
-const paymentColumns = computed(() => ([
-    { key: 'provider', label: t('admin.provider') },
-    { key: 'transaction_id', label: t('admin.transactionId') },
-    { key: 'payer_reference', label: t('admin.payer') },
-    { key: 'amount', label: t('admin.amount') },
-    { key: 'status', label: t('admin.status') },
-]))
-
-const paymentsSummary = computed(() => {
-    const meta = paymentsMeta.value || {}
-    if (!meta.total) return ''
-    return `${meta.current_page}/${meta.last_page} • ${meta.total}`
-})
-
-const changePaymentsPage = async (page) => {
+const loadBlog = async () => {
     try {
-        await loadPayments(page)
-        loadError.value = false
-    } catch (error) {
-        console.error('Payments page load error:', error)
-        loadError.value = true
+        const res = await blogService.getAll()
+        posts.value = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : []
+    } catch {
+        posts.value = []
     }
 }
 
-const filteredDonations = computed(() => {
-    const q = search.value.trim().toLowerCase()
-    if (!q) return donations.value
+onMounted(async () => {
+    if (props.activeTab === 'overview') {
+        await loadOverview()
+        return
+    }
 
-    return donations.value.filter((donation) =>
-        String(donation.donor_name || '').toLowerCase().includes(q) ||
-        String(donation.amount || '').toLowerCase().includes(q) ||
-        String(donation.type || '').toLowerCase().includes(q)
-    )
-})
-
-const filteredCases = computed(() => {
-    const q = search.value.trim().toLowerCase()
-    if (!q) return cases.value
-
-    return cases.value.filter((c) =>
-        String(c.name || '').toLowerCase().includes(q) ||
-        String(c.status || '').toLowerCase().includes(q)
-    )
-})
-
-const filteredVolunteers = computed(() => {
-    const q = search.value.trim().toLowerCase()
-    if (!q) return volunteers.value
-
-    return volunteers.value.filter((v) =>
-        String(v.full_name || '').toLowerCase().includes(q) ||
-        String(v.email || '').toLowerCase().includes(q) ||
-        String(v.role_interest || '').toLowerCase().includes(q) ||
-        String(v.status || '').toLowerCase().includes(q)
-    )
+    if (props.activeTab === 'blog') {
+        await loadBlog()
+    }
 })
 </script>
 
 <template>
-    <div class="space-y-6">
-        <AdminToast
-            :show="loadError"
-            :message="t('admin.loading')"
-            tone="error"
-        />
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <h1 class="text-2xl font-bold text-gray-900">{{ t('admin.dashboard') }}</h1>
+    <div class="space-y-8">
+        <!-- OVERVIEW -->
+        <template v-if="props.activeTab === 'overview'">
+            <section class="relative overflow-hidden rounded-3xl border border-[#2A7DE1]/15 bg-gradient-to-br from-[#2A7DE1] via-[#2569c7] to-[#1a4f9c] p-6 md:p-8 text-white shadow-lg shadow-[#2A7DE1]/20">
+                <div class="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+                <div class="absolute -bottom-10 left-1/3 h-32 w-32 rounded-full bg-white/10 blur-xl" />
+
+                <div class="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-white/80">Mehrli Insonlar — boshqaruv paneli</p>
+                        <h1 class="mt-1 text-2xl font-bold md:text-3xl">{{ t('admin.dashboard') }}</h1>
+                        <p class="mt-2 max-w-xl text-sm text-white/85">
+                            Holatlar, xayriyalar va murojaatlarni bir joydan kuzating. Quyida eng muhim ko‘rsatkichlar.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 rounded-2xl bg-white/15 px-4 py-3 text-sm backdrop-blur-sm">
+                        <TrendingUp class="h-5 w-5 shrink-0" />
+                        <span>{{ new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' }) }}</span>
+                    </div>
+                </div>
+            </section>
+
+            <div v-if="loading" class="rounded-2xl border border-gray-100 bg-white p-8 text-center text-gray-500">
+                Ma’lumotlar yuklanmoqda...
+            </div>
 
             <div
-                v-if="props.activeTab !== 'overview'"
-                class="w-full lg:w-80"
+                v-else-if="loadError"
+                class="flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-700"
             >
-                <input
-                    v-model="search"
-                    type="text"
-                    class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none"
-                    :placeholder="t('admin.search') || t('admin.searchPlaceholder')"
-                />
+                <AlertCircle class="h-5 w-5 shrink-0" />
+                Dashboard ma’lumotlarini yuklab bo‘lmadi. Sahifani yangilang.
             </div>
-        </div>
 
-        <div v-if="loading" class="text-gray-500">
-            {{ t('admin.loading') }}
-        </div>
-
-        <template v-else>
-            <div v-if="props.activeTab === 'overview'" class="space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
-                    <div class="bg-white rounded-2xl p-5 border border-gray-100">
-                        <p class="text-2xl font-bold text-gray-900">{{ formatMoney(totalDonated) }}</p>
-                        <p class="text-sm text-gray-500">{{ t('admin.totalDonations') }}</p>
-                    </div>
-
-                    <div class="bg-white rounded-2xl p-5 border border-gray-100">
-                        <p class="text-2xl font-bold text-gray-900">{{ activeCasesCount }}</p>
-                        <p class="text-sm text-gray-500">{{ t('admin.activeCases') }}</p>
-                    </div>
-
-                    <div class="bg-white rounded-2xl p-5 border border-gray-100">
-                        <p class="text-2xl font-bold text-gray-900">{{ pendingHelpRequests }}</p>
-                        <p class="text-sm text-gray-500">{{ t('admin.pendingHelpRequests') }}</p>
-                    </div>
-
-                    <div class="bg-white rounded-2xl p-5 border border-gray-100">
-                        <p class="text-2xl font-bold text-gray-900">{{ newMessages }}</p>
-                        <p class="text-sm text-gray-500">{{ t('admin.newMessages') }}</p>
-                    </div>
-
-                    <div class="bg-white rounded-2xl p-5 border border-gray-100">
-                        <p class="text-2xl font-bold text-gray-900">{{ paymentCount }}</p>
-                        <p class="text-sm text-gray-500">{{ t('admin.payments') }}</p>
-                    </div>
+            <template v-else>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    <router-link
+                        v-for="card in statCards"
+                        :key="card.key"
+                        :to="card.to"
+                        class="group rounded-2xl border bg-gradient-to-br p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                        :class="toneClasses[card.tone]"
+                    >
+                        <div class="flex items-start justify-between gap-3">
+                            <div
+                                class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/80 shadow-sm"
+                            >
+                                <component :is="card.icon" class="h-5 w-5" />
+                            </div>
+                            <ArrowRight class="h-4 w-4 opacity-0 transition group-hover:opacity-100" />
+                        </div>
+                        <p class="mt-4 text-2xl font-bold leading-none">
+                            {{ card.isMoney ? card.value : Number(card.value).toLocaleString('uz-UZ') }}
+                        </p>
+                        <p class="mt-2 text-sm font-semibold">{{ card.label }}</p>
+                        <p class="mt-1 text-xs opacity-80">{{ card.hint }}</p>
+                    </router-link>
                 </div>
 
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                        <div class="p-4 border-b">
-                            <h2 class="text-lg font-bold text-gray-900">{{ t('admin.payments') }}</h2>
+                <section>
+                    <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">Tezkor havolalar</h2>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <router-link
+                            v-for="link in quickLinks"
+                            :key="link.to"
+                            :to="link.to"
+                            class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-[#2A7DE1]/30 hover:shadow-md"
+                        >
+                            <p class="font-semibold text-gray-900">{{ link.label }}</p>
+                            <p class="mt-1 text-xs text-gray-500">{{ link.desc }}</p>
+                        </router-link>
+                    </div>
+                </section>
+
+                <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+                    <div class="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+                        <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+                            <h2 class="font-bold text-gray-900">So‘nggi yordam so‘rovlari</h2>
+                            <router-link to="/admin/help-requests" class="text-sm font-medium text-[#2A7DE1] hover:underline">
+                                Barchasi
+                            </router-link>
                         </div>
-                        <div class="divide-y divide-gray-100">
+                        <div class="divide-y divide-gray-50">
                             <div
-                                v-for="payment in payments.slice(0, 5)"
-                                :key="payment.id"
-                                class="p-4 flex items-center justify-between gap-3"
+                                v-for="item in recentHelp"
+                                :key="item.id"
+                                class="flex items-center justify-between gap-3 px-5 py-4"
                             >
                                 <div class="min-w-0">
-                                    <p class="font-medium text-gray-900 uppercase">{{ payment.provider }}</p>
-                                    <p class="text-sm text-gray-500 truncate">{{ payment.transaction_id }}</p>
+                                    <p class="truncate font-medium text-gray-900">{{ item.full_name }}</p>
+                                    <p class="text-xs text-gray-500">{{ item.city || '—' }} · {{ formatDate(item.created_at) }}</p>
                                 </div>
-                                <div class="text-right shrink-0">
-                                    <p class="font-semibold text-gray-900">{{ formatMoney(payment.amount) }}</p>
-                                    <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium" :class="badgeClass(payment.status)">
-                                        {{ payment.status }}
+                                <StatusBadge :status="item.status" :map="HELP_REQUEST_STATUS" />
+                            </div>
+                            <p v-if="recentHelp.length === 0" class="px-5 py-8 text-center text-sm text-gray-500">
+                                So‘rovlar yo‘q
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+                        <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+                            <h2 class="font-bold text-gray-900">Faol holatlar</h2>
+                            <router-link to="/admin/cases" class="text-sm font-medium text-[#2A7DE1] hover:underline">
+                                Barchasi
+                            </router-link>
+                        </div>
+                        <div class="divide-y divide-gray-50">
+                            <div
+                                v-for="item in recentCases"
+                                :key="item.id"
+                                class="px-5 py-4"
+                            >
+                                <div class="flex items-center justify-between gap-2">
+                                    <p class="truncate font-medium text-gray-900">{{ item.name || item.title }}</p>
+                                    <span class="text-xs font-semibold text-[#2A7DE1]">
+                                        {{ progressPercent(item.raised_amount, item.goal_amount) }}%
                                     </span>
                                 </div>
-                            </div>
-
-                            <div v-if="payments.length === 0" class="p-4 text-sm text-gray-500">
-                                {{ t('admin.noPayments') }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                        <div class="p-4 border-b">
-                            <h2 class="text-lg font-bold text-gray-900">{{ t('admin.volunteers') }}</h2>
-                        </div>
-                        <div class="divide-y divide-gray-100">
-                            <div
-                                v-for="v in volunteers.slice(0, 5)"
-                                :key="v.id"
-                                class="p-4 flex items-center justify-between gap-3"
-                            >
-                                <div class="min-w-0">
-                                    <p class="font-medium text-gray-900">{{ v.full_name }}</p>
-                                    <p class="text-sm text-gray-500 truncate">{{ v.email }}</p>
+                                <div class="mt-2 h-2 overflow-hidden rounded-full bg-gray-100">
+                                    <div
+                                        class="h-full rounded-full bg-gradient-to-r from-[#2A7DE1] to-[#4CAF50] transition-all"
+                                        :style="{ width: `${progressPercent(item.raised_amount, item.goal_amount)}%` }"
+                                    />
                                 </div>
-                                <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium shrink-0" :class="badgeClass(v.status)">
-                                    {{ t(`adminVolunteer.statuses.${v.status || 'pending'}`) }}
-                                </span>
+                                <p class="mt-2 text-xs text-gray-500">
+                                    {{ formatMoney(item.raised_amount) }} / {{ formatMoney(item.goal_amount) }}
+                                </p>
                             </div>
+                            <p v-if="recentCases.length === 0" class="px-5 py-8 text-center text-sm text-gray-500">
+                                Faol holatlar yo‘q
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-                            <div v-if="volunteers.length === 0" class="p-4 text-sm text-gray-500">
-                                {{ t('admin.noVolunteers') }}
+                <div
+                    v-if="isSuperAdmin"
+                    class="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden"
+                >
+                    <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+                        <h2 class="font-bold text-gray-900">So‘nggi onlayn to‘lovlar</h2>
+                        <router-link to="/admin/payments" class="text-sm font-medium text-[#2A7DE1] hover:underline">
+                            Barchasi
+                        </router-link>
+                    </div>
+                    <div class="divide-y divide-gray-50">
+                        <div
+                            v-for="payment in recentPayments"
+                            :key="payment.id"
+                            class="flex items-center justify-between gap-4 px-5 py-4"
+                        >
+                            <div class="min-w-0">
+                                <p class="font-medium text-gray-900">{{ providerLabel(payment.provider) }}</p>
+                                <p class="truncate text-xs text-gray-500">{{ payment.transaction_id || '—' }}</p>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <p class="font-semibold text-gray-900">{{ formatMoney(payment.amount) }}</p>
+                                <StatusBadge :status="payment.status" :map="PAYMENT_STATUSES" />
                             </div>
                         </div>
+                        <p v-if="recentPayments.length === 0" class="px-5 py-8 text-center text-sm text-gray-500">
+                            Onlayn to‘lovlar yo‘q
+                        </p>
                     </div>
                 </div>
-            </div>
+            </template>
+        </template>
 
-            <div v-if="props.activeTab === 'payments'" class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                <div class="p-4 border-b">
-                    <h2 class="text-xl font-bold">{{ t('admin.payments') }} ({{ filteredPayments.length }})</h2>
-                </div>
-
-                <AdminTable
-                    v-if="filteredPayments.length > 0"
-                    :columns="paymentColumns"
-                    :rows="filteredPayments"
-                >
-                    <template #cell-provider="{ value }">
-                        <span class="uppercase font-medium">{{ value }}</span>
-                    </template>
-                    <template #cell-payer_reference="{ value }">
-                        {{ value || t('common.unknown') }}
-                    </template>
-                    <template #cell-amount="{ value }">
-                        {{ formatMoney(value) }}
-                    </template>
-                    <template #cell-status="{ value }">
-                        <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium" :class="badgeClass(value)">
-                            {{ value }}
-                        </span>
-                    </template>
-                </AdminTable>
-
-                <AdminEmptyState
-                    v-else
-                    :message="t('admin.noPayments')"
-                />
-
-                <AdminPagination
-                    v-if="paymentsMeta && !search.trim()"
-                    :current-page="paymentsMeta.current_page || 1"
-                    :last-page="paymentsMeta.last_page || 1"
-                    :summary="paymentsSummary"
-                    @change="changePaymentsPage"
-                />
-            </div>
-
-            <div v-if="props.activeTab === 'cases'" class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                <div class="p-4 border-b">
-                    <h2 class="text-xl font-bold">{{ t('admin.cases') }} ({{ filteredCases.length }})</h2>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-50">
-                        <tr>
-                            <th class="text-left p-4">{{ t('admin.name') }}</th>
-                            <th class="text-left p-4">{{ t('admin.status') }}</th>
-                            <th class="text-left p-4">{{ t('admin.goal') }}</th>
-                            <th class="text-left p-4">{{ t('admin.raised') }}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="c in filteredCases" :key="c.id" class="border-t">
-                            <td class="p-4">{{ c.name }}</td>
-                            <td class="p-4">
-                                <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium" :class="badgeClass(c.status)">
-                                    {{ c.status }}
-                                </span>
-                            </td>
-                            <td class="p-4">{{ formatMoney(c.goal_amount) }}</td>
-                            <td class="p-4">{{ formatMoney(c.raised_amount) }}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div v-if="props.activeTab === 'donations'" class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                <div class="p-4 border-b">
-                    <h2 class="text-xl font-bold">{{ t('admin.donations') }} ({{ filteredDonations.length }})</h2>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-50">
-                        <tr>
-                            <th class="text-left p-4">{{ t('admin.donor') }}</th>
-                            <th class="text-left p-4">{{ t('admin.amount') }}</th>
-                            <th class="text-left p-4">{{ t('admin.type') }}</th>
-                            <th class="text-left p-4">{{ t('admin.date') }}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="d in filteredDonations" :key="d.id" class="border-t">
-                            <td class="p-4">{{ d.is_anonymous ? t('admin.anonymous') : d.donor_name }}</td>
-                            <td class="p-4">{{ formatMoney(d.amount) }}</td>
-                            <td class="p-4">{{ d.type || t('common.unknown') }}</td>
-                            <td class="p-4">{{ d.created_at || d.created_date || t('common.unknown') }}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div v-if="filteredDonations.length === 0" class="p-4 text-sm text-gray-500">
-                    {{ t('admin.noDonations') }}
-                </div>
-            </div>
-
-            <div v-if="props.activeTab === 'help-requests'" class="space-y-3">
-                <h2 class="text-2xl font-bold text-gray-900">{{ t('admin.helpRequests') }} ({{ helpRequests.length }})</h2>
-
+        <!-- BLOG TAB (legacy route) -->
+        <template v-else-if="props.activeTab === 'blog'">
+            <h1 class="text-2xl font-bold text-gray-900">{{ t('admin.blog') }}</h1>
+            <div class="mt-4 space-y-3">
                 <div
-                    v-for="h in helpRequests"
-                    :key="h.id"
-                    class="bg-white rounded-2xl border border-gray-100 p-5"
+                    v-for="post in posts"
+                    :key="post.id"
+                    class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
                 >
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <p class="font-semibold text-lg">{{ h.full_name }}</p>
-                            <p class="text-sm text-gray-500">{{ t('admin.phone') }}: {{ h.phone }} • {{ t('admin.city') }}: {{ h.city }}</p>
-                        </div>
-                        <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium shrink-0" :class="badgeClass(h.status)">
-                            {{ h.status }}
-                        </span>
-                    </div>
-                    <p class="mt-3 text-sm text-gray-600">{{ h.situation_description }}</p>
+                    <p class="font-semibold text-gray-900">{{ post.title }}</p>
+                    <p class="text-sm text-gray-500">{{ post.category }}</p>
                 </div>
-
-                <div v-if="helpRequests.length === 0" class="text-sm text-gray-500">
-                    {{ t('admin.noHelpRequests') }}
-                </div>
-            </div>
-
-            <div v-if="props.activeTab === 'volunteers'" class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                <div class="p-4 border-b">
-                    <h2 class="text-xl font-bold">{{ t('admin.volunteers') }} ({{ filteredVolunteers.length }})</h2>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-50">
-                        <tr>
-                            <th class="text-left p-4">{{ t('adminVolunteer.fields.fullName') }}</th>
-                            <th class="text-left p-4">{{ t('adminVolunteer.fields.email') }}</th>
-                            <th class="text-left p-4">{{ t('adminVolunteer.fields.role') }}</th>
-                            <th class="text-left p-4">{{ t('adminVolunteer.fields.availability') }}</th>
-                            <th class="text-left p-4">{{ t('adminVolunteer.fields.status') }}</th>
-                            <th class="text-left p-4">{{ t('adminVolunteer.fields.city') }}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="v in filteredVolunteers" :key="v.id" class="border-t">
-                            <td class="p-4">{{ v.full_name }}</td>
-                            <td class="p-4">{{ v.email }}</td>
-                            <td class="p-4">
-                                {{ t(`adminVolunteer.roles.${v.role_interest || 'other'}`) }}
-                            </td>
-                            <td class="p-4">
-                                {{ t(`adminVolunteer.availability.${v.availability || 'flexible'}`) }}
-                            </td>
-                            <td class="p-4">
-                                <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium" :class="badgeClass(v.status)">
-                                    {{ t(`adminVolunteer.statuses.${v.status || 'pending'}`) }}
-                                </span>
-                            </td>
-                            <td class="p-4">{{ v.city || t('common.unknown') }}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div v-if="filteredVolunteers.length === 0" class="p-4 text-sm text-gray-500">
-                    {{ t('admin.noVolunteers') }}
-                </div>
-            </div>
-
-            <div v-if="props.activeTab === 'messages'" class="space-y-3">
-                <h2 class="text-2xl font-bold text-gray-900">{{ t('admin.messages') }} ({{ messages.length }})</h2>
-
-                <div
-                    v-for="m in messages"
-                    :key="m.id"
-                    class="bg-white rounded-2xl border border-gray-100 p-5"
-                >
-                    <div class="flex items-start justify-between gap-3">
-                        <div>
-                            <p class="font-semibold">{{ m.name }}</p>
-                            <p class="text-sm text-gray-500">{{ m.email }}</p>
-                        </div>
-                        <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-medium" :class="badgeClass(m.status)">
-                            {{ m.status || t('common.unknown') }}
-                        </span>
-                    </div>
-                    <p class="text-sm font-medium mt-3">{{ t('admin.subject') }}: {{ m.subject }}</p>
-                    <p class="text-sm text-gray-600 mt-1">{{ m.message }}</p>
-                </div>
-
-                <div v-if="messages.length === 0" class="text-sm text-gray-500">
-                    {{ t('admin.noMessages') }}
-                </div>
-            </div>
-
-            <div v-if="props.activeTab === 'blog'" class="space-y-3">
-                <h2 class="text-2xl font-bold text-gray-900">{{ t('admin.blog') }} ({{ posts.length }})</h2>
-
-                <div
-                    v-for="p in posts"
-                    :key="p.id"
-                    class="bg-white rounded-2xl border border-gray-100 p-5"
-                >
-                    <p class="font-semibold">{{ p.title }}</p>
-                    <p class="text-sm text-gray-500">{{ t('admin.category') }}: {{ p.category }}</p>
-                </div>
-
-                <div v-if="posts.length === 0" class="text-sm text-gray-500">
-                    {{ t('admin.noBlogPosts') }}
-                </div>
+                <p v-if="posts.length === 0" class="text-sm text-gray-500">{{ t('admin.noBlogPosts') }}</p>
             </div>
         </template>
     </div>

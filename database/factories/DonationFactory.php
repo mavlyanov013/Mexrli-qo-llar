@@ -18,13 +18,10 @@ class DonationFactory extends Factory
         return [
             'case_id' => CaseItem::query()->inRandomOrder()->value('id'),
             'donor_name' => $faker->name(),
-            'donor_email' => $faker->safeEmail(),
+            'donor_phone' => '+99890' . $faker->numerify('#######'),
             'amount' => $faker->numberBetween(50000, 5000000),
             'currency' => 'UZS',
-            'type' => $faker->randomElement([
-                'one_time',
-                'monthly',
-            ]),
+            'type' => 'one_time',
             'message' => $faker->optional()->sentence(),
             'is_anonymous' => $faker->boolean(20),
             'status' => $faker->randomElement([

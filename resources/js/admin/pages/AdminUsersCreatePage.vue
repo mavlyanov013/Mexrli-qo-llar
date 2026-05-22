@@ -7,11 +7,14 @@
             </h2>
         </div>
 
-        <UserForm @submit="handleSubmit" />
+        <p v-if="error" class="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ error }}</p>
+
+        <UserForm :submitting="submitting" @submit="handleSubmit" />
     </section>
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { UserPlus } from 'lucide-vue-next'
@@ -20,9 +23,27 @@ import UserForm from './components/UserForm.vue'
 
 const { t } = useI18n()
 const router = useRouter()
+const error = ref('')
+const submitting = ref(false)
+
+const extractError = (err) => {
+    const data = err?.response?.data
+    if (data?.errors) {
+        return Object.values(data.errors).flat().join('\n')
+    }
+    return data?.message || err?.message || 'Saqlashda xatolik yuz berdi'
+}
 
 const handleSubmit = async (payload) => {
-    await userService.create(payload)
-    await router.push('/admin/users')
+    error.value = ''
+    submitting.value = true
+    try {
+        await userService.create(payload)
+        await router.push('/admin/users')
+    } catch (err) {
+        error.value = extractError(err)
+    } finally {
+        submitting.value = false
+    }
 }
 </script>

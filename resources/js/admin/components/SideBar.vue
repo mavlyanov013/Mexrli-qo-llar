@@ -6,19 +6,20 @@ import {
     UserCog,
     HandCoins,
     HeartPulse,
-    HandHeart,
     Users,
     Newspaper,
     CircleHelp,
     CreditCard,
     FileText,
     ClipboardList,
-    BarChart3,
-    Settings,
     Mail,
+    Activity,
+    MapPin,
 } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { canAccessAdminTab } from '@/admin/utils/permissions'
+import { usePermissions } from '@/composables/usePermissions'
 
 const props = defineProps({
     isOpen: {
@@ -34,25 +35,32 @@ const props = defineProps({
 const { t } = useI18n()
 const route = useRoute()
 const emit = defineEmits(['close'])
+const { isSuperAdmin } = usePermissions()
 
 const navItems = computed(() => [
-    { to: '/admin/dashboard', label: t('admin.dashboard'), icon: LayoutDashboard },
-    { to: '/admin/partners', label: t('admin.partners'), icon: Handshake },
-    { to: '/admin/users', label: t('admin.users'), icon: UserCog },
-    { to: '/admin/payments', label: t('admin.payments'), icon: CreditCard },
-    { to: '/admin/donations', label: t('admin.donations'), icon: HandCoins },
-    { to: '/admin/cases', label: t('admin.cases'), icon: HeartPulse },
-    { to: '/admin/help-requests', label: "Yordam so‘rovlari", icon: ClipboardList },
-    { to: '/admin/about-sections', label: "Biz haqimizda bo‘limlari", icon: FileText },
-    { to: '/admin/news', label: "Yangiliklar", icon: Newspaper },
-    { to: '/admin/faq', label: "FAQ-Ko‘p so‘raladigan savollar", icon: CircleHelp },
-    // { to: '/admin/blog', label: t('admin.blog'), icon: Newspaper },
-    { to: '/admin/volunteers', label: t('admin.volunteers'), icon: Users },
-    { to: '/admin/messages', label: t('admin.messages'), icon: Mail },
-    // { to: '/admin/pages', label: t('admin.pages'), icon: FileText },
-    // { to: '/admin/reports', label: t('admin.reports'), icon: BarChart3 },
-    // { to: '/admin/settings', label: t('admin.settings'), icon: Settings },
+    { to: '/admin/dashboard', label: t('admin.dashboard'), icon: LayoutDashboard, tab: 'overview' },
+    { to: '/admin/partners', label: t('admin.partners'), icon: Handshake, tab: 'partners' },
+    { to: '/admin/users', label: t('admin.users'), icon: UserCog, tab: 'users' },
+    { to: '/admin/payments', label: t('admin.payments'), icon: CreditCard, tab: 'payments' },
+    { to: '/admin/donations', label: t('admin.donations'), icon: HandCoins, tab: 'donations' },
+    { to: '/admin/cases', label: t('admin.cases'), icon: HeartPulse, tab: 'cases' },
+    { to: '/admin/help-requests', label: "Yordam so‘rovlari", icon: ClipboardList, tab: 'help-requests' },
+    { to: '/admin/about-sections', label: 'Biz haqimizda', icon: FileText, tab: 'about-sections' },
+    { to: '/admin/contact-info', label: "Aloqa ma'lumotlari", icon: MapPin, tab: 'contact-info' },
+    { to: '/admin/news', label: "Yangiliklar", icon: Newspaper, tab: 'news' },
+    { to: '/admin/faq', label: "FAQ-Ko‘p so‘raladigan savollar", icon: CircleHelp, tab: 'faq' },
+    { to: '/admin/treatment-processes', label: 'Davolanish jarayoni', icon: Activity, tab: 'treatment-processes' },
+    { to: '/admin/volunteers', label: t('admin.volunteers'), icon: Users, tab: 'volunteers' },
+    { to: '/admin/messages', label: t('admin.messages'), icon: Mail, tab: 'messages' },
 ])
+
+const visibleNavItems = computed(() => navItems.value.filter((item) => {
+    if ((item.tab === 'payments' || item.tab === 'donations' || item.tab === 'users') && !isSuperAdmin.value) {
+        return false
+    }
+
+    return canAccessAdminTab(props.user, item.tab)
+}))
 </script>
 
 <template>
@@ -64,11 +72,11 @@ const navItems = computed(() => [
 
     <aside
         :class="[
-            'fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col p-4 transition-transform duration-200',
+            'fixed inset-y-0 left-0 z-50 w-64 h-screen bg-white border-r border-gray-200 flex flex-col overflow-hidden p-4 transition-transform duration-200',
             isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         ]"
     >
-        <div class="mb-8 flex items-start justify-between">
+        <div class="shrink-0 mb-4 flex items-start justify-between">
             <div class="flex items-center gap-3">
                 <img
                     src="/public/images/logo.png"
@@ -91,22 +99,42 @@ const navItems = computed(() => [
             </button>
         </div>
 
-        <nav class="space-y-2">
+        <nav class="sidebar-nav flex-1 min-h-0 overflow-y-auto overscroll-contain space-y-2 pr-1 -mr-1">
             <router-link
-                v-for="item in navItems"
+                v-for="item in visibleNavItems"
                 :key="item.to"
                 :to="item.to"
                 @click="$emit('close')"
                 :class="[
-                    'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors flex items-center gap-3',
+                    'w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-colors flex items-center gap-3 shrink-0',
                     route.path.startsWith(item.to)
                         ? 'bg-[#2A7DE1] text-white shadow-sm'
                         : 'text-gray-600 hover:bg-gray-50'
                 ]"
             >
-                <component :is="item.icon" class="w-4.5 h-4.5" />
-                <span>{{ item.label }}</span>
+                <component :is="item.icon" class="w-4.5 h-4.5 shrink-0" />
+                <span class="leading-snug">{{ item.label }}</span>
             </router-link>
         </nav>
     </aside>
 </template>
+
+<style scoped>
+.sidebar-nav {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 9999px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+}
+</style>

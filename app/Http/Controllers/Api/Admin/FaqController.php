@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\FaqResource;
 use App\Models\Faq;
+use App\Support\LocalizedContent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -34,13 +35,20 @@ class FaqController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'question' => ['required', 'string', 'max:500'],
-            'answer' => ['required', 'string'],
-            'category' => ['nullable', 'string', 'max:150'],
-            'order' => ['nullable', 'integer', 'min:0'],
-            'is_active' => ['sometimes', 'boolean'],
-        ]);
+        $validated = $request->validate(array_merge(
+            [
+                'category' => ['nullable', 'string', 'max:150'],
+                'order' => ['nullable', 'integer', 'min:0'],
+                'is_active' => ['sometimes', 'boolean'],
+            ],
+            LocalizedContent::adminValidationRules('question', true, 500),
+            LocalizedContent::adminValidationRules('answer', true)
+        ));
+
+        $validated = LocalizedContent::syncLegacyColumns(
+            LocalizedContent::prepareAdminLocalized($validated, ['question', 'answer']),
+            ['question', 'answer']
+        );
 
         $faq = Faq::create($validated);
 
@@ -53,13 +61,21 @@ class FaqController extends Controller
     public function update(Request $request, int $id): JsonResponse
     {
         $faq = Faq::query()->findOrFail($id);
-        $validated = $request->validate([
-            'question' => ['sometimes', 'string', 'max:500'],
-            'answer' => ['sometimes', 'string'],
-            'category' => ['nullable', 'string', 'max:150'],
-            'order' => ['nullable', 'integer', 'min:0'],
-            'is_active' => ['sometimes', 'boolean'],
-        ]);
+        $validated = $request->validate(array_merge(
+            [
+                'category' => ['nullable', 'string', 'max:150'],
+                'order' => ['nullable', 'integer', 'min:0'],
+                'is_active' => ['sometimes', 'boolean'],
+            ],
+            LocalizedContent::adminValidationRules('question', true, 500),
+            LocalizedContent::adminValidationRules('answer', true)
+        ));
+
+        $validated = LocalizedContent::syncLegacyColumns(
+            LocalizedContent::prepareAdminLocalized($validated, ['question', 'answer']),
+            ['question', 'answer']
+        );
+
         $faq->update($validated);
 
         return response()->json([

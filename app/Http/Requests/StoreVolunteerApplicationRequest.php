@@ -17,7 +17,7 @@ class StoreVolunteerApplicationRequest extends FormRequest
         return [
             'full_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:50'],
+            'phone' => ['required', 'regex:/^\+998[0-9]{9}$/'],
             'city' => ['nullable', 'string', 'max:255'],
             'role_interest' => [
                 'nullable',

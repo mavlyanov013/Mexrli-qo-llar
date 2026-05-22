@@ -2,9 +2,7 @@
     <div class="pt-24 pb-20 min-h-screen bg-gray-50">
         <div class="max-w-3xl mx-auto px-4 sm:px-6">
             <div v-if="step === 'success'" class="text-center py-20">
-                <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
-                    <span class="text-4xl text-[#4CAF50]">✓</span>
-                </div>
+                <IconBadge :icon="CircleCheck" tone="green" size="lg" class="mx-auto mb-6" />
 
                 <h2 class="text-3xl font-bold text-gray-900 mb-3">
                     {{ t('donatePage.successTitle') }}
@@ -19,9 +17,7 @@
 
             <div v-else>
                 <div class="text-center mb-10">
-                    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-orange-50 flex items-center justify-center">
-                        <span class="text-3xl text-[#FF9800]">❤</span>
-                    </div>
+                    <IconBadge :icon="Heart" tone="red" size="lg" class="mx-auto mb-4" />
 
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
                         {{ t('donatePage.title') }}
@@ -38,7 +34,7 @@
 
                     <div v-if="caseData" class="mt-4 space-y-2">
                         <div class="inline-flex items-center gap-2 bg-blue-50 text-[#2A7DE1] px-4 py-2 rounded-full text-sm font-medium">
-                            {{ t('donatePage.donatingFor', { name: caseData.name }) }}
+                            {{ t('donatePage.donatingFor', { name: content(caseData, 'name') }) }}
                         </div>
 
                         <div class="flex items-center justify-center gap-3 text-sm text-gray-500 flex-wrap">
@@ -56,30 +52,6 @@
 
                 <form class="space-y-6" @submit.prevent="handleSubmit">
                     <div class="bg-white rounded-3xl p-6 md:p-7 border border-gray-100 shadow-sm">
-                        <div class="flex gap-2 mb-6">
-                            <button
-                                type="button"
-                                class="flex-1 rounded-2xl px-4 py-3 border font-semibold transition-all"
-                                :class="type === 'one_time'
-                                    ? 'bg-[#2A7DE1] text-white border-[#2A7DE1]'
-                                    : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'"
-                                @click="type = 'one_time'"
-                            >
-                                {{ t('donatePage.oneTime') }}
-                            </button>
-
-                            <button
-                                type="button"
-                                class="flex-1 rounded-2xl px-4 py-3 border font-semibold transition-all"
-                                :class="type === 'monthly'
-                                    ? 'bg-[#2A7DE1] text-white border-[#2A7DE1]'
-                                    : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400'"
-                                @click="type = 'monthly'"
-                            >
-                                {{ t('donatePage.monthly') }}
-                            </button>
-                        </div>
-
                         <div class="mb-5">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 {{ t('donatePage.selectedService') }}
@@ -92,7 +64,7 @@
                                 <option value="general">
                                     {{
                                         caseData
-                                            ? t('public.donate.forCaseSuffix', { name: caseData.name })
+                                            ? t('public.donate.forCaseSuffix', { name: content(caseData, 'name') })
                                             : t('donatePage.serviceOptions.general')
                                     }}
                                 </option>
@@ -101,6 +73,34 @@
                                 <option value="household">{{ t('donatePage.serviceOptions.household') }}</option>
                                 <option value="home_repair">{{ t('donatePage.serviceOptions.home_repair') }}</option>
                             </select>
+                        </div>
+
+                        <div v-if="!caseIdFromRoute" class="mb-5">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ t('donatePage.selectCase') }}
+                            </label>
+
+                            <select
+                                v-model="caseId"
+                                :disabled="casesLoading"
+                                class="rounded-2xl h-12 bg-gray-50 border border-gray-300 w-full px-4 outline-none disabled:opacity-60"
+                                @change="onCaseSelectChange"
+                            >
+                                <option value="">
+                                    {{ casesLoading ? t('donatePage.casesLoading') : t('donatePage.noCaseSelected') }}
+                                </option>
+                                <option
+                                    v-for="caseItem in activeCases"
+                                    :key="caseItem.id"
+                                    :value="String(caseItem.id)"
+                                >
+                                    {{ caseOptionLabel(caseItem) }}
+                                </option>
+                            </select>
+
+                            <p v-if="!casesLoading && activeCases.length === 0" class="text-sm text-gray-500 mt-2">
+                                {{ t('donatePage.noActiveCases') }}
+                            </p>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
@@ -138,94 +138,6 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-3xl p-6 md:p-7 border border-gray-100 shadow-sm">
-                        <label class="block text-sm font-medium text-gray-700 mb-3">
-                            {{ t('donatePage.paymentMethod') }}
-                        </label>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                            <button
-                                type="button"
-                                class="rounded-2xl p-4 border-2 text-left transition-all"
-                                :class="paymentMethod === 'paycom'
-                ? 'border-[#2A7DE1] bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'"
-                                @click="paymentMethod = 'paycom'"
-                            >
-                                <div class="font-bold text-gray-900">{{ t('public.donate.paymentMethods.paycom.title') }}</div>
-                                <div class="text-sm text-gray-500 mt-1">{{ t('public.donate.paymentMethods.paycom.description') }}</div>
-                            </button>
-
-                            <button
-                                type="button"
-                                class="rounded-2xl p-4 border-2 text-left transition-all"
-                                :class="paymentMethod === 'click'
-                ? 'border-[#2A7DE1] bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'"
-                                @click="paymentMethod = 'click'"
-                            >
-                                <div class="font-bold text-gray-900">{{ t('public.donate.paymentMethods.click.title') }}</div>
-                                <div class="text-sm text-gray-500 mt-1">{{ t('public.donate.paymentMethods.click.description') }}</div>
-                            </button>
-
-                            <button
-                                type="button"
-                                class="rounded-2xl p-4 border-2 text-left transition-all"
-                                :class="paymentMethod === 'paynet'
-                ? 'border-[#2A7DE1] bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'"
-                                @click="paymentMethod = 'paynet'"
-                            >
-                                <div class="font-bold text-gray-900">{{ t('public.donate.paymentMethods.paynet.title') }}</div>
-                                <div class="text-sm text-gray-500 mt-1">{{ t('public.donate.paymentMethods.paynet.description') }}</div>
-                            </button>
-
-                            <button
-                                type="button"
-                                class="rounded-2xl p-4 border-2 text-left transition-all"
-                                :class="paymentMethod === 'uzumbank'
-                ? 'border-[#2A7DE1] bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'"
-                                @click="paymentMethod = 'uzumbank'"
-                            >
-                                <div class="font-bold text-gray-900">{{ t('public.donate.paymentMethods.uzumbank.title') }}</div>
-                                <div class="text-sm text-gray-500 mt-1">{{ t('public.donate.paymentMethods.uzumbank.description') }}</div>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-3xl p-6 md:p-7 border border-gray-100 shadow-sm space-y-4">
-                        <input
-                            v-model="name"
-                            type="text"
-                            :placeholder="t('donatePage.fullName')"
-                            class="rounded-2xl h-12 border border-gray-300 w-full px-4 outline-none"
-                            required
-                        />
-
-                        <input
-                            v-model="phone"
-                            type="tel"
-                            :placeholder="t('donatePage.phone')"
-                            class="rounded-2xl h-12 border border-gray-300 w-full px-4 outline-none"
-                            required
-                        />
-
-                        <textarea
-                            v-model="message"
-                            rows="4"
-                            :placeholder="t('donatePage.messageOptional')"
-                            class="rounded-2xl resize-none border border-gray-300 w-full px-4 py-3 outline-none"
-                        />
-
-                        <label class="flex items-center gap-2">
-                            <input v-model="anonymous" type="checkbox" />
-                            <span class="text-sm text-gray-600">
-                                {{ t('donatePage.anonymous') }}
-                            </span>
-                        </label>
-                    </div>
-
                     <p v-if="errorText" class="text-sm text-red-600 text-center">
                         {{ errorText }}
                     </p>
@@ -241,8 +153,9 @@
                         class="w-full h-14 bg-[#FF9800] hover:bg-[#F57C00] text-white rounded-2xl text-lg font-semibold shadow-xl shadow-orange-200/50 disabled:opacity-60"
                     >
                         <span v-if="submitting">{{ t('donatePage.processing') }}</span>
-                        <span v-else>
-                            ❤ {{ t('donatePage.completeDonation', { amount: `${Number(finalAmount || 0).toLocaleString()} ${t('public.donate.sumSuffix')}` }) }}
+                        <span v-else class="inline-flex items-center justify-center gap-2">
+                            <IconBadge :icon="Heart" tone="red" size="xs" class="shrink-0" />
+                            {{ t('donatePage.completeDonation', { amount: `${Number(finalAmount || 0).toLocaleString()} ${t('public.donate.sumSuffix')}` }) }}
                         </span>
                     </button>
                 </form>
@@ -252,13 +165,19 @@
 </template>
 
 <script setup>
-import {computed, onMounted, reactive, ref, watch} from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { CircleCheck, Heart } from 'lucide-vue-next'
+import IconBadge from '@/components/shared/IconBadge.vue'
+import { useLocalizedDisplay } from '@/composables/useLocalizedDisplay'
+import api from '../services/api'
+import { normalizeList } from '../services/serviceHelpers'
 import donationService from '../services/donationService'
 import caseService from '../services/caseService'
 
 const { t, tm } = useI18n()
+const { content } = useLocalizedDisplay()
 const route = useRoute()
 
 const allowedServices = ['education', 'surgery', 'household', 'home_repair', 'general']
@@ -272,8 +191,11 @@ const presetAmounts = computed(() => [
     { amount: 500000, label: tm('donatePage.presetLabels')[5] },
 ])
 
-const caseId = ref(route.query.caseId || '')
+const caseIdFromRoute = ref(route.query.caseId ? String(route.query.caseId) : '')
+const caseId = ref(caseIdFromRoute.value)
 const caseData = ref(null)
+const activeCases = ref([])
+const casesLoading = ref(false)
 
 const initialService = allowedServices.includes(route.query.service)
     ? route.query.service
@@ -282,17 +204,15 @@ const initialService = allowedServices.includes(route.query.service)
 const serviceType = ref(initialService)
 
 const step = ref('form')
-const type = ref('one_time')
 const amount = ref(10000)
 const customAmount = ref('')
-const name = ref('')
-const message = ref('')
-const anonymous = ref(false)
 const paymentMethod = ref('paycom')
 const submitting = ref(false)
 const errorText = ref('')
 
-const selectedServiceLabel = computed(() => t(`donatePage.serviceOptions.${serviceType.value}`))
+const selectedServiceLabel = computed(() => {
+    return t(`donatePage.serviceOptions.${serviceType.value}`)
+})
 
 const finalAmount = computed(() => {
     const value = customAmount.value ? parseFloat(customAmount.value) : amount.value
@@ -312,16 +232,47 @@ const remainingAmount = computed(() => {
     )
 })
 
+const caseOptionLabel = (caseItem) => {
+    return content(caseItem, 'name') || caseItem.title || caseItem.name || ''
+}
+
 const selectPreset = (value) => {
     amount.value = value
     customAmount.value = ''
 }
 
-const fetchCase = async () => {
-    if (!caseId.value) return
+const syncCaseData = async () => {
+    if (!caseId.value) {
+        caseData.value = null
+        return
+    }
 
-    const result = await caseService.getCaseById(caseId.value)
+    const fromList = activeCases.value.find((item) => String(item.id) === String(caseId.value))
+    if (fromList) {
+        caseData.value = fromList
+        return
+    }
+
+    const result = await caseService.getCaseById(caseId.value, { admin: false })
     caseData.value = result.data || null
+}
+
+const fetchActiveCases = async () => {
+    casesLoading.value = true
+
+    try {
+        const response = await api.get('/cases/active')
+        activeCases.value = normalizeList(response)
+    } catch (error) {
+        console.error('Active cases load error:', error)
+        activeCases.value = []
+    } finally {
+        casesLoading.value = false
+    }
+}
+
+const onCaseSelectChange = async () => {
+    await syncCaseData()
 }
 
 watch(
@@ -331,8 +282,6 @@ watch(
     },
     { immediate: true }
 )
-
-const phone = ref('')
 
 const handleSubmit = async () => {
     errorText.value = ''
@@ -345,18 +294,22 @@ const handleSubmit = async () => {
     submitting.value = true
 
     try {
-        const checkout = await donationService.initCheckout({
-            case_id: caseId.value || undefined,
+        const payload = {
             service_type: serviceType.value,
-            donor_name: name.value,
-            donor_phone: phone.value,
+            donor_name: 'Anonymous',
+            donor_phone: '-',
             amount: Number(finalAmount.value),
             currency: 'UZS',
-            type: type.value,
-            message: message.value,
-            is_anonymous: anonymous.value,
+            type: 'one_time',
+            is_anonymous: true,
             payment_method: paymentMethod.value,
-        })
+        }
+
+        if (caseId.value) {
+            payload.case_id = caseId.value
+        }
+
+        const checkout = await donationService.initCheckout(payload)
 
         if (checkout?.checkout_url) {
             window.location.href = checkout.checkout_url
@@ -372,5 +325,8 @@ const handleSubmit = async () => {
     }
 }
 
-onMounted(fetchCase)
+onMounted(async () => {
+    await fetchActiveCases()
+    await syncCaseData()
+})
 </script>

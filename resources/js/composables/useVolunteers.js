@@ -19,7 +19,6 @@ export function useVolunteers() {
 
     const updateVolunteer = async (id, payload) => volunteerService.update(id, payload)
     const deleteVolunteer = async (id) => volunteerService.remove(id)
-    const submitVolunteer = async (payload) => volunteerService.submit(payload)
 
-    return { volunteers, meta, loading, error, fetchVolunteers, updateVolunteer, deleteVolunteer, submitVolunteer }
+    return { volunteers, meta, loading, error, fetchVolunteers, updateVolunteer, deleteVolunteer }
 }

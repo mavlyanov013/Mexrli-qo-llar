@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ class Payment extends Model
         'legacy_mongo_id',
         'legacy_local_id',
         'provider',
+        'method',
         'transaction_id',
         'status',
         'category',
@@ -45,6 +47,27 @@ class Payment extends Model
     public const STATUS_CANCELLED = 'cancelled';
     public const STATUS_FAILED = 'failed';
     public const STATUS_FUNDED = 'funded';
+
+    public const PROVIDER_CASH = 'cash';
+
+    public function scopeOnlineOnly(Builder $query): Builder
+    {
+        return $query
+            ->whereRaw("LOWER(COALESCE(provider, '')) NOT IN ('cash', 'naxt')")
+            ->where(function (Builder $inner) {
+                $inner->whereNull('method')
+                    ->orWhereRaw("LOWER(COALESCE(method, '')) NOT IN ('cash', 'naxt')");
+            });
+    }
+
+    public function isCashPayment(): bool
+    {
+        $provider = strtolower((string) $this->provider);
+        $method = strtolower((string) ($this->method ?? ''));
+
+        return in_array($provider, [self::PROVIDER_CASH, 'naxt'], true)
+            || in_array($method, [self::PROVIDER_CASH, 'naxt'], true);
+    }
 
     public function isPending(): bool
     {

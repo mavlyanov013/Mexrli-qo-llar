@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasLocalizedAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,16 +10,40 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class CaseItem extends Model
 {
     use HasFactory;
+    use HasLocalizedAttributes;
 
-    protected $fillable = [
+    public array $localizedAttributes = [
         'name',
-        'age',
-        'photo_url',
         'location',
-        'phone',
         'condition',
         'story',
         'short_description',
+    ];
+
+    protected $fillable = [
+        'name',
+        'name_uz',
+        'name_oz',
+        'name_ru',
+        'age',
+        'photo_url',
+        'location',
+        'location_uz',
+        'location_oz',
+        'location_ru',
+        'phone',
+        'condition',
+        'condition_uz',
+        'condition_oz',
+        'condition_ru',
+        'story',
+        'story_uz',
+        'story_oz',
+        'story_ru',
+        'short_description',
+        'short_description_uz',
+        'short_description_oz',
+        'short_description_ru',
         'goal_amount',
         'raised_amount',
         'urgency',
@@ -49,5 +74,10 @@ class CaseItem extends Model
     public function helpRequests(): HasMany
     {
         return $this->hasMany(HelpRequest::class, 'case_id');
+    }
+
+    public function treatmentProcesses(): HasMany
+    {
+        return $this->hasMany(TreatmentProcess::class, 'case_id');
     }
 }

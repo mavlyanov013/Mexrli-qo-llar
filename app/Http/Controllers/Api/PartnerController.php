@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PartnerResource;
 use App\Models\Partner;
+use App\Support\LocalizedContent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -32,7 +34,7 @@ class PartnerController extends Controller
         $partners = $query->paginate((int) $request->input('per_page', 20));
 
         return response()->json([
-            'data' => $partners->items(),
+            'data' => PartnerResource::collection($partners->items()),
             'meta' => [
                 'current_page' => $partners->currentPage(),
                 'last_page' => $partners->lastPage(),
@@ -44,22 +46,28 @@ class PartnerController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', 'string', 'in:foundation,ngo,government,medical,media,corporate'],
-            'logo_url' => ['nullable', 'string', 'max:500'],
-            'website' => ['nullable', 'string', 'max:500'],
-            'description' => ['nullable', 'string'],
-            'is_active' => ['sometimes', 'boolean'],
-        ]);
+        $validated = $request->validate(array_merge(
+            [
+                'type' => ['required', 'string', 'in:foundation,ngo,government,medical,media,corporate'],
+                'logo_url' => ['nullable', 'string', 'max:2048'],
+                'website' => ['nullable', 'string', 'max:500'],
+                'is_active' => ['sometimes', 'boolean'],
+            ],
+            LocalizedContent::adminValidationRules('name', true, 255),
+            LocalizedContent::adminValidationRules('description', true)
+        ));
 
+        $validated = LocalizedContent::syncLegacyColumns(
+            LocalizedContent::prepareAdminLocalized($validated, ['name', 'description']),
+            ['name', 'description']
+        );
         $validated['is_active'] = $validated['is_active'] ?? true;
 
         $partner = Partner::create($validated);
 
         return response()->json([
             'message' => 'Hamkor muvaffaqiyatli yaratildi',
-            'data' => $partner,
+            'data' => new PartnerResource($partner),
         ], 201);
     }
 
@@ -68,7 +76,7 @@ class PartnerController extends Controller
         $partner = Partner::query()->findOrFail($id);
 
         return response()->json([
-            'data' => $partner,
+            'data' => new PartnerResource($partner),
         ]);
     }
 
@@ -76,19 +84,27 @@ class PartnerController extends Controller
     {
 
         $partner = Partner::query()->findOrFail($id);
-        $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
-            'type' => ['required', 'string', 'in:foundation,ngo,government,medical,media,corporate'],
-            'logo_url' => ['nullable', 'string', 'max:500'],
-            'website' => ['nullable', 'string', 'max:500'],
-            'description' => ['nullable', 'string'],
-            'is_active' => ['sometimes', 'boolean'],
-        ]);
+        $validated = $request->validate(array_merge(
+            [
+                'type' => ['required', 'string', 'in:foundation,ngo,government,medical,media,corporate'],
+                'logo_url' => ['nullable', 'string', 'max:2048'],
+                'website' => ['nullable', 'string', 'max:500'],
+                'is_active' => ['sometimes', 'boolean'],
+            ],
+            LocalizedContent::adminValidationRules('name', true, 255),
+            LocalizedContent::adminValidationRules('description', true)
+        ));
+
+        $validated = LocalizedContent::syncLegacyColumns(
+            LocalizedContent::prepareAdminLocalized($validated, ['name', 'description']),
+            ['name', 'description']
+        );
+
         $partner->update($validated);
 
         return response()->json([
             'message' => 'Partner updated successfully',
-            'data' => $partner->fresh(),
+            'data' => new PartnerResource($partner->fresh()),
         ]);
     }
 

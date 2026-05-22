@@ -10,49 +10,24 @@ class AdminMiddleware
 {
     private const ROLE_CAPABILITIES = [
         'super_admin' => ['*'],
-        'admin' => [
-            'users.view', 'users.create', 'users.update', 'users.delete',
-            'cases.view', 'cases.create', 'cases.update', 'cases.delete',
-            'help_requests.view', 'help_requests.update',
-            'volunteers.view', 'volunteers.update',
-            'messages.view', 'messages.update', 'messages.delete',
-            'blog.view', 'blog.create', 'blog.update', 'blog.delete',
-            'donations.view', 'donations.update', 'donations.delete',
-            'donations.create',
-            'payments.view', 'payments.create', 'payments.update', 'payments.delete',
-            'partners.view', 'partners.create', 'partners.update', 'partners.delete',
-            'media.create', 'media.delete',
-            'pages.view', 'pages.create', 'pages.update', 'pages.delete',
-            'sections.create', 'sections.update', 'sections.delete',
-            'reports.view', 'reports.create', 'reports.update', 'reports.delete',
-            'settings.view', 'settings.update',
-        ],
         'editor' => [
             'cases.view', 'cases.create', 'cases.update', 'cases.delete',
-            'help_requests.view', 'help_requests.update',
+            'help_requests.view', 'help_requests.update', 'help_requests.create',
             'volunteers.view', 'volunteers.update',
             'messages.view', 'messages.update',
             'blog.view', 'blog.create', 'blog.update', 'blog.delete',
-            'donations.view',
-            'partners.view',
-        ],
-        'finance' => [
-            'payments.view',
-            'donations.view',
-            'users.view',
-            'reports.view',
-            'partners.view',
+            'news.view', 'news.create', 'news.update', 'news.delete',
+            'faq.view', 'faq.create', 'faq.update', 'faq.delete',
+            'treatment_processes.view', 'treatment_processes.create', 'treatment_processes.update', 'treatment_processes.delete',
+            'sections.view', 'sections.create', 'sections.update', 'sections.delete',
+            'pages.view', 'pages.update',
+            'partners.view', 'partners.create', 'partners.update', 'partners.delete',
+            'media.create', 'media.delete',
         ],
     ];
 
     public function handle(Request $request, Closure $next): Response
     {
-        \Log::info('USER DEBUG', [
-            'user' => $request->user(),
-            'token' => $request->bearerToken(),
-            'headers' => $request->headers->all(),
-        ]);
-
         $user = auth('api')->user();
 
         if (!$user) {
@@ -61,7 +36,43 @@ class AdminMiddleware
             ], 401);
         }
 
-        return $next($request);
+        $capability = $this->resolveCapability($request);
+
+        if ($user->hasRole('super_admin')) {
+            return $next($request);
+        }
+
+        foreach ($this->resolveUserRoles($user) as $role) {
+            if ($this->hasCapability($role, $capability)) {
+                return $next($request);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Forbidden',
+        ], 403);
+    }
+
+    private function resolveUserRoles($user): array
+    {
+        $roles = $user->roles->pluck('name')->filter()->map(function ($role) {
+            return $this->normalizeRoleName((string) $role);
+        })->unique()->values()->all();
+
+        if ($user->role) {
+            $roles[] = $this->normalizeRoleName($user->role);
+        }
+
+        if ($user->is_admin) {
+            $roles[] = 'super_admin';
+        }
+
+        return array_values(array_unique($roles));
+    }
+
+    private function normalizeRoleName(string $role): string
+    {
+        return $role === 'admin' ? 'super_admin' : $role;
     }
 
     private function resolveCapability(Request $request): string
@@ -87,8 +98,14 @@ class AdminMiddleware
             'volunteer-applications' => 'volunteers',
             'contact-messages' => 'messages',
             'blog-posts' => 'blog',
+            'news' => 'news',
+            'faq' => 'faq',
+            'treatment-processes' => 'treatment_processes',
             'users' => 'users',
             'pages' => 'pages',
+            'about' => 'sections',
+            'about-sections' => 'sections',
+            'contact-info' => 'sections',
             'sections' => 'sections',
             'reports' => 'reports',
             'settings' => 'settings',

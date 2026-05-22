@@ -6,9 +6,7 @@
         </div>
 
         <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center relative z-10">
-            <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-white/20 flex items-center justify-center">
-                <span class="w-8 h-8 text-white text-2xl">❤</span>
-            </div>
+            <IconBadge :icon="Heart" tone="red" size="lg" class="mx-auto mb-6" />
 
             <h2 class="text-3xl md:text-5xl font-bold text-white mb-5">
                 {{ t('finalCta.titleLine1') }}<br />
@@ -36,6 +34,8 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
+import { Heart } from 'lucide-vue-next'
+import IconBadge from '../shared/IconBadge.vue'
 
 const { t } = useI18n()
 </script>

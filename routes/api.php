@@ -13,6 +13,13 @@ use App\Http\Controllers\Api\BlogPostController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\NewsController;
+use App\Http\Controllers\Api\TreatmentProcessController;
+use App\Http\Controllers\Api\AboutContentController;
+use App\Http\Controllers\Api\TransparencyChartController;
+use App\Http\Controllers\Api\TodayStatsController;
+use App\Http\Controllers\Api\ContactInfoController;
+use App\Http\Controllers\Api\Admin\AboutContentController as AdminAboutContentController;
+use App\Http\Controllers\Api\Admin\ContactInfoController as AdminContactInfoController;
 use App\Http\Controllers\Api\ContactMessageController;
 
 use App\Http\Controllers\Api\Billing\PaycomController;
@@ -29,6 +36,7 @@ use App\Http\Controllers\Api\Admin\SectionController as AdminSectionController;
 use App\Http\Controllers\Api\Admin\MediaController as AdminMediaController;
 use App\Http\Controllers\Api\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Api\Admin\NewsController as AdminNewsController;
+use App\Http\Controllers\Api\Admin\TreatmentProcessController as AdminTreatmentProcessController;
 
 
 use Illuminate\Support\Facades\Storage;
@@ -115,11 +123,17 @@ Route::prefix('v1')->group(function () {
     Route::get('/news/{slug}', [NewsController::class, 'show']);
     Route::get('/faq', [FaqController::class, 'index']);
 
+    Route::get('/cases/active', [CaseController::class, 'active']);
     Route::get('/cases', [CaseController::class, 'index']);
     Route::get('/cases/{id}', [CaseController::class, 'show']);
+    Route::get('/cases/{id}/treatment-processes', [TreatmentProcessController::class, 'indexByCase']);
 
     Route::get('/home', [PageController::class, 'home']);
     Route::get('/pages/{slug}', [PageController::class, 'show']);
+    Route::get('/about/content', [AboutContentController::class, 'show']);
+    Route::get('/contact-info', [ContactInfoController::class, 'show']);
+    Route::get('/transparency/chart', [TransparencyChartController::class, 'show']);
+    Route::get('/stats/today', [TodayStatsController::class, 'show']);
 
 
     /*
@@ -164,19 +178,16 @@ Route::prefix('v1')->group(function () {
         Route::put('/cases/{id}', [CaseController::class, 'update']);
         Route::delete('/cases/{id}', [CaseController::class, 'destroy']);
 
-        // 💰 Donations (ALL, admin uchun)
-        Route::get('/donations', [DonationController::class, 'index']);
-        Route::post('/donations', [DonationController::class, 'store']);
-        Route::get('/donations/{id}', [DonationController::class, 'show']);
-        Route::put('/donations/{id}', [DonationController::class, 'update']);
-        Route::delete('/donations/{id}', [DonationController::class, 'destroy']);
+        // 💰 Donations / 💳 Payments (super_admin only)
+        Route::middleware(['role.super_admin'])->group(function () {
+            Route::get('/donations', [DonationController::class, 'index']);
+            Route::post('/donations', [DonationController::class, 'store']);
+            Route::get('/donations/{id}', [DonationController::class, 'show']);
+            Route::put('/donations/{id}', [DonationController::class, 'update']);
+            Route::delete('/donations/{id}', [DonationController::class, 'destroy']);
 
-        // 💳 Payments
-        Route::get('/payments', [AdminPaymentController::class, 'index']);
-        Route::post('/payments', [AdminPaymentController::class, 'store']);
-        Route::get('/payments/{id}', [AdminPaymentController::class, 'show']);
-        Route::put('/payments/{id}', [AdminPaymentController::class, 'update']);
-        Route::delete('/payments/{id}', [AdminPaymentController::class, 'destroy']);
+            Route::get('/payments', [AdminPaymentController::class, 'index']);
+        });
 
         // 🤝 Partners
         Route::get('/partners', [PartnerController::class, 'index']);
@@ -185,25 +196,28 @@ Route::prefix('v1')->group(function () {
         Route::put('/partners/{id}', [PartnerController::class, 'update']);
         Route::delete('/partners/{id}', [PartnerController::class, 'destroy']);
 
-        // 👤 Users
-        Route::get('/users', [AdminUserController::class, 'index']);
-        Route::post('/users', [AdminUserController::class, 'store']);
-        Route::get('/users/{id}', [AdminUserController::class, 'show']);
-        Route::put('/users/{id}', [AdminUserController::class, 'update']);
-        Route::delete('/users/{id}', [AdminUserController::class, 'destroy']);
+        // 👤 Users (super_admin only)
+        Route::middleware(['role.super_admin'])->group(function () {
+            Route::get('/users', [AdminUserController::class, 'index']);
+            Route::post('/users', [AdminUserController::class, 'store']);
+            Route::get('/users/{id}', [AdminUserController::class, 'show']);
+            Route::put('/users/{id}', [AdminUserController::class, 'update']);
+            Route::delete('/users/{id}', [AdminUserController::class, 'destroy']);
+        });
 
         // 📩 Help Requests
         Route::get('/help-requests', [HelpRequestController::class, 'index']);
         Route::get('/help-requests/{id}', [HelpRequestController::class, 'show']);
         Route::put('/help-requests/{id}', [HelpRequestController::class, 'update']);
+        Route::patch('/help-requests/{id}/status', [HelpRequestController::class, 'updateStatus']);
         Route::post('/help-requests/{id}/approve', [HelpRequestController::class, 'approve']);
         Route::post('/help-requests/{id}/reject', [HelpRequestController::class, 'reject']);
         Route::post('/help-requests/{id}/convert-to-case', [HelpRequestController::class, 'convertToCase']);
 
         // 🙋 Volunteers
-        Route::post('/volunteer-applications', [VolunteerApplicationController::class, 'store']);
         Route::get('/volunteer-applications', [VolunteerApplicationController::class, 'index']);
         Route::get('/volunteer-applications/{id}', [VolunteerApplicationController::class, 'show']);
+        Route::patch('/volunteer-applications/{id}', [VolunteerApplicationController::class, 'update']);
         Route::put('/volunteer-applications/{id}', [VolunteerApplicationController::class, 'update']);
         Route::delete('/volunteer-applications/{id}', [VolunteerApplicationController::class, 'destroy']);
 
@@ -237,6 +251,13 @@ Route::prefix('v1')->group(function () {
         Route::put('/faq/{id}', [AdminFaqController::class, 'update']);
         Route::delete('/faq/{id}', [AdminFaqController::class, 'destroy']);
 
+        // 🏥 Treatment processes
+        Route::get('/treatment-processes', [AdminTreatmentProcessController::class, 'index']);
+        Route::post('/treatment-processes', [AdminTreatmentProcessController::class, 'store']);
+        Route::get('/treatment-processes/{id}', [AdminTreatmentProcessController::class, 'show']);
+        Route::put('/treatment-processes/{id}', [AdminTreatmentProcessController::class, 'update']);
+        Route::delete('/treatment-processes/{id}', [AdminTreatmentProcessController::class, 'destroy']);
+
         // 📄 CMS Pages / Sections
         Route::get('/pages', [AdminPageController::class, 'index']);
         Route::post('/pages', [AdminPageController::class, 'store']);
@@ -244,6 +265,17 @@ Route::prefix('v1')->group(function () {
         Route::put('/pages/{id}', [AdminPageController::class, 'update']);
         Route::delete('/pages/{id}', [AdminPageController::class, 'destroy']);
         Route::get('/pages/{slug}', [PageController::class, 'showBySlug']);
+
+        Route::get('/about/content', [AdminAboutContentController::class, 'show']);
+        Route::put('/about/bank-details', [AdminAboutContentController::class, 'updateBank']);
+        Route::put('/about/legal-info', [AdminAboutContentController::class, 'updateLegal']);
+        Route::put('/about/documents/{key}', [AdminAboutContentController::class, 'updateDocument']);
+        Route::post('/about/team-members', [AdminAboutContentController::class, 'storeTeamMember']);
+        Route::put('/about/team-members/{id}', [AdminAboutContentController::class, 'updateTeamMember']);
+        Route::delete('/about/team-members/{id}', [AdminAboutContentController::class, 'destroyTeamMember']);
+
+        Route::get('/contact-info', [AdminContactInfoController::class, 'show']);
+        Route::put('/contact-info', [AdminContactInfoController::class, 'update']);
 
         Route::post('/sections', [AdminSectionController::class, 'store']);
         Route::put('/sections/{id}', [AdminSectionController::class, 'update']);

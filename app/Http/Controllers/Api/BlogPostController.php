@@ -11,7 +11,10 @@ class BlogPostController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = BlogPost::query()->latest();
+        $query = BlogPost::query()
+            ->where('status', 'published')
+            ->latest('published_at')
+            ->latest('id');
 
         if ($request->filled('category')) {
             $query->where('category', $request->string('category'));

@@ -19,12 +19,13 @@ export default {
         return response.data.data ?? response.data
     },
 
-    async getCaseById(id) {
+    async getCaseById(id, { admin = true } = {}) {
         try {
-            const response = await api.get(`/admin/cases/${id}`)
+            const endpoint = admin ? `/admin/cases/${id}` : `/cases/${id}`
+            const response = await api.get(endpoint)
 
             return {
-                data: response.data.data,
+                data: response.data.data ?? response.data,
                 error: null
             }
         } catch (error) {

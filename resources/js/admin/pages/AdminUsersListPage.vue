@@ -1,7 +1,7 @@
 <template>
     <AdminCrudShell
         :title="t('admin.users')"
-        create-to="/admin/users/create"
+        :create-to="isSuperAdmin ? '/admin/users/create' : null"
     >
         <!-- SEARCH -->
         <div class="mb-5 flex items-center gap-3">
@@ -86,6 +86,7 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import userService from '@/services/userService'
+import { usePermissions } from '@/composables/usePermissions'
 
 
 import {
@@ -103,6 +104,7 @@ import AdminEmptyState from '@/admin/components/common/AdminEmptyState.vue'
 import AdminPagination from '@/admin/components/common/AdminPagination.vue'
 
 const { t } = useI18n()
+const { isSuperAdmin } = usePermissions()
 
 const users = ref([])
 const loading = ref(false)
@@ -128,8 +130,17 @@ const fetchUsers = async (page = 1) => {
 }
 
 const removeUser = async (id) => {
-    await userService.remove(id)
-    await fetchUsers(meta.value?.current_page || 1)
+    if (!window.confirm('Foydalanuvchini o‘chirishni tasdiqlaysizmi?')) {
+        return
+    }
+
+    try {
+        await userService.remove(id)
+        await fetchUsers(meta.value?.current_page || 1)
+    } catch (err) {
+        const data = err?.response?.data
+        alert(data?.message || 'O‘chirishda xatolik yuz berdi')
+    }
 }
 
 onMounted(() => fetchUsers(1))
