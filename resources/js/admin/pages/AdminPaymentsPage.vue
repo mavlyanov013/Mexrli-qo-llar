@@ -6,14 +6,14 @@
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                     <AdminSearchInput
                         v-model="filters.q"
-                        placeholder="Qidirish (ID, tranzaksiya, donor)..."
+                        :placeholder="t('admin.placeholders.searchPayments')"
                     />
 
                     <select
                         v-model="filters.status"
                         class="h-10 rounded-lg border border-gray-300 px-3 text-sm"
                     >
-                        <option value="">Barcha holatlar</option>
+                        <option value="">{{ t('admin.allStatuses') }}</option>
                         <option
                             v-for="status in PAYMENT_STATUS_FILTER_OPTIONS"
                             :key="status.value"
@@ -27,7 +27,7 @@
                         v-model="filters.provider"
                         class="h-10 rounded-lg border border-gray-300 px-3 text-sm"
                     >
-                        <option value="">Barcha to‘lov tizimlari</option>
+                        <option value="">{{ t('admin.allProviders') }}</option>
                         <option
                             v-for="provider in ONLINE_PAYMENT_PROVIDER_OPTIONS"
                             :key="provider.value"
@@ -40,7 +40,7 @@
 
                 <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
                     <div class="flex flex-col gap-1">
-                        <label class="text-xs font-medium text-gray-500">Sanadan</label>
+                        <label class="text-xs font-medium text-gray-500">{{ t('admin.dateFrom') }}</label>
                         <input
                             v-model="filters.date_from"
                             type="date"
@@ -49,7 +49,7 @@
                     </div>
 
                     <div class="flex flex-col gap-1">
-                        <label class="text-xs font-medium text-gray-500">Sanagacha</label>
+                        <label class="text-xs font-medium text-gray-500">{{ t('admin.dateTo') }}</label>
                         <input
                             v-model="filters.date_to"
                             type="date"
@@ -63,7 +63,7 @@
                             class="h-10 flex-1 rounded-lg bg-[#2A7DE1] px-4 text-sm font-medium text-white hover:bg-[#2569c7]"
                             @click="applyFilters"
                         >
-                            Filtrlash
+                            {{ t('admin.filter') }}
                         </button>
 
                         <button
@@ -71,7 +71,7 @@
                             class="h-10 flex-1 rounded-lg border border-gray-300 px-4 text-sm text-gray-700 hover:border-gray-400"
                             @click="clearFilters"
                         >
-                            Tozalash
+                            {{ t('admin.reset') }}
                         </button>
                     </div>
                 </div>
@@ -86,15 +86,16 @@
                     </template>
 
                     <template #cell-amount="{ row }">
-                        {{ formatAmount(row.amount, row.currency) }}
+                        {{ formatAmountDisplay(row.amount, row.currency) }}
+                    </template>
+
+                    <template #cell-transaction_id="{ row }">
+                        {{ row.transaction_id || '—' }}
                     </template>
 
                     <template #cell-donor_name="{ row }">
-                        {{ row.payload?.donor_name || row.donation?.donor_name || '—' }}
-                    </template>
-
-                    <template #cell-donor_phone="{ row }">
-                        {{ row.payload?.donor_phone || row.donation?.donor_phone || '—' }}
+                        <span v-if="row.is_anonymous">{{ t('admin.anonymous') }}</span>
+                        <span v-else>{{ row.donor_name || row.payload?.donor_name || row.donation?.donor_name || '—' }}</span>
                     </template>
 
                     <template #cell-created_at="{ row }">
@@ -122,8 +123,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 import { PAYMENT_STATUSES } from '@/constants/statuses'
@@ -140,25 +141,25 @@ import AdminPagination from '@/admin/components/common/AdminPagination.vue'
 import AdminSearchInput from '@/admin/components/common/AdminSearchInput.vue'
 import ListState from '@/components/shared/ListState.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
+import { formatMoneyAmount } from '@/utils/formatAmount'
 
 const { t } = useI18n()
 const route = useRoute()
-const router = useRouter()
 
 const { payments, loading, error, fetchPayments, meta } = usePayments()
 
 const isListMode = computed(() => route.name === 'admin-payments')
 const title = computed(() => t('admin.payments'))
 
-const columns = [
+const columns = computed(() => [
     { key: 'id', label: 'ID' },
-    { key: 'provider', label: 'To‘lov tizimi' },
-    { key: 'amount', label: 'Summa' },
-    { key: 'donor_name', label: 'Donor ismi' },
-    { key: 'donor_phone', label: 'Telefon' },
-    { key: 'created_at', label: 'Sana' },
-    { key: 'status', label: 'Holat' },
-]
+    { key: 'transaction_id', label: t('admin.transactionId') },
+    { key: 'provider', label: t('admin.provider') },
+    { key: 'amount', label: t('admin.amount') },
+    { key: 'donor_name', label: t('admin.donorName') },
+    { key: 'created_at', label: t('admin.date') },
+    { key: 'status', label: t('admin.status') },
+])
 
 const filters = reactive({
     q: '',
@@ -230,26 +231,11 @@ const formatDate = (value) => {
     })
 }
 
-const formatAmount = (amount, currency = 'UZS') => {
-    const value = Number(amount || 0)
-    return `${value.toLocaleString('uz-UZ')} ${currency || 'UZS'}`
+const formatAmountDisplay = (amount, currency = 'UZS') => {
+    return formatMoneyAmount(amount, currency || 'UZS')
 }
 
-watch(() => route.fullPath, async () => {
-    if (!isListMode.value) {
-        router.replace('/admin/payments')
-        return
-    }
-
-    await fetchPage(currentPage.value)
-}, { immediate: true })
-
-onMounted(async () => {
-    if (!isListMode.value) {
-        router.replace('/admin/payments')
-        return
-    }
-
-    await fetchPage(1)
+onMounted(() => {
+    fetchPage(1)
 })
 </script>

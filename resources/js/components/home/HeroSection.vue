@@ -5,7 +5,7 @@
         <div class="absolute right-0 top-0 bottom-0 w-full lg:w-[55%]">
             <img
                 :src="featuredCase?.photo_url || heroImage"
-                :alt="featuredCase?.name || t('hero.imageAlt')"
+                :alt="featuredName || t('hero.imageAlt')"
                 class="w-full h-full object-cover"
             />
             <div class="absolute inset-0 bg-gradient-to-r from-white via-white/40 to-transparent" />
@@ -30,9 +30,9 @@
                             <span class="text-gray-600">{{ t('hero.raised') }}</span>
 
                             <span class="font-bold text-gray-900 text-right">
-                                {{ formatNumber(featuredCase.raised_amount || 0) }} UZS
+                                {{ formatMoney(featuredCase.raised_amount || 0) }}
                                 {{ t('hero.of') }}
-                                {{ formatNumber(featuredCase.goal_amount || 0) }} UZS
+                                {{ formatMoney(featuredCase.goal_amount || 0) }}
                             </span>
                         </div>
 
@@ -44,7 +44,7 @@
                         </div>
 
                         <p class="text-xs text-orange-600 mt-2 font-medium">
-                            {{ formatNumber(remainingAmount) }} UZS {{ t('hero.stillNeeded') }}
+                            {{ formatMoney(remainingAmount) }} {{ t('hero.stillNeeded') }}
                         </p>
                     </div>
 
@@ -83,8 +83,11 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { CircleCheck } from 'lucide-vue-next'
 import IconBadge from '../shared/IconBadge.vue'
+import { useLocalizedDisplay } from '@/composables/useLocalizedDisplay'
+import { formatMoneyAmount } from '@/utils/formatAmount'
 
 const { t } = useI18n()
+const { content } = useLocalizedDisplay()
 
 const props = defineProps({
     heroImage: {
@@ -97,10 +100,15 @@ const props = defineProps({
     },
 })
 
+const featuredName = computed(() => {
+    if (!props.featuredCase) return ''
+    return content(props.featuredCase, 'name')
+})
+
 const headline = computed(() => {
     if (props.featuredCase) {
         return t('hero.featuredHeadline', {
-            name: props.featuredCase.name,
+            name: featuredName.value,
             age: props.featuredCase.age,
         })
     }
@@ -109,7 +117,15 @@ const headline = computed(() => {
 })
 
 const story = computed(() => {
-    return props.featuredCase?.short_description || props.featuredCase?.story || t('hero.defaultStory')
+    if (!props.featuredCase) {
+        return t('hero.defaultStory')
+    }
+
+    return (
+        content(props.featuredCase, 'short_description')
+        || content(props.featuredCase, 'story')
+        || t('hero.defaultStory')
+    )
 })
 
 const progressPercent = computed(() => {
@@ -136,7 +152,5 @@ const donateLink = computed(() => {
     return '/donate'
 })
 
-const formatNumber = (value) => {
-    return Number(value || 0).toLocaleString()
-}
+const formatMoney = (value) => formatMoneyAmount(value, t('common.currencyCode'))
 </script>

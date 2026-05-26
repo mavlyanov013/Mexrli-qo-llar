@@ -74,28 +74,28 @@
                         <input
                             v-model="section.title"
                             class="input"
-                            placeholder="Title"
+                            :placeholder="t('admin.placeholders.pageTitle')"
                         />
 
                         <!-- SUBTITLE -->
                         <input
                             v-model="section.subtitle"
                             class="input"
-                            placeholder="Subtitle"
+                            :placeholder="t('admin.placeholders.pageSubtitle')"
                         />
 
                         <!-- CONTENT -->
                         <textarea
                             v-model="section.content"
                             class="input"
-                            placeholder="Content"
+                            :placeholder="t('admin.placeholders.pageContent')"
                         />
 
                         <!-- EXTRA JSON -->
                         <textarea
                             v-model="section._extra"
                             class="input"
-                            placeholder='{"icon":"Eye","tone":"blue"}'
+                            :placeholder="t('admin.placeholders.pageMeta')"
                         />
 
                         <!-- ACTIONS -->
@@ -125,11 +125,14 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import AdminCrudShell from '@/admin/components/common/AdminCrudShell.vue'
 import AdminTable from '@/admin/components/common/AdminTable.vue'
 import ListState from '@/components/shared/ListState.vue'
 import pageService from '@/services/pageService'
+
+const { t } = useI18n()
 
 /* ================= STATE ================= */
 const pages = ref([])

@@ -19,7 +19,7 @@
                         {{ donation.is_anonymous ? t('transparencyPage.anonymous') : donation.donor_name }}
                         {{ t('transparencyPage.donated') }}
                         <span class="text-[#4CAF50] font-bold">
-                            {{ Number(donation.amount || 0).toLocaleString() }} UZS
+                            {{ formatMoney(donation.amount) }}
                         </span>
                     </p>
 
@@ -44,6 +44,7 @@
 <script setup>
 import { Heart, TrendingUp } from 'lucide-vue-next'
 import IconBadge from '../shared/IconBadge.vue'
+import { formatMoneyAmount } from '@/utils/formatAmount'
 
 const props = defineProps({
     donations: {
@@ -60,6 +61,8 @@ const props = defineProps({
     },
 })
 
+const formatMoney = (amount) => formatMoneyAmount(amount, props.t('common.currencyCode'))
+
 const getCaseName = (caseId) => {
     if (!caseId) return props.t('transparencyPage.generalFund')
     const found = props.cases.find((c) => c.id === caseId)
@@ -74,8 +77,12 @@ const timeAgo = (dateString) => {
     const diff = Math.floor((now - date) / 1000)
 
     if (diff < 60) return props.t('transparencyPage.justNow')
-    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`
-    if (diff < 86400) return `${Math.floor(diff / 3600)} h ago`
-    return `${Math.floor(diff / 86400)} d ago`
+    if (diff < 3600) {
+        return props.t('common.timeAgo.minutes', { n: Math.floor(diff / 60) })
+    }
+    if (diff < 86400) {
+        return props.t('common.timeAgo.hours', { n: Math.floor(diff / 3600) })
+    }
+    return props.t('common.timeAgo.days', { n: Math.floor(diff / 86400) })
 }
 </script>

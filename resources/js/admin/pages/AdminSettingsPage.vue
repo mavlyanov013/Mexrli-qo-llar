@@ -2,8 +2,8 @@
     <AdminCrudShell :title="t('admin.settings')">
         <form class="space-y-3" @submit.prevent="save">
             <div v-for="(item, index) in items" :key="index" class="grid grid-cols-2 gap-3">
-                <input v-model="item.key" class="h-10 rounded-lg border border-gray-200 px-3 text-sm" placeholder="key" />
-                <input v-model="item.value" class="h-10 rounded-lg border border-gray-200 px-3 text-sm" placeholder="value" />
+                <input v-model="item.key" class="h-10 rounded-lg border border-gray-200 px-3 text-sm" :placeholder="t('admin.placeholders.settingKey')" />
+                <input v-model="item.value" class="h-10 rounded-lg border border-gray-200 px-3 text-sm" :placeholder="t('admin.placeholders.settingValue')" />
             </div>
             <div class="flex gap-2">
                 <button type="button" class="rounded-lg border border-gray-200 px-3 py-2 text-sm" @click="items.push({ key: '', value: '' })">

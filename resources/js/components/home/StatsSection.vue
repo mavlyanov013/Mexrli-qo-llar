@@ -97,7 +97,7 @@ const stats = computed(() => [
         label: t('homeStats.totalRaised'),
         value: totalRaised.value,
         prefix: '',
-        suffix: ' UZS',
+        suffix: ` ${t('common.currencyCode')}`,
     },
     {
         icon: Users,

@@ -246,13 +246,13 @@
 
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="label">Kerak summa</label>
-                            <input v-model.number="form.goal_amount" type="number" class="input" />
+                            <label class="label">{{ t('admin.goal') }}</label>
+                            <input v-model.number="form.goal_amount" type="number" class="input" :placeholder="t('admin.placeholders.goalAmount')" />
                         </div>
 
                         <div>
-                            <label class="label">Yig‘ilgan summa</label>
-                            <input v-model.number="form.raised_amount" type="number" class="input" />
+                            <label class="label">{{ t('admin.collected') }}</label>
+                            <input v-model.number="form.raised_amount" type="number" class="input" :placeholder="t('admin.placeholders.raisedAmount')" />
                         </div>
                     </div>
                 </div>
@@ -361,6 +361,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useCases } from '@/composables/useCases'
 import caseService from '@/services/caseService'
 import mediaService from '@/services/mediaService'
@@ -385,6 +386,7 @@ const caseLocalizedFields = [
     { name: 'short_description', label: 'Qisqa tavsif', type: 'textarea', rows: 4 },
 ]
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 

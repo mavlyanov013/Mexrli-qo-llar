@@ -11,7 +11,7 @@
                     {{ t('donatePage.successText') }}
                 </p>
                 <p class="text-2xl font-bold text-[#2A7DE1]">
-                    {{ Number(finalAmount || 0).toLocaleString() }} {{ t('public.donate.sumSuffix') }}
+                    {{ formatSum(finalAmount) }}
                 </p>
             </div>
 
@@ -44,7 +44,7 @@
                             </span>
                             <span>•</span>
                             <span>
-                                {{ t('donatePage.remaining', { amount: `${remainingAmount.toLocaleString()} so'm` }) }}
+                                {{ t('donatePage.remaining', { amount: formatSum(remainingAmount) }) }}
                             </span>
                         </div>
                     </div>
@@ -115,7 +115,7 @@
                                 @click="selectPreset(item.amount)"
                             >
                                 <div class="text-2xl font-bold text-gray-900 leading-none">
-                                    {{ Number(item.amount).toLocaleString() }} {{ t('public.donate.sumSuffix') }}
+                                    {{ formatSum(item.amount) }}
                                 </div>
                                 <div class="text-xs text-gray-500 mt-2 leading-5">
                                     {{ item.label }}
@@ -138,6 +138,32 @@
                         </div>
                     </div>
 
+                    <div class="bg-white rounded-3xl p-6 md:p-7 border border-gray-100 shadow-sm">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">
+                            {{ t('donatePage.paymentMethod') }}
+                        </label>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <button
+                                v-for="option in paymentOptions"
+                                :key="option.value"
+                                type="button"
+                                class="rounded-2xl p-4 text-left border-2 transition-all"
+                                :class="paymentMethod === option.value
+                                    ? 'border-[#2A7DE1] bg-blue-50'
+                                    : 'border-gray-200 hover:border-gray-300 bg-white'"
+                                @click="paymentMethod = option.value"
+                            >
+                                <div class="font-semibold text-gray-900">
+                                    {{ option.title }}
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    {{ option.description }}
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
                     <p v-if="errorText" class="text-sm text-red-600 text-center">
                         {{ errorText }}
                     </p>
@@ -155,7 +181,7 @@
                         <span v-if="submitting">{{ t('donatePage.processing') }}</span>
                         <span v-else class="inline-flex items-center justify-center gap-2">
                             <IconBadge :icon="Heart" tone="red" size="xs" class="shrink-0" />
-                            {{ t('donatePage.completeDonation', { amount: `${Number(finalAmount || 0).toLocaleString()} ${t('public.donate.sumSuffix')}` }) }}
+                            {{ t('donatePage.completeDonation', { amount: formatSum(finalAmount) }) }}
                         </span>
                     </button>
                 </form>
@@ -175,8 +201,11 @@ import api from '../services/api'
 import { normalizeList } from '../services/serviceHelpers'
 import donationService from '../services/donationService'
 import caseService from '../services/caseService'
+import { formatAmount, formatMoneyAmount } from '@/utils/formatAmount'
+import { PAYMENT_PROVIDERS } from '@/constants/payments'
 
 const { t, tm } = useI18n()
+const formatSum = (value) => formatMoneyAmount(value, t('public.donate.sumSuffix'))
 const { content } = useLocalizedDisplay()
 const route = useRoute()
 
@@ -206,9 +235,17 @@ const serviceType = ref(initialService)
 const step = ref('form')
 const amount = ref(10000)
 const customAmount = ref('')
-const paymentMethod = ref('paycom')
+const paymentMethod = ref(PAYMENT_PROVIDERS.paycom)
 const submitting = ref(false)
 const errorText = ref('')
+
+const paymentOptions = computed(() => (
+    Object.values(PAYMENT_PROVIDERS).map((value) => ({
+        value,
+        title: t(`public.donate.paymentMethods.${value}.title`),
+        description: t(`public.donate.paymentMethods.${value}.description`),
+    }))
+))
 
 const selectedServiceLabel = computed(() => {
     return t(`donatePage.serviceOptions.${serviceType.value}`)

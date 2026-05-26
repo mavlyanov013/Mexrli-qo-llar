@@ -422,6 +422,7 @@ import treatmentProcessService from '../services/treatmentProcessService'
 import { Download, FileText, Heart, MapPin, Share2, Wallet } from 'lucide-vue-next'
 import IconBadge from '../components/shared/IconBadge.vue'
 import ProgressRing from '../components/shared/ProgressRing.vue'
+import { formatAmount } from '@/utils/formatAmount'
 
 const { t, locale } = useI18n()
 const { content } = useLocalizedDisplay()
@@ -525,9 +526,7 @@ const progressStyle = computed(() => {
 })
 
 
-const formatMoney = (value) => {
-    return Number(value || 0).toLocaleString()
-}
+const formatMoney = (value) => formatAmount(value)
 const formatShortDate = (value) => {
     if (!value) return ''
 

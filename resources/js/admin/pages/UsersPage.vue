@@ -30,7 +30,7 @@ const filteredUsers = computed(() => {
 
 <template>
     <div class="space-y-4">
-        <AdminSearchInput v-model="search" :placeholder="t('admin.search') || 'Search...'" />
+        <AdminSearchInput v-model="search" :placeholder="t('admin.searchPlaceholder')" />
 
         <div v-if="loading" class="text-gray-500">
             {{ t('admin.loading') }}

@@ -63,7 +63,12 @@ const current = ref(null)
 const isListMode = computed(() => route.name === 'admin-reports')
 const isEditMode = computed(() => route.name === 'admin-reports-edit')
 const isViewMode = computed(() => route.name === 'admin-reports-view')
-const title = computed(() => isListMode.value ? t('admin.reports') : isEditMode.value ? 'Edit report' : route.name === 'admin-reports-create' ? 'Create report' : 'Report details')
+const title = computed(() => {
+    if (isListMode.value) return t('admin.reports')
+    if (isEditMode.value) return t('admin.titles.editReport')
+    if (route.name === 'admin-reports-create') return t('admin.titles.createReport')
+    return t('admin.titles.viewReport')
+})
 const form = reactive({
     title: '',
     period: '',
@@ -99,7 +104,7 @@ const save = async () => {
     }
 }
 const remove = async (id) => {
-    if (!window.confirm('Delete this report?')) return
+    if (!window.confirm(t('admin.confirmDeleteReport'))) return
     const result = await deleteReport(id)
     if (!result.error) await fetchReports({ admin: true })
 }

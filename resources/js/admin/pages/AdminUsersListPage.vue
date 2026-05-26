@@ -3,6 +3,10 @@
         :title="t('admin.users')"
         :create-to="isSuperAdmin ? '/admin/users/create' : null"
     >
+        <p v-if="loadError" class="mb-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {{ loadError }}
+        </p>
+
         <!-- SEARCH -->
         <div class="mb-5 flex items-center gap-3">
             <Search class="w-4 h-4 text-gray-400" />
@@ -118,12 +122,26 @@ const columns = [
     { key: 'actions', label: t('admin.actions') },
 ]
 
+const loadError = ref(null)
+
 const fetchUsers = async (page = 1) => {
     loading.value = true
+    loadError.value = null
     try {
         const res = await userService.getAll({ page, search: search.value })
         users.value = res.data || []
         meta.value = res.meta || null
+    } catch (err) {
+        const status = err?.response?.status
+        if (status === 403) {
+            loadError.value = 'Foydalanuvchilar ro‘yxatini faqat super admin ko‘ra oladi.'
+        } else if (status === 401) {
+            loadError.value = 'Sessiya tugagan. Qayta kiring.'
+        } else {
+            loadError.value = err?.response?.data?.message || 'Ma’lumotlarni yuklashda xatolik.'
+        }
+        users.value = []
+        meta.value = null
     } finally {
         loading.value = false
     }

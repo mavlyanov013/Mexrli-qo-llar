@@ -5,6 +5,26 @@
     "unknown": "Noma'lum",
     "loading": "Yuklanmoqda...",
     "refresh": "Yangilash",
+    "currency": "so'm",
+    "currencyCode": "UZS",
+    "anonymous": "Anonim",
+    "donor": "Donor",
+    "phoneInvalid": "Telefon raqam +998 formatida bo'lishi kerak",
+    "pagination": {
+      "prev": "Oldingi",
+      "next": "Keyingi",
+      "range": "{start}-{end} / {total}"
+    },
+    "listState": {
+      "loading": "Yuklanmoqda...",
+      "error": "Xatolik yuz berdi",
+      "empty": "Ma'lumot topilmadi"
+    },
+    "timeAgo": {
+      "minutes": "{n} daqiqa oldin",
+      "hours": "{n} soat oldin",
+      "days": "{n} kun oldin"
+    },
     "status": {
         "approved": "Tasdiqlangan",
       "pending": "Kutilmoqda",
@@ -32,6 +52,11 @@
         "totalDonations": "Jami xayriyalar",
         "loadError": "Bugungi statistikani yuklab bo'lmadi"
     },
+  "urgentCases": {
+    "title": "Davolanishga muhtoj bemorlar",
+    "subtitle": "Hozirda davolanish va qo'llab-quvvatlashga muhtoj bo'lgan bemorlar",
+    "viewAll": "Barchasini ko'rish"
+  },
   "auth": {
     "login": {
       "title": "Tizimga kirish",
@@ -91,7 +116,57 @@
     "title": "Ishonchli hamkorlar",
     "subtitle": "Biz bilan birga bo'lgan tashkilotlar",
     "empty": "Hamkor tashkilotlar shu yerda ko'rsatiladi.",
-    "visitWebsite": "Veb-saytga o'tish"
+    "visitWebsite": "Veb-saytga o'tish",
+    "types": {
+      "ngo": "NNT",
+      "government": "Davlat",
+      "medical": "Tibbiy",
+      "media": "OAV",
+      "corporate": "Korporativ",
+      "foundation": "Fond"
+    }
+  },
+  "homePartners": {
+    "title": "Ishonchli hamkorlar",
+    "subtitle": "Biz bilan birga bo'lgan tashkilotlar"
+  },
+  "howItWorks": {
+    "title": "Qanday ishlaydi",
+    "steps": {
+      "apply": {
+        "title": "Yordam so'rash",
+        "desc": "Oila tibbiy hujjatlar va vaziyat haqida ma'lumot yuboradi."
+      },
+      "verify": {
+        "title": "Tekshiruv",
+        "desc": "Jamoamiz barcha hujjatlar va tibbiy ma'lumotlarni diqqat bilan tekshiradi."
+      },
+      "fundraise": {
+        "title": "Moliyalashtirish",
+        "desc": "Shaffof kampaniya ochiladi va xayriyachilar bilan bog'lanamiz."
+      },
+      "treatment": {
+        "title": "Davolanish",
+        "desc": "Mablag'lar tasdiqlangan tibbiy muassasalarga yo'naltiriladi."
+      }
+    }
+  },
+  "liveDonationsPage": {
+    "badge": "Jonli",
+    "title": "Jonli xayriyalar",
+    "subtitle": "Xayriyalar real vaqt rejimida",
+    "todayAmount": "Bugungi summa",
+    "todayCount": "Bugungi xayriyalar",
+    "uniqueDonors": "Noyob donorlar",
+    "recentTitle": "So'nggi xayriyalar",
+    "empty": "Hozircha xayriyalar yo'q"
+  },
+  "liveActivityBar": {
+    "label": "Jonli:",
+    "loading": "Xayriyalar yuklanmoqda...",
+    "empty": "Hozircha xayriya yo'q",
+    "error": "Xayriyalarni yuklab bo'lmadi",
+    "donated": "{name} {amount} xayriya qildi"
   },
   "payStatus": {
     "paynetTitle": "Paynet to'lov holati",
@@ -104,30 +179,32 @@
     "notFound": "To'lov topilmadi"
   },
   "admin": {
-      "city": "Shahar",
-      "experience": "Tajriba",
-      "donorName": "Ism",
-      "donorPhone": "Telefon raqami",
+    "city": "Shahar",
+    "experience": "Tajriba",
+    "donorName": "Donor ismi",
+    "donorPhone": "Telefon raqami",
     "searchPlaceholder": "Qidirish...",
+    "dashboard": "Boshqaruv paneli",
+    "management": "Boshqaruv",
     "users": "Foydalanuvchilar",
     "partners": "Hamkorlar",
     "messages": "Xabarlar",
     "payments": "To'lovlar",
     "donations": "Ehsonlar",
-    "cases": "Bemorlarlarning holatlari",
+    "cases": "Holatlar",
     "volunteers": "Ko'ngillilar",
-    "provider": "Provayder",
-    "amount": "Miqdor",
+    "provider": "To'lov tizimi",
+    "amount": "Summa",
     "transactionId": "Tranzaksiya ID",
-    "goal": "Maqsad",
+    "goal": "Kerakli summa",
     "collected": "Yig'ilgan",
     "description": "Tavsif",
     "title": "Sarlavha",
     "period": "Davr",
     "type": "Turi",
-    "received": "Qabul qilingan",
-    "spent": "Sarflangan",
-    "fileUrl": "Fayl URL",
+    "received": "Qabul qilingan summa",
+    "spent": "Sarflangan summa",
+    "fileUrl": "Hisobot fayli (URL)",
     "pages": "Sahifalar",
     "reports": "Hisobotlar",
     "settings": "Sozlamalar",
@@ -136,6 +213,7 @@
     "view": "Ko'rish",
     "delete": "O'chirish",
     "save": "Saqlash",
+    "saving": "Saqlanmoqda...",
     "cancel": "Bekor qilish",
     "search": "Qidirish",
     "loading": "Yuklanmoqda...",
@@ -145,11 +223,75 @@
     "name": "Ism",
     "email": "Email",
     "status": "Holat",
+    "password": "Parol",
+    "allStatuses": "Barcha holatlar",
+    "allProviders": "Barcha to'lov tizimlari",
+    "filter": "Filtrlash",
+    "reset": "Tozalash",
+    "dateFrom": "Sanadan",
+    "dateTo": "Sanagacha",
+    "back": "Ortga",
+    "active": "Faol",
+    "inactive": "Faol emas",
+    "confirmDelete": "O'chirishni tasdiqlaysizmi?",
+    "confirmDeleteDonation": "Bu ehsonni o'chirishni tasdiqlaysizmi?",
+    "confirmDeleteReport": "Bu hisobotni o'chirishni tasdiqlaysizmi?",
+    "titles": {
+      "editDonation": "Ehsonni tahrirlash",
+      "createDonation": "Naqd ehson qo'shish",
+      "viewDonation": "Ehson tafsilotlari",
+      "editPartner": "Hamkorni tahrirlash",
+      "createPartner": "Hamkor qo'shish",
+      "viewPartner": "Hamkor tafsilotlari",
+      "editReport": "Hisobotni tahrirlash",
+      "createReport": "Hisobot yaratish",
+      "viewReport": "Hisobot tafsilotlari",
+      "editCase": "Holatni tahrirlash",
+      "createCase": "Yangi holat",
+      "viewCase": "Holat tafsilotlari"
+    },
+    "placeholders": {
+      "searchDonor": "Donor ismi yoki ID bo'yicha qidirish...",
+      "searchPayments": "ID, tranzaksiya yoki donor bo'yicha qidirish...",
+      "amount": "Masalan: 500000",
+      "donorName": "Masalan: Ali Valiyev",
+      "currency": "UZS",
+      "slug": "masalan: bolalar-uchun-yordam",
+      "category": "Masalan: Tibbiy",
+      "order": "Masalan: 1",
+      "website": "https://hamkor.uz",
+      "settingKey": "Masalan: site_phone",
+      "settingValue": "Masalan: +998901234567",
+      "pageTitle": "Sarlavha matni",
+      "pageSubtitle": "Qisqa izoh",
+      "pageContent": "Asosiy matn",
+      "pageMeta": "Qo'shimcha sozlamalar (JSON)",
+      "goalAmount": "Masalan: 50 000 000",
+      "raisedAmount": "Masalan: 12 500 000",
+      "adminNote": "Ichki eslatma (foydalanuvchilar ko'rmaydi)",
+      "reportPeriod": "Masalan: 2026-yil 1-chorak",
+      "reportUrl": "https://.../hisobot.pdf"
+    },
+    "hints": {
+      "slug": "Bo'sh qoldirsangiz, sarlavhadan avtomatik yaratiladi",
+      "manualCash": "Qo'lda kiritilgan naqd pul ehsoni",
+      "coverImage": "JPG yoki PNG, tavsiya: 1200×630 px"
+    },
     "usersModule": {
       "createUser": "Foydalanuvchi yaratish",
       "editUser": "Foydalanuvchini tahrirlash",
       "userDetails": "Foydalanuvchi tafsilotlari",
-      "passwordOptional": "Parol (yangilashda ixtiyoriy)"
+      "passwordOptional": "Parol (yangilashda ixtiyoriy)",
+      "passwordCreate": "Kamida 8 belgili parol"
+    },
+    "donationStatus": {
+      "pending": "Kutilmoqda",
+      "completed": "Yakunlangan",
+      "failed": "Muvaffaqiyatsiz"
+    },
+    "donationType": {
+      "manual": "Naqd pul (qo'lda)",
+      "online": "Onlayn to'lov"
     }
   }
 }

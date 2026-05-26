@@ -136,7 +136,7 @@
                         v-model="statusForm.admin_notes"
                         rows="3"
                         class="input"
-                        placeholder="Admin izohi (ixtiyoriy)"
+                        :placeholder="t('admin.placeholders.adminNote')"
                     />
 
                     <p v-if="statusError" class="text-sm text-red-600">{{ statusError }}</p>
@@ -173,6 +173,9 @@ import {
     HELP_REQUEST_STATUS_OPTIONS,
 } from '@/constants/statuses.js'
 
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 

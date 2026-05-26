@@ -47,6 +47,12 @@
                 </div>
             </div>
 
+            <SectionHeader
+                v-if="docs.length"
+                :title="t('aboutPage.docsTitle')"
+                :subtitle="t('aboutPage.docsSubtitle')"
+            />
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
                 <component
                     :is="doc.file_url ? 'a' : 'div'"
@@ -55,7 +61,7 @@
                     :href="doc.file_url || undefined"
                     :download="doc.file_url ? '' : undefined"
                     :target="doc.file_url ? '_blank' : undefined"
-                    class="flex items-center gap-5 bg-white rounded-2xl p-6 border transition group"
+                    class="flex items-center gap-5 bg-white rounded-2xl p-6 shadow-sm transition group"
                     :class="doc.file_url ? 'cursor-pointer hover:shadow-md' : ''"
                 >
                     <IconBadge

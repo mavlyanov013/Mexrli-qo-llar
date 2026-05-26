@@ -24,6 +24,7 @@ import { providerLabel } from '@/constants/payments'
 import { PAYMENT_STATUSES } from '@/constants/statuses'
 import { HELP_REQUEST_STATUS } from '@/constants/statuses'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
+import { formatMoneyAmount, formatAmount } from '@/utils/formatAmount'
 
 const props = defineProps({
     activeTab: {
@@ -53,7 +54,7 @@ const recentCases = ref([])
 const recentPayments = ref([])
 const posts = ref([])
 
-const formatMoney = (value) => `${Number(value || 0).toLocaleString('uz-UZ')} so'm`
+const formatMoney = (value) => formatMoneyAmount(value, "so'm")
 
 const formatDate = (value) => {
     if (!value) return '—'
@@ -295,7 +296,7 @@ onMounted(async () => {
                             <ArrowRight class="h-4 w-4 opacity-0 transition group-hover:opacity-100" />
                         </div>
                         <p class="mt-4 text-2xl font-bold leading-none">
-                            {{ card.isMoney ? card.value : Number(card.value).toLocaleString('uz-UZ') }}
+                            {{ card.isMoney ? card.value : formatAmount(card.value) }}
                         </p>
                         <p class="mt-2 text-sm font-semibold">{{ card.label }}</p>
                         <p class="mt-1 text-xs opacity-80">{{ card.hint }}</p>

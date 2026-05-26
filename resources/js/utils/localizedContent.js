@@ -83,14 +83,15 @@ export function validateAdminLocalizedFields(form, fields) {
     return missing
 }
 
-/** Saqlashdan oldin: kirill lotindan; rus alohida kiritilgan bo‘lsa saqlanadi */
+/** Saqlashdan oldin: kirill qo‘lda kiritilgan bo‘lsa saqlanadi, bo‘lmasa lotindan avtomatik */
 export function applyAdminLocalization(form, fields) {
     fields.forEach((field) => {
         const uz = String(form[`${field}_uz`] || '').trim()
+        const oz = String(form[`${field}_oz`] || '').trim()
         const ru = String(form[`${field}_ru`] || '').trim()
 
         form[`${field}_uz`] = uz
-        form[`${field}_oz`] = transliterateLatinToCyrillic(uz)
+        form[`${field}_oz`] = oz || transliterateLatinToCyrillic(uz)
         form[`${field}_ru`] = ru || null
     })
 }

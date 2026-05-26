@@ -1,12 +1,12 @@
 <template>
     <section class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
-            <SectionHeader title="How It Works" />
+            <SectionHeader :title="t('howItWorks.title')" />
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div
                     v-for="(step, index) in steps"
-                    :key="index"
+                    :key="step.key"
                     class="text-center relative"
                 >
                     <div
@@ -16,9 +16,9 @@
 
                     <div
                         :class="[
-              'w-16 h-16 mx-auto mb-5 rounded-2xl flex items-center justify-center relative z-10 text-2xl',
-              step.color
-            ]"
+                            'w-16 h-16 mx-auto mb-5 rounded-2xl flex items-center justify-center relative z-10 text-2xl',
+                            step.color
+                        ]"
                     >
                         {{ step.icon }}
                     </div>
@@ -41,32 +41,40 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import SectionHeader from '../shared/SectionHeader.vue'
 
-const steps = [
+const { t } = useI18n()
+
+const steps = computed(() => [
     {
+        key: 'apply',
         icon: '📄',
-        title: 'Apply for Support',
-        desc: 'Families submit an application with medical documents and their story.',
+        title: t('howItWorks.steps.apply.title'),
+        desc: t('howItWorks.steps.apply.desc'),
         color: 'bg-blue-50 text-[#2A7DE1]',
     },
     {
+        key: 'verify',
         icon: '🛡',
-        title: 'Verification',
-        desc: 'Our team verifies all documents and medical records thoroughly.',
+        title: t('howItWorks.steps.verify.title'),
+        desc: t('howItWorks.steps.verify.desc'),
         color: 'bg-green-50 text-[#4CAF50]',
     },
     {
+        key: 'fundraise',
         icon: '📣',
-        title: 'Fundraising',
-        desc: 'We launch a transparent campaign and connect with donors.',
+        title: t('howItWorks.steps.fundraise.title'),
+        desc: t('howItWorks.steps.fundraise.desc'),
         color: 'bg-orange-50 text-[#FF9800]',
     },
     {
+        key: 'treatment',
         icon: '❤',
-        title: 'Treatment',
-        desc: 'Funds are directed to medical facilities for treatment.',
+        title: t('howItWorks.steps.treatment.title'),
+        desc: t('howItWorks.steps.treatment.desc'),
         color: 'bg-purple-50 text-purple-600',
     },
-]
+])
 </script>

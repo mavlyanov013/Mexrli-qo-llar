@@ -39,7 +39,11 @@ class PaymentService
                     ->orWhere('payer_reference', 'like', $term)
                     ->orWhere('provider', 'like', $term)
                     ->orWhere('status', 'like', $term)
-                    ->orWhere('external_id', 'like', $term);
+                    ->orWhere('external_id', 'like', $term)
+                    ->orWhereHas('donation', function ($donationQuery) use ($term) {
+                        $donationQuery->where('donor_name', 'like', $term);
+                    })
+                    ->orWhereRaw("LOWER(CAST(payload AS CHAR)) LIKE ?", [strtolower($term)]);
             });
         });
 

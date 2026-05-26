@@ -39,11 +39,13 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import Sidebar from '../components/SideBar.vue'
+import { useAuth } from '@/composables/useAuth'
 
 const sidebarOpen = ref(false)
 const { locale, t } = useI18n()
 const route = useRoute()
-const authUser = computed(() => JSON.parse(localStorage.getItem('user') || 'null'))
+const { user, fetchUser, logout } = useAuth()
+const authUser = computed(() => user.value)
 
 const pageTitle = computed(() => {
     const map = {
@@ -68,8 +70,14 @@ const pageTitle = computed(() => {
     return entry ? entry[1] : t('admin.panel')
 })
 
-onMounted(() => {
+onMounted(async () => {
     locale.value = 'uz'
     localStorage.setItem('lang', 'uz')
+
+    try {
+        await fetchUser()
+    } catch {
+        await logout()
+    }
 })
 </script>

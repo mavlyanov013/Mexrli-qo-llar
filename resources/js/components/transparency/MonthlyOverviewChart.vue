@@ -113,6 +113,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import transparencyService from '@/services/transparencyService'
+import { formatMoneyAmount } from '@/utils/formatAmount'
 
 const props = defineProps({
     t: {
@@ -132,9 +133,7 @@ const loading = ref(true)
 const error = ref('')
 const activeTooltip = ref(null)
 
-const formatMoney = (value) => {
-    return `${Number(value || 0).toLocaleString()} so'm`
-}
+const formatMoney = (value) => formatMoneyAmount(value, props.t('public.donate.sumSuffix'))
 
 const barStyle = (percent) => {
     const height = Math.max(0, Math.min(100, Number(percent) || 0))

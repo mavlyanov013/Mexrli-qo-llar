@@ -8,7 +8,7 @@
             <input v-model="form.email" type="email" class="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm" required />
         </AdminFormField>
 
-        <AdminFormField :label="isEdit ? t('admin.usersModule.passwordOptional') : 'Password'">
+        <AdminFormField :label="isEdit ? t('admin.usersModule.passwordOptional') : t('admin.password')">
             <input v-model="form.password" type="password" class="h-10 w-full rounded-lg border border-gray-200 px-3 text-sm" :required="!isEdit" />
         </AdminFormField>
 

@@ -30,8 +30,8 @@
                     :fields="faqLocalizedFields"
                 />
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input v-model="form.category" class="input" placeholder="Kategoriya" />
-                    <input v-model.number="form.order" type="number" class="input" placeholder="Tartib" />
+                    <input v-model="form.category" class="input" :placeholder="t('admin.placeholders.category')" />
+                    <input v-model.number="form.order" type="number" class="input" :placeholder="t('admin.placeholders.order')" />
                 </div>
                 <label class="text-sm flex items-center gap-2 md:col-span-2"><input v-model="form.is_active" type="checkbox" /> Faol</label>
                 <div class="md:col-span-2 flex gap-3 mt-2">
@@ -46,6 +46,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AdminCrudShell from '@/admin/components/common/AdminCrudShell.vue'
 import AdminTable from '@/admin/components/common/AdminTable.vue'
 import AdminPagination from '@/admin/components/common/AdminPagination.vue'
@@ -58,6 +59,8 @@ const faqLocalizedFields = [
     { name: 'question', label: 'Savol', type: 'input' },
     { name: 'answer', label: 'Javob', type: 'textarea', rows: 5 },
 ]
+
+const { t } = useI18n()
 
 const rows = ref([])
 const meta = ref(null)

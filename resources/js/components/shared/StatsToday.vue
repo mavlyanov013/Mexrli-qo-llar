@@ -64,6 +64,7 @@ import { useI18n } from 'vue-i18n'
 import { Banknote, CreditCard, RefreshCw, Users } from 'lucide-vue-next'
 import statsService from '@/services/statsService'
 import IconBadge from './IconBadge.vue'
+import { formatAmount, formatMoneyAmount } from '@/utils/formatAmount'
 
 const props = defineProps({
     variant: {
@@ -83,9 +84,7 @@ const loading = ref(true)
 const error = ref('')
 let intervalId = null
 
-const formatNumber = (value) => {
-    return Number(value || 0).toLocaleString()
-}
+const formatNumber = (value) => formatAmount(value)
 
 const updatedAtLabel = computed(() => {
     const raw = stats.value?.updated_at
@@ -113,13 +112,13 @@ const updatedAtLabel = computed(() => {
 const cards = computed(() => [
     {
         label: t('todayDonations.cashAmount'),
-        value: `${formatNumber(stats.value?.cash_total)} UZS`,
+        value: formatMoneyAmount(stats.value?.cash_total, 'UZS'),
         tone: 'yellow',
         icon: Banknote,
     },
     {
         label: t('todayDonations.onlineAmount'),
-        value: `${formatNumber(stats.value?.online_total)} UZS`,
+        value: formatMoneyAmount(stats.value?.online_total, 'UZS'),
         tone: 'green',
         icon: CreditCard,
     },

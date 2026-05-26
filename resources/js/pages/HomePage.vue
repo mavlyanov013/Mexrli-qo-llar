@@ -15,7 +15,7 @@
         <ServicesSection />
         <TodayDonationsSection />
 
-        <UrgentCasesSection :cases="cases" />
+        <UrgentCasesSection :cases="activeCases" />
 
         <LatestNewsSection
             v-if="posts.length"
@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { getHomeData } from '../services/homeService'
 
 import HeroSection from '../components/home/HeroSection.vue'
@@ -60,6 +60,8 @@ const isActiveCase = (item) => {
     const status = String(item?.status || '').toLowerCase()
     return ['active', 'open', 'in_progress'].includes(status)
 }
+
+const activeCases = computed(() => cases.value.filter(isActiveCase))
 
 const isUrgentCase = (item) => {
     return Boolean(item?.is_urgent) && isActiveCase(item)

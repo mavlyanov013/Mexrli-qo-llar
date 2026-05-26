@@ -36,7 +36,7 @@ const submit = async () => {
     error.value = null
 
     if (form.phone && !phoneInputRef.value?.validate()) {
-        error.value = phoneInputRef.value?.getError?.() || "Telefon raqam +998 formatida bo'lishi kerak"
+        error.value = phoneInputRef.value?.getError?.() || t('common.phoneInvalid')
         return
     }
 

@@ -47,7 +47,7 @@
                         {{ donation.is_anonymous ? t('transparencyPage.anonymous') : donation.donor_name }}
                     </td>
                     <td class="p-4 font-bold text-[#4CAF50]">
-                        {{ Number(donation.amount || 0).toLocaleString() }} UZS
+                        {{ formatMoney(donation.amount) }}
                     </td>
                     <td class="p-4">
                         {{ getCaseName(donation.case_id) }}
@@ -65,7 +65,7 @@
             class="px-6 py-4 border-t border-gray-100 flex items-center justify-between flex-wrap gap-3"
         >
             <p class="text-sm text-gray-500">
-                {{ startItem }}-{{ endItem }} / {{ filteredDonations.length }}
+                {{ props.t('common.pagination.range', { start: startItem, end: endItem, total: filteredDonations.length }) }}
             </p>
 
             <div class="flex items-center gap-2">
@@ -75,7 +75,7 @@
                     :disabled="currentPage === 1"
                     @click="prevPage"
                 >
-                    Prev
+                    {{ props.t('common.pagination.prev') }}
                 </button>
 
                 <div class="flex items-center gap-2 flex-wrap">
@@ -99,7 +99,7 @@
                     :disabled="currentPage === totalPages"
                     @click="nextPage"
                 >
-                    Next
+                    {{ props.t('common.pagination.next') }}
                 </button>
             </div>
         </div>
@@ -108,6 +108,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { formatMoneyAmount } from '@/utils/formatAmount'
 
 const props = defineProps({
     donations: {
@@ -253,6 +254,8 @@ const getCaseName = (caseId) => {
     const found = props.cases.find((c) => c.id === caseId)
     return found ? found.name : props.t('transparencyPage.generalFund')
 }
+
+const formatMoney = (amount) => formatMoneyAmount(amount, props.t('common.currencyCode'))
 
 const formatDate = (dateString) => {
     if (!dateString) return '-'

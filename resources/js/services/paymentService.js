@@ -5,7 +5,10 @@ export default {
     async fetchList(params = {}) {
         try {
             const response = await api.get('/admin/payments', { params })
-            return { data: normalizeList(response), meta: normalizeMeta(response), error: null }
+            const body = response?.data
+            const data = Array.isArray(body) ? body : normalizeList(response)
+
+            return { data, meta: null, error: null }
         } catch (error) {
             return { data: [], meta: null, error: toServiceError(error, 'Failed to fetch payments') }
         }

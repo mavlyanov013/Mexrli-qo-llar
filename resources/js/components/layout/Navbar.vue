@@ -8,10 +8,10 @@
                 <RouterLink to="/" class="flex items-center gap-3">
                     <img
                         src="/public/images/logo.png"
-                        alt="Mehrli Insonlar"
+                        :alt="t('common.brandName')"
                         class="w-11 h-11 object-contain rounded-xl"
                     />
-                    <span class="text-xl font-bold text-gray-900 tracking-tight">Mehrli Insonlar</span>
+                    <span class="text-xl font-bold text-gray-900 tracking-tight">{{ t('common.brandName') }}</span>
                 </RouterLink>
 
                 <div class="hidden lg:flex items-center gap-1">

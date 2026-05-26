@@ -15,7 +15,7 @@
 
                     <p class="text-gray-600 mb-2">{{ t('payStatus.transactionId') }}: <strong>{{ payment.transaction_id }}</strong></p>
 
-                    <p class="text-gray-600 mb-2">{{ t('payStatus.amount') }}: <strong>{{ Number(payment.amount).toLocaleString() }} {{ payment.currency }}</strong></p>
+                    <p class="text-gray-600 mb-2">{{ t('payStatus.amount') }}: <strong>{{ formatPaymentAmount(payment) }}</strong></p>
 
                     <div class="mt-4">
                         <StatusBadge :status="payment.status" :map="PAYMENT_STATUSES" />
@@ -57,9 +57,12 @@ import StatusBadge from '@/components/shared/StatusBadge.vue'
 import ExternalLink from '@/components/shared/ExternalLink.vue'
 import { PAYMENT_STATUSES } from '@/constants/statuses'
 import { PAYMENT_PROVIDERS } from '@/constants/payments'
+import { formatMoneyAmount } from '@/utils/formatAmount'
 
 const route = useRoute()
 const { t } = useI18n()
+
+const formatPaymentAmount = (item) => formatMoneyAmount(item?.amount, item?.currency || 'UZS')
 
 const payment = ref(null)
 const loading = ref(false)

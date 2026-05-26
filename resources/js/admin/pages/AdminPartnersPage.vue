@@ -84,7 +84,7 @@
                     <input
                         v-model="draft.website"
                         type="text"
-                        placeholder="https://example.uz"
+                        :placeholder="t('admin.placeholders.website')"
                         class="w-full h-11 rounded-xl border border-gray-200 px-4 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition"
                     />
                 </div>
@@ -207,7 +207,12 @@ const previewUrl = ref('')
 const isListMode = computed(() => route.name === 'admin-partners')
 const isEditMode = computed(() => route.name === 'admin-partners-edit')
 const isViewMode = computed(() => route.name === 'admin-partners-view')
-const title = computed(() => isListMode.value ? t('admin.partners') : isEditMode.value ? 'Edit partner' : route.name === 'admin-partners-create' ? 'Create partner' : 'Partner details')
+const title = computed(() => {
+    if (isListMode.value) return t('admin.partners')
+    if (isEditMode.value) return t('admin.titles.editPartner')
+    if (route.name === 'admin-partners-create') return t('admin.titles.createPartner')
+    return t('admin.titles.viewPartner')
+})
 const getTypeLabel = (val) => PARTNER_TYPE_LABELS[val] || val
 
 const columns = [

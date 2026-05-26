@@ -73,29 +73,30 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
-                        Kategoriya *
+                        {{ t('helpRequestPage.supportType') }}
                     </label>
                     <select
                         v-model="form.category"
                         class="rounded-xl mt-2 border border-gray-300 px-4 py-3 w-full outline-none"
                     >
-                        <option value="medical_treatment">Tibbiy davolanish</option>
-                        <option value="surgery">Jarrohlik</option>
-                        <option value="rehabilitation">Reabilitatsiya</option>
-                        <option value="medication">Dori-darmon</option>
-                        <option value="family_support">Oilaviy yordam</option>
-                        <option value="other">Boshqa</option>
+                        <option
+                            v-for="option in supportOptions"
+                            :key="option.value"
+                            :value="option.value"
+                        >
+                            {{ option.label }}
+                        </option>
                     </select>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
-                        Tavsif *
+                        {{ t('helpRequestPage.situation') }}
                     </label>
                     <textarea
                         v-model="form.description"
                         rows="6"
-                        placeholder="Vaziyatni yozing"
+                        :placeholder="t('helpRequestPage.situationPlaceholder')"
                         class="rounded-xl mt-2 border border-gray-300 px-4 py-3 w-full outline-none resize-none"
                         required
                     />
@@ -107,7 +108,7 @@
                     </label>
                     <div class="mt-2 border-2 border-dashed border-gray-200 rounded-xl p-6 text-center">
                         <IconBadge :icon="FileText" tone="gray" size="md" class="mx-auto mb-2" />
-                        <p class="text-sm text-gray-500 mb-3">Fayllar ixtiyoriy</p>
+                        <p class="text-sm text-gray-500 mb-3">{{ t('helpRequestPage.medicalDocumentsHint') }}</p>
                         <input
                             type="file"
                             multiple
@@ -118,7 +119,7 @@
                             v-if="form.attachments.length > 0"
                             class="text-sm text-green-600 mt-2"
                         >
-                            {{ form.attachments.length }} ta fayl tanlandi
+                            {{ t('helpRequestPage.filesSelected', { count: form.attachments.length }) }}
                         </p>
                     </div>
                 </div>
@@ -171,7 +172,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { CircleCheck, FileText, Heart } from 'lucide-vue-next'
 import helpRequestService from '../services/helpRequestService'
@@ -179,6 +180,15 @@ import PhoneInput from '../components/shared/PhoneInput.vue'
 import IconBadge from '../components/shared/IconBadge.vue'
 
 const { t } = useI18n()
+
+const supportOptions = computed(() => [
+    { value: 'medical_treatment', label: t('helpRequestPage.supportOptions.medical_treatment') },
+    { value: 'surgery', label: t('helpRequestPage.supportOptions.surgery') },
+    { value: 'rehabilitation', label: t('helpRequestPage.supportOptions.rehabilitation') },
+    { value: 'medication', label: t('helpRequestPage.supportOptions.medication') },
+    { value: 'family_support', label: t('helpRequestPage.supportOptions.family_support') },
+    { value: 'other', label: t('helpRequestPage.supportOptions.other') },
+])
 
 const submitted = ref(false)
 const submitting = ref(false)

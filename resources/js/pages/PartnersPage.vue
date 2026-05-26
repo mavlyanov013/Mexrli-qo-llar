@@ -63,21 +63,28 @@ import { useI18n } from 'vue-i18n'
 import { useLocalizedDisplay } from '@/composables/useLocalizedDisplay'
 import ListState from '@/components/shared/ListState.vue'
 import ExternalLink from '@/components/shared/ExternalLink.vue'
-import { PARTNER_TYPES } from '@/constants/partners'
+import { PARTNER_TYPE_LABELS } from '@/constants/partners'
 import { usePartners } from '@/composables/usePartners'
 
 const { t } = useI18n()
 const { content } = useLocalizedDisplay()
 const { partners, loading, error } = usePartners()
 
-const formatType = (value) => (value || 'corporate').replace(/_/g, ' ')
+const formatType = (value) => {
+    const key = value || 'corporate'
+    return t(`partnersPage.types.${key}`, PARTNER_TYPE_LABELS[key] || key)
+}
 
 const typeClass = (type) => {
-    if (!PARTNER_TYPES.includes(type)) return 'bg-blue-50 text-[#2A7DE1]'
-    if (type === 'Nodavlat Notijorat Tashkiloti') return 'bg-green-50 text-[#4CAF50]'
-    if (type === 'hukumat') return 'bg-purple-50 text-purple-600'
-    if (type === 'tibbiy') return 'bg-red-50 text-red-600'
-    if (type === 'ommaviy axborot vositalari') return 'bg-orange-50 text-[#FF9800]'
-    return 'bg-blue-50 text-[#2A7DE1]'
+    const map = {
+        ngo: 'bg-green-50 text-[#4CAF50]',
+        government: 'bg-purple-50 text-purple-600',
+        medical: 'bg-red-50 text-red-600',
+        media: 'bg-orange-50 text-[#FF9800]',
+        corporate: 'bg-blue-50 text-[#2A7DE1]',
+        foundation: 'bg-blue-50 text-[#2A7DE1]',
+    }
+
+    return map[type] || 'bg-blue-50 text-[#2A7DE1]'
 }
 </script>

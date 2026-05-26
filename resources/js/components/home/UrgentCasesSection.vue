@@ -40,5 +40,5 @@ const props = defineProps({
     },
 })
 
-const visibleCases = computed(() => props.cases.slice(0, 3))
+const visibleCases = computed(() => props.cases.slice(0, 6))
 </script>

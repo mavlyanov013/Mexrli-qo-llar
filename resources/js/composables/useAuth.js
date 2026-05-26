@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import authService from '../services/authService'
+import { canAccessAdmin } from '@/admin/utils/permissions'
 
 const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
 
@@ -15,7 +16,7 @@ export function useAuth() {
 
         user.value = res.user
 
-        if (res.user?.is_admin) {
+        if (canAccessAdmin(res.user)) {
             router.push('/admin/dashboard')
         } else {
             router.push('/')
@@ -23,12 +24,25 @@ export function useAuth() {
     }
 
     const fetchUser = async () => {
+        const token = localStorage.getItem('token')
+
+        if (!token || token === 'null' || token === 'undefined') {
+            user.value = null
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+            throw new Error('Missing token')
+        }
+
         try {
             const res = await authService.getMe()
             user.value = res.user ?? res
             localStorage.setItem('user', JSON.stringify(user.value))
+            return user.value
         } catch (e) {
             user.value = null
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+            throw e
         }
     }
 

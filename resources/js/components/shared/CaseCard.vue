@@ -112,6 +112,7 @@ import { RouterLink } from 'vue-router'
 import { Heart, MapPin } from 'lucide-vue-next'
 import IconBadge from './IconBadge.vue'
 import ProgressRing from './ProgressRing.vue'
+import { formatAmount } from '@/utils/formatAmount'
 
 const { t } = useI18n()
 const { content } = useLocalizedDisplay()
@@ -170,6 +171,5 @@ const progressStyle = computed(() => {
     }
 })
 
-const formatMoney = (value) =>
-    new Intl.NumberFormat('uz-UZ').format(value || 0) + " so'm"
+const formatMoney = (value) => `${formatAmount(value)} ${t('public.donate.sumSuffix')}`
 </script>

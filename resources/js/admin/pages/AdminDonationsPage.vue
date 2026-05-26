@@ -10,15 +10,15 @@
 
                     <input
                         v-model="filters.search"
-                        placeholder="Qidirish donor..."
+                        :placeholder="t('admin.placeholders.searchDonor')"
                         class="h-10 border rounded-lg px-3 text-sm"
                     />
 
                     <select v-model="filters.status" class="h-10 border rounded-lg px-3 text-sm">
-                        <option value="">Barcha statuslar</option>
-                        <option value="pending">kutilmoqda</option>
-                        <option value="completed">yakunlandi</option>
-                        <option value="failed">muvaffaqiyatsiz</option>
+                        <option value="">{{ t('admin.allStatuses') }}</option>
+                        <option value="pending">{{ t('admin.donationStatus.pending') }}</option>
+                        <option value="completed">{{ t('admin.donationStatus.completed') }}</option>
+                        <option value="failed">{{ t('admin.donationStatus.failed') }}</option>
                     </select>
 
                     <button
@@ -26,7 +26,7 @@
                         class="h-10 bg-[#2A7DE1] text-white rounded-lg text-sm px-4"
                         @click="applyFilters"
                     >
-                        Filtrlash
+                        {{ t('admin.filter') }}
                     </button>
 
                     <button
@@ -34,7 +34,7 @@
                         class="h-10 border rounded-lg text-sm px-4"
                         @click="resetFilters"
                     >
-                        Tozalash
+                        {{ t('admin.reset') }}
                     </button>
 
                 </div>
@@ -92,7 +92,6 @@
             <div class="space-y-2 text-sm">
                 <p><strong>ID:</strong> {{ current.id }}</p>
                 <p><strong>Xayriya qiluvchi:</strong> {{ current.donor_name }}</p>
-                <p><strong>Telefon:</strong> {{ current.donor_phone }}</p>
                 <p><strong>Miqdori:</strong> {{ current.amount }} {{ current.currency }}</p>
                 <p>
                     <strong>Holati:</strong>
@@ -109,7 +108,7 @@
                     v-if="isCreateMode"
                     class="md:col-span-2 flex h-10 items-center rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm font-medium text-gray-700"
                 >
-                    Naqt pul
+                    {{ t('admin.hints.manualCash') }}
                 </div>
 
                 <select
@@ -117,8 +116,8 @@
                     v-model="form.type"
                     class="h-10 border rounded-lg px-3 text-sm"
                 >
-                    <option value="manual">naqd pul (qo'lda)</option>
-                    <option value="online">onlayn</option>
+                    <option value="manual">{{ t('admin.donationType.manual') }}</option>
+                    <option value="online">{{ t('admin.donationType.online') }}</option>
                 </select>
 
                 <input
@@ -126,28 +125,21 @@
                     type="number"
                     min="0"
                     class="h-10 border rounded-lg px-3 text-sm"
-                    placeholder="Miqdori"
+                    :placeholder="t('admin.placeholders.amount')"
                     required
                 />
 
                 <input
                     v-model="form.donor_name"
                     class="h-10 border rounded-lg px-3 text-sm"
-                    placeholder="Xayriya qiluvchi ismi"
+                    :placeholder="t('admin.placeholders.donorName')"
                     required
-                />
-
-                <PhoneInput
-                    v-if="!isCreateMode"
-                    ref="phoneInputRef"
-                    v-model="form.donor_phone"
-                    input-class="h-10 border rounded-lg px-3 text-sm w-full"
                 />
 
                 <input
                     v-model="form.currency"
                     class="h-10 border rounded-lg px-3 text-sm"
-                    placeholder="UZS"
+                    :placeholder="t('admin.placeholders.currency')"
                 />
 
                 <select
@@ -155,21 +147,21 @@
                     v-model="form.status"
                     class="h-10 border rounded-lg px-3 text-sm"
                 >
-                    <option value="completed">yakunlandi</option>
-                    <option value="pending">kutilmoqda</option>
-                    <option value="failed">muvaffaqiyatsiz</option>
+                    <option value="completed">{{ t('admin.donationStatus.completed') }}</option>
+                    <option value="pending">{{ t('admin.donationStatus.pending') }}</option>
+                    <option value="failed">{{ t('admin.donationStatus.failed') }}</option>
                 </select>
 
                 <div class="md:col-span-2 flex gap-2">
                     <button class="bg-blue-600 text-white px-4 py-2 rounded-lg">
-                        Saqlash
+                        {{ t('admin.save') }}
                     </button>
 
                     <router-link
                         to="/admin/donations"
                         class="border px-4 py-2 rounded-lg"
                     >
-                        Bekor qilish
+                        {{ t('admin.cancel') }}
                     </router-link>
                 </div>
 
@@ -186,7 +178,6 @@ import { useI18n } from 'vue-i18n'
 
 import { useDonations } from '@/composables/useDonations'
 import donationService from '@/services/donationService'
-import PhoneInput from '@/components/shared/PhoneInput.vue'
 
 import AdminCrudShell from '@/admin/components/common/AdminCrudShell.vue'
 import AdminTable from '@/admin/components/common/AdminTable.vue'
@@ -213,7 +204,6 @@ const {
 const currentPage = ref(1)
 
 const current = ref(null)
-const phoneInputRef = ref(null)
 
 const isListMode = computed(() => route.name === 'admin-donations')
 const isCreateMode = computed(() => route.name === 'admin-donations-create')
@@ -224,10 +214,10 @@ const title = computed(() =>
     isListMode.value
         ? t('admin.donations')
         : isEditMode.value
-            ? 'Edit donation'
+            ? t('admin.titles.editDonation')
             : isViewMode.value
-                ? 'Donation details'
-                : 'Create donation'
+                ? t('admin.titles.viewDonation')
+                : t('admin.titles.createDonation')
 )
 
 const filters = reactive({
@@ -237,18 +227,16 @@ const filters = reactive({
 
 const columns = [
     { key: 'id', label: 'ID' },
-    { key: 'donor_name', label: 'Ism' },
-    { key: 'donor_phone', label: 'Telefon raqam' },
-    { key: 'amount', label: 'Jami' },
-    { key: 'status', label: 'Holati' },
-    { key: 'provider', label: 'Provider' },
-    { key: 'actions', label: 'Harakatlar' },
+    { key: 'donor_name', label: t('admin.donorName') },
+    { key: 'amount', label: t('admin.amount') },
+    { key: 'status', label: t('admin.status') },
+    { key: 'provider', label: t('admin.provider') },
+    { key: 'actions', label: t('admin.actions') },
 ]
 
 const form = reactive({
     type: 'naxt',
     donor_name: '',
-    donor_phone: '',
     amount: 0,
     status: 'completed',
     currency: 'UZS',
@@ -275,10 +263,6 @@ const resetFilters = () => {
 }
 
 const save = async () => {
-    if (!isCreateMode.value && form.donor_phone && !phoneInputRef.value?.validate()) {
-        return
-    }
-
     const payload = isCreateMode.value
         ? {
             type: 'naxt',
@@ -291,7 +275,6 @@ const save = async () => {
             type: form.type,
             amount: form.amount,
             donor_name: form.donor_name,
-            donor_phone: form.donor_phone,
             currency: form.currency,
             status: form.status,
         }
@@ -315,7 +298,6 @@ const loadCurrent = async () => {
         Object.assign(form, {
             type: res.data.type || 'manual',
             donor_name: res.data.donor_name,
-            donor_phone: res.data.donor_phone,
             amount: Number(res.data.amount),
             status: res.data.status,
             currency: res.data.currency || 'UZS',
@@ -324,7 +306,7 @@ const loadCurrent = async () => {
 }
 
 const remove = async (id) => {
-    if (!confirm('Delete donation?')) return
+    if (!confirm(t('admin.confirmDeleteDonation'))) return
     await deleteDonation(id)
     await fetchPage(currentPage.value)
 }

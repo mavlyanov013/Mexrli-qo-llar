@@ -440,6 +440,8 @@ const messages = {
                 { title: 'Impact', desc: 'We measure success by lives transformed.' },
                 { title: 'Trust', desc: 'Built on accountability and open reporting.' },
             ],
+            docsTitle: 'Documents and activity',
+            docsSubtitle: 'Official documents of our organization',
             docs: [
                 {
                     title: 'State registration certificate',
@@ -1113,6 +1115,8 @@ const messages = {
                 { title: 'Ta’sir', desc: 'Biz muvaffaqiyatni o‘zgargan hayotlar bilan o‘lchaymiz.' },
                 { title: 'Ishonch', desc: 'Mas’uliyat va ochiq hisobot asosida qurilgan.' },
             ],
+            docsTitle: 'Hujjatlar va faoliyat',
+            docsSubtitle: 'Tashkilotimizning rasmiy hujjatlari',
             docs: [
                 {
                     title: 'Davlat ro‘yxatidan o‘tganlik guvohnomasi',
@@ -1616,12 +1620,12 @@ const messages = {
             oneTime: 'Разово',
             monthly: 'Ежемесячно',
             filters: {
-                all: 'All Time',
-                today: 'Today',
-                week: 'This Week',
-                month: 'This Month',
+                all: 'За всё время',
+                today: 'Сегодня',
+                week: 'За неделю',
+                month: 'За месяц',
             },
-            liveDonationsFeed: 'Live Donations Feed',
+            liveDonationsFeed: 'Лента пожертвований в реальном времени',
             noRecentDonations: 'Нет недавних пожертвований',
             anonymous: 'Анонимно',
             donated: 'пожертвовал',
@@ -1776,6 +1780,8 @@ const messages = {
                 { title: 'Результат', desc: 'Мы измеряем успех изменёнными жизнями.' },
                 { title: 'Доверие', desc: 'Основано на ответственности и открытой отчётности.' },
             ],
+            docsTitle: 'Документы и деятельность',
+            docsSubtitle: 'Официальные документы нашей организации',
             docs: [
                 {
                     title: 'Свидетельство о государственной регистрации',

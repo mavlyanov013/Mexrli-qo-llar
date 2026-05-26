@@ -1,11 +1,12 @@
 <template>
   <span ref="elementRef" class="text-3xl md:text-4xl font-bold text-gray-900">
-    {{ prefix }}{{ displayValue.toLocaleString() }}{{ suffix }}
+    {{ prefix }}{{ formattedValue }}{{ suffix }}
   </span>
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { formatAmount } from '@/utils/formatAmount'
 
 const props = defineProps({
     target: {
@@ -23,6 +24,7 @@ const props = defineProps({
 })
 
 const displayValue = ref(0)
+const formattedValue = computed(() => formatAmount(displayValue.value))
 const elementRef = ref(null)
 const isVisible = ref(false)
 

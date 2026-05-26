@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\PaymentResource;
 use App\Services\Admin\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class PaymentController extends Controller
 {
@@ -22,7 +24,7 @@ class PaymentController extends Controller
         return null;
     }
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection|JsonResponse
     {
         if ($response = $this->forbidUnlessSuperAdmin()) {
             return $response;
@@ -30,16 +32,7 @@ class PaymentController extends Controller
 
         $payments = $this->paymentService->list($request);
 
-        return response()->json([
-            'message' => 'Payments fetched successfully',
-            'data' => $payments->items(),
-            'meta' => [
-                'current_page' => $payments->currentPage(),
-                'last_page' => $payments->lastPage(),
-                'per_page' => $payments->perPage(),
-                'total' => $payments->total(),
-            ],
-        ]);
+        return PaymentResource::collection($payments->items());
     }
 
     public function store(Request $request): JsonResponse

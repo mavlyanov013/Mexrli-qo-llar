@@ -116,7 +116,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="field-label">Sahifa manzili (ixtiyoriy)</label>
-                        <input v-model="form.slug" class="input" placeholder="slug" />
+                        <input v-model="form.slug" class="input" :placeholder="t('admin.placeholders.slug')" />
+                        <p class="text-xs text-gray-500 mt-1">{{ t('admin.hints.slug') }}</p>
                     </div>
                     <div>
                         <label class="field-label">Holat</label>
@@ -172,6 +173,9 @@ import newsService from '@/services/newsService'
 import mediaService from '@/services/mediaService'
 import { emptyLocalizedFields, assignLocalizedFromRow, validateAdminLocalizedFields, buildAdminPayload } from '@/utils/localizedContent'
 import { Pencil, Trash2, Eye } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const newsLocalizedFields = [
     { name: 'title', label: 'Sarlavha', type: 'input' },

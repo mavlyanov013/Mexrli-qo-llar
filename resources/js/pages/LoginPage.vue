@@ -40,6 +40,10 @@
                     />
                 </div>
 
+                <p v-if="route.query.session === 'expired'" class="error-message">
+                    Sessiya tugagan. Iltimos, qayta kiring.
+                </p>
+
                 <p v-if="error" class="error-message">{{ error }}</p>
 
                 <button type="submit" class="auth-button">
@@ -57,11 +61,13 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '../composables/useAuth'
 
 const { login } = useAuth()
 const { t } = useI18n()
+const route = useRoute()
 
 const form = reactive({
     email: '',

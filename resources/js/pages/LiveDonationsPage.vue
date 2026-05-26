@@ -4,14 +4,14 @@
             <div class="text-center mb-12">
                 <div class="inline-flex items-center gap-2 bg-red-50 text-red-500 px-4 py-2 rounded-full text-sm font-medium mb-5">
                     <IconBadge :icon="Radio" tone="red" size="xs" class="shrink-0" />
-                    Jonli
+                    {{ t('liveDonationsPage.badge') }}
                 </div>
 
                 <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
-                    Jonli xayriyalar
+                    {{ t('liveDonationsPage.title') }}
                 </h1>
                 <p class="text-gray-500 text-lg">
-                    Xayriyalar real vaqt rejimida
+                    {{ t('liveDonationsPage.subtitle') }}
                 </p>
             </div>
 
@@ -20,9 +20,9 @@
                     <div class="flex items-center gap-3 mb-3">
                         <IconBadge :icon="Wallet" tone="green" size="md" />
                     </div>
-                    <p class="text-sm text-gray-500 mb-1">Bugungi summa</p>
+                    <p class="text-sm text-gray-500 mb-1">{{ t('liveDonationsPage.todayAmount') }}</p>
                     <p class="text-3xl font-bold text-gray-900">
-                        {{ formatNumber(todayTotal) }} UZS
+                        {{ formatMoney(todayTotal) }}
                     </p>
                 </div>
 
@@ -30,7 +30,7 @@
                     <div class="flex items-center gap-3 mb-3">
                         <IconBadge :icon="HandHeart" tone="blue" size="md" />
                     </div>
-                    <p class="text-sm text-gray-500 mb-1">Bugungi xayriyalar</p>
+                    <p class="text-sm text-gray-500 mb-1">{{ t('liveDonationsPage.todayCount') }}</p>
                     <p class="text-3xl font-bold text-gray-900">
                         {{ todayDonations.length }}
                     </p>
@@ -40,7 +40,7 @@
                     <div class="flex items-center gap-3 mb-3">
                         <IconBadge :icon="Users" tone="orange" size="md" />
                     </div>
-                    <p class="text-sm text-gray-500 mb-1">Noyob donorlar</p>
+                    <p class="text-sm text-gray-500 mb-1">{{ t('liveDonationsPage.uniqueDonors') }}</p>
                     <p class="text-3xl font-bold text-gray-900">
                         {{ uniqueDonors }}
                     </p>
@@ -52,16 +52,16 @@
                     <IconBadge :icon="Heart" tone="red" size="sm" />
 
                     <h2 class="font-bold text-gray-900 text-lg">
-                        So‘nggi xayriyalar
+                        {{ t('liveDonationsPage.recentTitle') }}
                     </h2>
                 </div>
 
                 <div v-if="loading" class="p-6 text-gray-500">
-                    Yuklanmoqda...
+                    {{ t('common.loading') }}
                 </div>
 
                 <div v-else-if="donations.length === 0" class="p-6 text-gray-500">
-                    Hozircha xayriyalar yo‘q.
+                    {{ t('liveDonationsPage.empty') }}
                 </div>
 
                 <div v-else class="divide-y divide-gray-100">
@@ -72,7 +72,7 @@
                     >
                         <div class="min-w-0">
                             <p class="font-medium text-gray-900">
-                                {{ item.is_anonymous ? 'Anonim' : item.donor_name || 'Donor' }}
+                                {{ item.is_anonymous ? t('common.anonymous') : (item.donor_name || t('common.donor')) }}
                             </p>
                             <p class="text-sm text-gray-500">
                                 {{ formatDateTime(item.created_at || item.created_date) }}
@@ -81,7 +81,7 @@
 
                         <div class="text-right shrink-0">
                             <p class="font-bold text-[#2A7DE1]">
-                                {{ formatNumber(item.amount) }} UZS
+                                {{ formatMoney(item.amount) }}
                             </p>
                             <p class="text-xs text-gray-400">
                                 {{ item.status }}
@@ -95,7 +95,7 @@
                     class="px-6 py-4 border-t border-gray-100 flex items-center justify-between flex-wrap gap-3"
                 >
                     <p class="text-sm text-gray-500">
-                        {{ startItem }}-{{ endItem }} / {{ donations.length }}
+                        {{ t('common.pagination.range', { start: startItem, end: endItem, total: donations.length }) }}
                     </p>
 
                     <div class="flex items-center gap-2">
@@ -105,7 +105,7 @@
                             :disabled="currentPage === 1"
                             @click="prevPage"
                         >
-                            Prev
+                            {{ t('common.pagination.prev') }}
                         </button>
 
                         <div class="flex items-center gap-2 flex-wrap">
@@ -129,7 +129,7 @@
                             :disabled="currentPage === totalPages"
                             @click="nextPage"
                         >
-                            Next
+                            {{ t('common.pagination.next') }}
                         </button>
                     </div>
                 </div>
@@ -140,9 +140,13 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Heart, HandHeart, Radio, Users, Wallet } from 'lucide-vue-next'
 import IconBadge from '@/components/shared/IconBadge.vue'
 import donationService from '../services/donationService'
+import { formatMoneyAmount } from '@/utils/formatAmount'
+
+const { t } = useI18n()
 
 const donations = ref([])
 const loading = ref(false)
@@ -247,11 +251,12 @@ const nextPage = () => {
     }
 }
 
-const formatNumber = (value) => Number(value || 0).toLocaleString()
+const formatMoney = (value) => formatMoneyAmount(value, t('common.currencyCode'))
 
 const formatDateTime = (value) => {
     if (!value) return ''
-    return new Date(value).toLocaleString()
+    const localeCode = locale.value === 'ru' ? 'ru-RU' : 'uz-UZ'
+    return new Date(value).toLocaleString(localeCode)
 }
 
 onMounted(async () => {

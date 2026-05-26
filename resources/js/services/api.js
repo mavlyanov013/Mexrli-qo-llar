@@ -7,12 +7,18 @@ const api = axios.create({
     }
 })
 
+const isValidToken = (token) =>
+    typeof token === 'string' && token.length > 20 && token !== 'null' && token !== 'undefined'
+
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token')
+    const lang = localStorage.getItem('lang') || 'uz'
 
-    if (token) {
+    if (isValidToken(token)) {
         config.headers.Authorization = `Bearer ${token}`
     }
+
+    config.headers['X-Locale'] = lang
 
     return config
 })
@@ -20,6 +26,18 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (response) => response,
     (error) => {
+        const status = error.response?.status
+        const url = error.config?.url || ''
+
+        if (status === 401 && !url.includes('/auth/login')) {
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+
+            if (!window.location.pathname.startsWith('/login')) {
+                window.location.assign('/login?session=expired')
+            }
+        }
+
         return Promise.reject(error)
     }
 )

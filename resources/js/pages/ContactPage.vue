@@ -194,7 +194,7 @@ const loadContactInfo = async () => {
 
 const handleSubmit = async () => {
     if (form.phone && !phoneInputRef.value?.validate()) {
-        errorText.value = phoneInputRef.value?.getError?.() || "Telefon raqam +998 formatida bo'lishi kerak"
+        errorText.value = phoneInputRef.value?.getError?.() || t('common.phoneInvalid')
         return
     }
 

@@ -7,7 +7,7 @@
             <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse shrink-0"></span>
 
             <span class="font-semibold text-red-600 shrink-0">
-                Live:
+                {{ t('liveActivityBar.label') }}
             </span>
 
             <span class="text-gray-700 truncate">
@@ -20,16 +20,29 @@
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import donationService from '../../services/donationService'
+import { formatMoneyAmount } from '@/utils/formatAmount'
 
 const router = useRouter()
+const { t } = useI18n()
 
 const donations = ref([])
 const currentIndex = ref(0)
-const latestText = ref('Loading donations...')
+const latestText = ref('')
 
 let rotateInterval = null
 let fetchInterval = null
+
+const formatAmountDisplay = (amount) => formatMoneyAmount(amount, t('common.currencyCode'))
+
+const donorLabel = (donation) => {
+    if (donation.is_anonymous) {
+        return t('common.anonymous')
+    }
+
+    return donation.donor_name || t('common.donor')
+}
 
 const fetchLiveDonations = async () => {
     try {
@@ -39,11 +52,11 @@ const fetchLiveDonations = async () => {
         if (donations.value.length > 0) {
             updateText()
         } else {
-            latestText.value = 'No donations yet'
+            latestText.value = t('liveActivityBar.empty')
         }
     } catch (error) {
         console.error('Live donations error:', error)
-        latestText.value = 'Unable to load donations'
+        latestText.value = t('liveActivityBar.error')
     }
 }
 
@@ -52,7 +65,10 @@ const updateText = () => {
 
     const d = donations.value[currentIndex.value]
 
-    latestText.value = `${d.is_anonymous ? 'Anonymous' : (d.donor_name || 'Donor')} donated ${Number(d.amount || 0).toLocaleString()} UZS`
+    latestText.value = t('liveActivityBar.donated', {
+        name: donorLabel(d),
+        amount: formatAmountDisplay(d.amount),
+    })
 
     currentIndex.value = (currentIndex.value + 1) % donations.value.length
 }
@@ -62,6 +78,7 @@ const goToLive = () => {
 }
 
 onMounted(async () => {
+    latestText.value = t('liveActivityBar.loading')
     await fetchLiveDonations()
 
     rotateInterval = setInterval(() => {
