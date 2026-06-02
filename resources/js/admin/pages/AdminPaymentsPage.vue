@@ -1,5 +1,5 @@
 <template>
-    <AdminCrudShell :title="title">
+    <AdminCrudShell :title="title" :subtitle="t('admin.paymentsHint')">
 
         <template v-if="isListMode">
             <div class="mb-4 space-y-3">
@@ -278,7 +278,7 @@ const exportCsv = async () => {
 
     try {
         await downloadExport({
-            filename: `tolovlar-${new Date().toISOString().slice(0, 10)}.csv`,
+            filename: `online-tolovlar-${new Date().toISOString().slice(0, 10)}.csv`,
             columns: columns.value,
             rows: payments.value,
             getCellValue: resolvePaymentCell,

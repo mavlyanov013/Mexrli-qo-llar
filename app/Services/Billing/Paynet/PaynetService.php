@@ -164,7 +164,8 @@ class PaynetService
                     ->where('provider', $this->provider)
                     ->where('status', Payment::STATUS_PENDING)
                     ->where(function ($query) use ($userData) {
-                        $query->where('payer_reference', (string) $userData)
+                        $query->where('id', (int) $userData)
+                            ->orWhere('payer_reference', (string) $userData)
                             ->orWhere('donation_id', (int) $userData);
                     })
                     ->latest('id')

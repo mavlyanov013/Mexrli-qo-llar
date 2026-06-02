@@ -61,7 +61,7 @@ class PaycomService
         $this->validateCreateParams($params);
 
         $providerTransactionId = (string) $params['id'];
-        $donationId = isset($params['account']['user_data'])
+        $referenceId = isset($params['account']['user_data'])
             ? (int) $params['account']['user_data']
             : null;
 
@@ -70,10 +70,19 @@ class PaycomService
             ->where('transaction_id', $providerTransactionId)
             ->first();
 
-        if (!$payment && $donationId) {
+        if (!$payment && $referenceId) {
             $payment = Payment::query()
                 ->where('provider', 'paycom')
-                ->where('donation_id', $donationId)
+                ->where('id', $referenceId)
+                ->where('status', Payment::STATUS_PENDING)
+                ->latest('id')
+                ->first();
+        }
+
+        if (!$payment && $referenceId) {
+            $payment = Payment::query()
+                ->where('provider', 'paycom')
+                ->where('donation_id', $referenceId)
                 ->where('status', Payment::STATUS_PENDING)
                 ->latest('id')
                 ->first();
@@ -81,7 +90,7 @@ class PaycomService
 
         if ($payment) {
             $payment->transaction_id = $providerTransactionId;
-            $payment->payer_reference = (string) ($donationId ?: $payment->payer_reference);
+            $payment->payer_reference = (string) ($referenceId ?: $payment->payer_reference);
             $payment->provider_time_ms = (int) $params['time'];
             $payment->provider_create_time = $payment->provider_create_time ?: $this->currentTimestampMs();
             $payment->payload = array_merge($payment->payload ?? [], [
@@ -102,8 +111,8 @@ class PaycomService
         $payment = Payment::create([
             'transaction_id' => $providerTransactionId,
             'provider' => 'paycom',
-            'payer_reference' => $donationId ? (string) $donationId : null,
-            'donation_id' => $donationId,
+            'payer_reference' => $referenceId ? (string) $referenceId : null,
+            'donation_id' => null,
             'amount' => $this->normalizeAmountFromTiyin($params['amount']),
             'status' => Payment::STATUS_PENDING,
             'provider_time_ms' => (int) $params['time'],

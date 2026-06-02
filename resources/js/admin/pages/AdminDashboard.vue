@@ -116,9 +116,9 @@ const statCards = computed(() => {
     if (isSuperAdmin.value) {
         cards.unshift({
             key: 'donations',
-            label: 'Jami xayriyalar',
+            label: t('admin.totalEhson'),
             value: formatMoney(stats.value.totalDonations),
-            hint: 'Barcha xayriyalar',
+            hint: t('admin.donations'),
             icon: HandCoins,
             tone: 'orange',
             to: '/admin/donations',
@@ -126,9 +126,9 @@ const statCards = computed(() => {
         })
         cards.push({
             key: 'payments',
-            label: 'Onlayn to‘lovlar',
+            label: t('admin.payments'),
             value: stats.value.onlinePayments,
-            hint: 'To‘lovlar bo‘limi',
+            hint: t('admin.paymentsHint'),
             icon: CreditCard,
             tone: 'sky',
             to: '/admin/payments',

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Billing;
 
 use App\Http\Controllers\Controller;
 use App\Models\CaseItem;
-use App\Models\Donation;
 use App\Models\Payment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,7 +35,7 @@ class CheckoutController extends Controller
             'case_id' => ['nullable', 'integer'],
             'service_type' => ['required', 'string'],
             'donor_name' => ['required', 'string', 'max:255'],
-            'donor_phone' => ['required', 'string', 'max:20'],
+            'donor_phone' => ['nullable', 'string', 'max:20'],
             'amount' => ['required', 'numeric', 'min:1000'],
             'currency' => ['required', 'string', 'max:10'],
             'type' => ['required', 'string', 'in:one_time,monthly'],
@@ -63,19 +62,6 @@ class CheckoutController extends Controller
             }
         }
 
-        $donation = Donation::create([
-            'case_id' => $data['case_id'] ?? null,
-            'service_type' => $data['service_type'],
-            'donor_name' => $data['donor_name'],
-            'donor_phone' => $data['donor_phone'],
-            'amount' => $amount,
-            'currency' => 'UZS',
-            'type' => $data['type'],
-            'message' => $data['message'] ?? null,
-            'is_anonymous' => $data['is_anonymous'] ?? false,
-            'status' => 'pending',
-        ]);
-
         $transactionId = $provider === 'paycom'
             ? 'PM_' . strtoupper(Str::random(12))
             : (string) random_int(1000000000, 9999999999);
@@ -84,14 +70,14 @@ class CheckoutController extends Controller
             'provider' => $provider,
             'transaction_id' => $transactionId,
             'status' => Payment::STATUS_PENDING,
-            'payer_reference' => (string) $donation->id,
+            'payer_reference' => null,
             'amount' => $amount,
             'currency' => 'UZS',
-            'donation_id' => $donation->id,
+            'donation_id' => null,
             'live_mode' => true,
             'payload' => [
+                'source' => 'website_checkout',
                 'donor_name' => $data['donor_name'],
-                'donor_phone' => $data['donor_phone'],
                 'service_type' => $data['service_type'],
                 'case_id' => $data['case_id'] ?? null,
                 'type' => $data['type'],
@@ -100,12 +86,14 @@ class CheckoutController extends Controller
             ],
         ]);
 
+        $payment->payer_reference = (string) $payment->id;
+        $payment->save();
+
         $checkoutUrl = $this->buildCheckoutUrl($payment);
 
         Log::info('CHECKOUT INIT RESULT', [
             'provider' => $provider,
             'payment_id' => $payment->id,
-            'donation_id' => $donation->id,
             'transaction_id' => $payment->transaction_id,
             'amount_uzs' => $amount,
             'checkout_url' => $checkoutUrl,
@@ -113,7 +101,6 @@ class CheckoutController extends Controller
 
         return response()->json([
             'data' => [
-                'donation_id' => $donation->id,
                 'payment_id' => $payment->id,
                 'provider' => $provider,
                 'transaction_id' => $payment->transaction_id,
@@ -126,6 +113,8 @@ class CheckoutController extends Controller
 
     protected function buildCheckoutUrl(Payment $payment): ?string
     {
+        $referenceId = (string) $payment->id;
+
         if ($payment->provider === 'paycom') {
             $merchantId = config('payments.paycom.merchant_id');
 
@@ -138,7 +127,7 @@ class CheckoutController extends Controller
             return 'https://payme.uz/fallback/merchant/'
                 . '?id=' . urlencode((string) $merchantId)
                 . '&amount=' . $amountTiyin
-                . '&ac.user_data=' . urlencode((string) $payment->donation_id);
+                . '&ac.user_data=' . urlencode($referenceId);
         }
 
         if ($payment->provider === 'click') {
@@ -154,14 +143,15 @@ class CheckoutController extends Controller
                 . '?service_id=' . urlencode((string) $serviceId)
                 . '&merchant_id=' . urlencode((string) $merchantId)
                 . '&amount=' . urlencode((string) ((int) round($payment->amount)))
-                . '&transaction_param=' . urlencode((string) $payment->donation_id)
+                . '&transaction_param=' . urlencode($referenceId)
                 . '&return_url=' . urlencode((string) $returnUrl);
         }
 
         if ($payment->provider === 'paynet') {
-    		$merchantId = config('payments.paynet.app_merchant_id', '4590');
-    		return 'https://app.paynet.uz/?m=' . urlencode((string) $merchantId);
-	}
+            $merchantId = config('payments.paynet.app_merchant_id', '4590');
+            return 'https://app.paynet.uz/?m=' . urlencode((string) $merchantId);
+        }
+
         if ($payment->provider === 'uzumbank') {
             return 'https://www.apelsin.uz/open-service?serviceId=12030307';
         }

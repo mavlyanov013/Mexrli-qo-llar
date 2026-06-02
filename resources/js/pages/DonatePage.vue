@@ -152,19 +152,6 @@
                             />
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                {{ t('donatePage.phone') }}
-                            </label>
-                            <input
-                                v-model="donorPhone"
-                                type="tel"
-                                :disabled="isAnonymous"
-                                :placeholder="t('donatePage.phonePlaceholder')"
-                                class="rounded-2xl h-12 bg-gray-50 border border-gray-300 w-full px-4 outline-none disabled:opacity-60"
-                            />
-                        </div>
-
                         <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
                             <input
                                 v-model="isAnonymous"
@@ -274,7 +261,6 @@ const amount = ref(10000)
 const customAmount = ref('')
 const paymentMethod = ref(PAYMENT_PROVIDERS.paycom)
 const donorName = ref('')
-const donorPhone = ref('')
 const isAnonymous = ref(false)
 const submitting = ref(false)
 const errorText = ref('')
@@ -376,7 +362,6 @@ const handleSubmit = async () => {
             donor_name: isAnonymous.value
                 ? t('common.anonymous')
                 : (donorName.value.trim() || t('common.donor')),
-            donor_phone: isAnonymous.value ? '-' : (donorPhone.value.trim() || '-'),
             amount: Number(finalAmount.value),
             currency: 'UZS',
             type: 'one_time',

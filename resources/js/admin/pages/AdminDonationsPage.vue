@@ -1,5 +1,9 @@
 <template>
-    <AdminCrudShell :title="title" :create-to="isListMode ? '/admin/donations/create' : ''">
+    <AdminCrudShell
+        :title="title"
+        :subtitle="t('admin.donationsHint')"
+        :create-to="isListMode ? '/admin/donations/create' : ''"
+    >
 
         <!-- LIST -->
         <template v-if="isListMode">
@@ -91,7 +95,7 @@
                 v-if="meta && meta.last_page > 1"
                 :current-page="meta.current_page || 1"
                 :last-page="meta.last_page || 1"
-                :summary="`${meta.total || 0} ta xayriya`"
+                :summary="t('admin.ehsonCount', { count: meta.total || 0 })"
                 @change="fetchPage"
             />
         </template>
@@ -100,10 +104,10 @@
         <template v-else-if="isViewMode && current">
             <div class="space-y-2 text-sm">
                 <p><strong>ID:</strong> {{ current.id }}</p>
-                <p><strong>Xayriya qiluvchi:</strong> {{ current.donor_name }}</p>
-                <p><strong>Miqdori:</strong> {{ current.amount }} {{ current.currency }}</p>
+                <p><strong>{{ t('admin.donorLabel') }}:</strong> {{ current.donor_name }}</p>
+                <p><strong>{{ t('admin.amountLabel') }}:</strong> {{ current.amount }} {{ current.currency }}</p>
                 <p>
-                    <strong>Holati:</strong>
+                    <strong>{{ t('admin.statusLabel') }}:</strong>
                     <StatusBadge :status="current.status" :map="DONATION_STATUSES" />
                 </p>
             </div>
@@ -297,7 +301,7 @@ const exportCsv = async () => {
 
     try {
         await downloadExport({
-            filename: `xayriyalar-${new Date().toISOString().slice(0, 10)}.csv`,
+            filename: `ehsonlar-${new Date().toISOString().slice(0, 10)}.csv`,
             columns,
             rows: donations.value,
             getCellValue: resolveDonationCell,

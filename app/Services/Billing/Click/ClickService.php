@@ -32,17 +32,26 @@ class ClickService
         $clickTransId = (string) $payload['click_trans_id'];
         $merchantTransId = $this->decodeMerchantTransId($payload['merchant_trans_id']);
         $amount = (float) $payload['amount'];
-        $donationId = (int) $merchantTransId;
+        $referenceId = (int) $merchantTransId;
 
         $payment = Payment::query()
             ->where('provider', 'click')
             ->where('transaction_id', $clickTransId)
             ->first();
 
-        if (!$payment && $donationId) {
+        if (!$payment && $referenceId) {
             $payment = Payment::query()
                 ->where('provider', 'click')
-                ->where('donation_id', $donationId)
+                ->where('id', $referenceId)
+                ->where('status', Payment::STATUS_PENDING)
+                ->latest('id')
+                ->first();
+        }
+
+        if (!$payment && $referenceId) {
+            $payment = Payment::query()
+                ->where('provider', 'click')
+                ->where('donation_id', $referenceId)
                 ->where('status', Payment::STATUS_PENDING)
                 ->latest('id')
                 ->first();
@@ -87,7 +96,7 @@ class ClickService
             'provider' => 'click',
             'transaction_id' => $clickTransId,
             'payer_reference' => $merchantTransId,
-            'donation_id' => $donationId ?: null,
+            'donation_id' => null,
             'amount' => $amount,
             'status' => Payment::STATUS_PENDING,
             'currency' => config('payments.currency', 'UZS'),

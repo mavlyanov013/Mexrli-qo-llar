@@ -69,7 +69,7 @@ class TodayStatsService
             ->whereIn('status', self::COMPLETED_STATUSES)
             ->whereRaw("LOWER(COALESCE(provider, '')) NOT IN (?, ?)", self::CASH_PROVIDERS)
             ->with(['donation:id,donor_phone,donor_name,is_anonymous'])
-            ->get(['id', 'payer_reference', 'donation_id'])
+            ->get(['id', 'payer_reference', 'donation_id', 'payload'])
             ->each(function (Payment $payment) use (&$keys) {
                 if ($payment->donation) {
                     $key = $this->donorKey($payment->donation);
@@ -81,10 +81,16 @@ class TodayStatsService
                     }
                 }
 
-                $reference = trim((string) ($payment->payer_reference ?? ''));
+                $payload = is_array($payment->payload) ? $payment->payload : [];
 
-                if ($reference !== '') {
-                    $keys[$reference] = true;
+                if (! empty($payload['is_anonymous'])) {
+                    return;
+                }
+
+                $name = trim((string) ($payload['donor_name'] ?? ''));
+
+                if ($name !== '') {
+                    $keys['payment:' . $payment->id] = true;
                 }
             });
 

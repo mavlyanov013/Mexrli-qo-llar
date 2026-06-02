@@ -1,7 +1,12 @@
 <template>
     <section class="space-y-4">
-        <div class="flex items-center justify-between">
-            <h2 class="text-xl font-semibold text-gray-900">{{ title }}</h2>
+        <div class="flex items-center justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-900">{{ title }}</h2>
+                <p v-if="subtitle" class="mt-1 text-sm text-gray-500 max-w-2xl">
+                    {{ subtitle }}
+                </p>
+            </div>
             <router-link
                 v-if="createTo"
                 :to="createTo"
@@ -21,6 +26,7 @@ import { useI18n } from 'vue-i18n'
 
 defineProps({
     title: { type: String, required: true },
+    subtitle: { type: String, default: '' },
     createTo: { type: String, default: '' },
 })
 

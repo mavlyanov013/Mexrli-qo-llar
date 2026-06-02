@@ -28,8 +28,18 @@ class DonationController extends Controller
             return $response;
         }
 
+        $onlineProviders = ['paycom', 'click', 'paynet', 'uzumbank'];
+
         $query = Donation::query()
-            ->with('payment') // 🔥 provider olish uchun MUHIM
+            ->with('payment')
+            ->whereDoesntHave('payment', function ($paymentQuery) use ($onlineProviders) {
+                $paymentQuery->whereIn('provider', $onlineProviders);
+            })
+            ->where(function ($donationQuery) {
+                $donationQuery
+                    ->where('type', '!=', 'one_time')
+                    ->orWhere('status', '!=', 'pending');
+            })
             ->latest();
 
         // 🔎 STATUS FILTER
