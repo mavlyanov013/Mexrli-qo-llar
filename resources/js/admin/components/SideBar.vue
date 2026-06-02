@@ -20,6 +20,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { canAccessAdminTab } from '@/admin/utils/permissions'
 import { usePermissions } from '@/composables/usePermissions'
+import { siteLogo } from '@/constants/branding'
 
 const props = defineProps({
     isOpen: {
@@ -79,8 +80,8 @@ const visibleNavItems = computed(() => navItems.value.filter((item) => {
         <div class="shrink-0 mb-4 flex items-start justify-between">
             <div class="flex items-center gap-3">
                 <img
-                    src="/public/images/logo.png"
-                    alt="Mehrli Insonlar"
+                    :src="siteLogo"
+                    :alt="t('common.brandName')"
                     class="w-11 h-11 object-contain rounded-xl"
                 />
 

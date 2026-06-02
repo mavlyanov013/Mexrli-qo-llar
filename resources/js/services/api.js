@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { clearAuthStorage } from '@/utils/storage'
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
@@ -30,8 +31,7 @@ api.interceptors.response.use(
         const url = error.config?.url || ''
 
         if (status === 401 && !url.includes('/auth/login')) {
-            localStorage.removeItem('token')
-            localStorage.removeItem('user')
+            clearAuthStorage()
 
             if (!window.location.pathname.startsWith('/login')) {
                 window.location.assign('/login?session=expired')

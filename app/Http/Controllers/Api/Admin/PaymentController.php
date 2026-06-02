@@ -7,7 +7,7 @@ use App\Http\Resources\Admin\PaymentResource;
 use App\Services\Admin\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Symfony\Component\HttpFoundation\Response;
 
 class PaymentController extends Controller
 {
@@ -24,7 +24,7 @@ class PaymentController extends Controller
         return null;
     }
 
-    public function index(Request $request): AnonymousResourceCollection|JsonResponse
+    public function index(Request $request): JsonResponse|Response
     {
         if ($response = $this->forbidUnlessSuperAdmin()) {
             return $response;
@@ -32,7 +32,14 @@ class PaymentController extends Controller
 
         $payments = $this->paymentService->list($request);
 
-        return PaymentResource::collection($payments->items());
+        $response = PaymentResource::collection($payments->items())->toResponse($request);
+
+        $response->headers->set('X-Pagination-Current-Page', (string) $payments->currentPage());
+        $response->headers->set('X-Pagination-Last-Page', (string) $payments->lastPage());
+        $response->headers->set('X-Pagination-Per-Page', (string) $payments->perPage());
+        $response->headers->set('X-Pagination-Total', (string) $payments->total());
+
+        return $response;
     }
 
     public function store(Request $request): JsonResponse

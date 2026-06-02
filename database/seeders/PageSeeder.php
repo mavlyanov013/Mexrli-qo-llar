@@ -13,9 +13,9 @@ class PageSeeder extends Seeder
         $page = Page::updateOrCreate(
             ['slug' => 'home'],
             [
-                'title' => 'Mexrli Qo‘llar',
+                'title' => 'Mexrli Insonlar',
                 'content' => 'Home page',
-                'meta_title' => 'Mexrli Qo‘llar',
+                'meta_title' => 'Mexrli Insonlar',
                 'meta_description' => 'Yordam va ko‘mak platformasi',
                 'is_active' => true,
                 'published_at' => now(),
@@ -29,7 +29,7 @@ class PageSeeder extends Seeder
                 'sort_order' => 1,
             ],
             [
-                'title' => 'Mexrli Qo‘llar',
+                'title' => 'Mexrli Insonlar',
                 'subtitle' => 'Birgalikda yaxshilik qilamiz',
                 'content' => 'Bu yerga keyin Base44 dagi matnlarni ko‘chirasiz.',
                 'is_active' => true,

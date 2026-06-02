@@ -1,5 +1,5 @@
 import api from './api'
-import { normalizeItem, normalizeList, normalizeMeta, toServiceError } from './serviceHelpers'
+import { normalizeItem, normalizeList, normalizeMeta, normalizePaginationHeaders, toServiceError } from './serviceHelpers'
 
 export default {
     async fetchList(params = {}) {
@@ -8,7 +8,11 @@ export default {
             const body = response?.data
             const data = Array.isArray(body) ? body : normalizeList(response)
 
-            return { data, meta: null, error: null }
+            return {
+                data,
+                meta: normalizePaginationHeaders(response),
+                error: null,
+            }
         } catch (error) {
             return { data: [], meta: null, error: toServiceError(error, 'Failed to fetch payments') }
         }

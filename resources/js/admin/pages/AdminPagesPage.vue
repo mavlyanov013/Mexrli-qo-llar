@@ -32,6 +32,14 @@
                 </AdminTable>
 
             </ListState>
+
+            <AdminPagination
+                v-if="meta && meta.last_page > 1"
+                :current-page="meta.current_page || 1"
+                :last-page="meta.last_page || 1"
+                :summary="`${meta.total || 0} ta sahifa`"
+                @change="fetchPages"
+            />
         </template>
 
         <!-- ================= VIEW ================= -->
@@ -129,6 +137,7 @@ import { useI18n } from 'vue-i18n'
 
 import AdminCrudShell from '@/admin/components/common/AdminCrudShell.vue'
 import AdminTable from '@/admin/components/common/AdminTable.vue'
+import AdminPagination from '@/admin/components/common/AdminPagination.vue'
 import ListState from '@/components/shared/ListState.vue'
 import pageService from '@/services/pageService'
 
@@ -136,6 +145,7 @@ const { t } = useI18n()
 
 /* ================= STATE ================= */
 const pages = ref([])
+const meta = ref(null)
 const loading = ref(false)
 const error = ref(null)
 
@@ -156,11 +166,12 @@ const columns = [
 
 /* ================= API ================= */
 
-const fetchPages = async () => {
+const fetchPages = async (page = 1) => {
     loading.value = true
     try {
-        const res = await pageService.getAll()
-        pages.value = res.data.data
+        const res = await pageService.getAll({ page, per_page: 15 })
+        pages.value = res.data
+        meta.value = res.meta
     } catch (e) {
         error.value = e.message
     } finally {
@@ -226,7 +237,7 @@ const remove = async (id) => {
 }
 
 /* ================= INIT ================= */
-onMounted(fetchPages)
+onMounted(() => fetchPages(1))
 </script>
 
 <style scoped>

@@ -6,17 +6,6 @@
 
         <!-- LIST -->
         <template v-if="isListMode">
-            <div class="mb-4 flex flex-wrap items-center justify-end gap-2">
-                <button
-                    type="button"
-                    class="h-10 rounded-lg border border-emerald-300 bg-emerald-50 px-4 text-sm font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
-                    :disabled="exporting || loading"
-                    @click="exportCsv"
-                >
-                    {{ exporting ? t('admin.exporting') : t('admin.exportCsv') }}
-                </button>
-            </div>
-
             <AdminTable :columns="columns" :rows="rows">
                 <template #cell-category="{ row }">
                     {{ HELP_REQUEST_CATEGORIES[row.category] ?? row.category }}
@@ -183,7 +172,6 @@ import {
     HELP_REQUEST_STATUS,
     HELP_REQUEST_STATUS_OPTIONS,
 } from '@/constants/statuses.js'
-import { downloadExport, fetchAllPaginatedResults } from '@/utils/downloadExport'
 
 import { useI18n } from 'vue-i18n'
 
@@ -196,7 +184,6 @@ const meta = ref(null)
 const currentPage = ref(1)
 const current = ref(null)
 const loading = ref(false)
-const exporting = ref(false)
 const savingStatus = ref(false)
 const statusError = ref('')
 const successMessage = ref('')
@@ -271,42 +258,6 @@ const imageItems = computed(() => {
 const formatDate = (value) => {
     if (!value) return '—'
     return new Date(value).toLocaleString('uz-UZ')
-}
-
-const resolveHelpRequestCell = (row, key) => {
-    if (key === 'category') {
-        return HELP_REQUEST_CATEGORIES[row.category] ?? row.category ?? ''
-    }
-    if (key === 'status') {
-        const normalized = normalizeStatus(row.status)
-        return HELP_REQUEST_STATUS[normalized]?.label
-            || HELP_REQUEST_STATUS[row.status]?.label
-            || row.status
-            || ''
-    }
-    if (key === 'created_at') {
-        return formatDate(row.created_at)
-    }
-    return row[key] ?? ''
-}
-
-const exportCsv = async () => {
-    exporting.value = true
-
-    try {
-        await downloadExport({
-            filename: `yordam-so-rovlari-${new Date().toISOString().slice(0, 10)}.csv`,
-            columns,
-            rows: rows.value,
-            getCellValue: resolveHelpRequestCell,
-            fetchAllRows: () => fetchAllPaginatedResults(
-                (p) => helpRequestService.fetchList(p),
-                { per_page: 200 },
-            ),
-        })
-    } finally {
-        exporting.value = false
-    }
 }
 
 const fetchPage = async (page = 1) => {

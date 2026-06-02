@@ -2,8 +2,9 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import authService from '../services/authService'
 import { canAccessAdmin } from '@/admin/utils/permissions'
+import { clearAuthStorage, readStoredUser } from '@/utils/storage'
 
-const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
+const user = ref(readStoredUser())
 
 export function useAuth() {
     const router = useRouter()
@@ -28,8 +29,7 @@ export function useAuth() {
 
         if (!token || token === 'null' || token === 'undefined') {
             user.value = null
-            localStorage.removeItem('token')
-            localStorage.removeItem('user')
+            clearAuthStorage()
             throw new Error('Missing token')
         }
 
@@ -40,8 +40,7 @@ export function useAuth() {
             return user.value
         } catch (e) {
             user.value = null
-            localStorage.removeItem('token')
-            localStorage.removeItem('user')
+            clearAuthStorage()
             throw e
         }
     }
@@ -51,8 +50,7 @@ export function useAuth() {
             await authService.logoutUser()
         } catch (e) {}
 
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
+        clearAuthStorage()
         user.value = null
 
         router.push('/login')

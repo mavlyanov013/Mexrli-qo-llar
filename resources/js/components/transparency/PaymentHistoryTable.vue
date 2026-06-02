@@ -60,55 +60,26 @@
             </table>
         </div>
 
-        <div
-            v-if="totalPages > 1"
-            class="px-6 py-4 border-t border-gray-100 flex items-center justify-between flex-wrap gap-3"
-        >
-            <p class="text-sm text-gray-500">
-                {{ props.t('common.pagination.range', { start: startItem, end: endItem, total: filteredDonations.length }) }}
-            </p>
-
-            <div class="flex items-center gap-2">
-                <button
-                    type="button"
-                    class="rounded-xl px-4 py-2 text-sm border border-gray-300 bg-white text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    :disabled="currentPage === 1"
-                    @click="prevPage"
-                >
-                    {{ props.t('common.pagination.prev') }}
-                </button>
-
-                <div class="flex items-center gap-2 flex-wrap">
-                    <button
-                        v-for="page in visiblePages"
-                        :key="page"
-                        type="button"
-                        class="min-w-10 h-10 rounded-xl text-sm border transition-all"
-                        :class="page === currentPage
-                            ? 'bg-[#2A7DE1] text-white border-[#2A7DE1]'
-                            : 'bg-white text-gray-700 border-gray-300'"
-                        @click="goToPage(page)"
-                    >
-                        {{ page }}
-                    </button>
-                </div>
-
-                <button
-                    type="button"
-                    class="rounded-xl px-4 py-2 text-sm border border-gray-300 bg-white text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    :disabled="currentPage === totalPages"
-                    @click="nextPage"
-                >
-                    {{ props.t('common.pagination.next') }}
-                </button>
-            </div>
-        </div>
+        <Pagination
+            wrapper-class="px-6 py-4 border-t border-gray-100"
+            :current-page="currentPage"
+            :last-page="totalPages"
+            :start-item="startItem"
+            :end-item="endItem"
+            :total-items="filteredDonations.length"
+            :visible-pages="visiblePages"
+            @change="goToPage"
+            @prev="prevPage"
+            @next="nextPage"
+        />
     </div>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { formatMoneyAmount } from '@/utils/formatAmount'
+import Pagination from '@/components/shared/Pagination.vue'
+import { useClientPagination } from '@/composables/useClientPagination'
 
 const props = defineProps({
     donations: {
@@ -126,8 +97,6 @@ const props = defineProps({
 })
 
 const filter = ref('all')
-const currentPage = ref(1)
-const perPage = 10
 
 const filters = computed(() => [
     { id: 'all', label: props.t('transparencyPage.filters.all') },
@@ -185,69 +154,22 @@ const filteredDonations = computed(() => {
     return result
 })
 
-const totalPages = computed(() => {
-    return Math.max(1, Math.ceil(filteredDonations.value.length / perPage))
-})
-
-const paginatedDonations = computed(() => {
-    const start = (currentPage.value - 1) * perPage
-    const end = start + perPage
-
-    return filteredDonations.value.slice(start, end)
-})
-
-const startItem = computed(() => {
-    if (!filteredDonations.value.length) return 0
-    return (currentPage.value - 1) * perPage + 1
-})
-
-const endItem = computed(() => {
-    return Math.min(currentPage.value * perPage, filteredDonations.value.length)
-})
-
-const visiblePages = computed(() => {
-    const pages = []
-    const maxVisible = 5
-    let start = Math.max(1, currentPage.value - 2)
-    let end = Math.min(totalPages.value, start + maxVisible - 1)
-
-    if (end - start + 1 < maxVisible) {
-        start = Math.max(1, end - maxVisible + 1)
-    }
-
-    for (let i = start; i <= end; i++) {
-        pages.push(i)
-    }
-
-    return pages
-})
+const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedDonations,
+    startItem,
+    endItem,
+    visiblePages,
+    goToPage,
+    prevPage,
+    nextPage,
+} = useClientPagination(filteredDonations, 10)
 
 const changeFilter = (value) => {
     filter.value = value
     currentPage.value = 1
 }
-
-const goToPage = (page) => {
-    currentPage.value = page
-}
-
-const prevPage = () => {
-    if (currentPage.value > 1) {
-        currentPage.value--
-    }
-}
-
-const nextPage = () => {
-    if (currentPage.value < totalPages.value) {
-        currentPage.value++
-    }
-}
-
-watch(filteredDonations, () => {
-    if (currentPage.value > totalPages.value) {
-        currentPage.value = 1
-    }
-})
 
 const getCaseName = (caseId) => {
     if (!caseId) return props.t('transparencyPage.generalFund')

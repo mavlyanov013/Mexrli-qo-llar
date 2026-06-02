@@ -20,6 +20,16 @@ class VolunteerApplicationController extends Controller
             $query->where('status', $request->string('status'));
         }
 
+        if ($request->filled('q')) {
+            $term = '%' . $request->string('q') . '%';
+            $query->where(function ($inner) use ($term) {
+                $inner->where('full_name', 'like', $term)
+                    ->orWhere('email', 'like', $term)
+                    ->orWhere('phone', 'like', $term)
+                    ->orWhere('city', 'like', $term);
+            });
+        }
+
         $items = $query->paginate((int) $request->input('per_page', 20));
 
         return response()->json([

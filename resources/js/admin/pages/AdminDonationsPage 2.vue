@@ -37,15 +37,6 @@
                         {{ t('admin.reset') }}
                     </button>
 
-                    <button
-                        type="button"
-                        class="h-10 border border-emerald-300 bg-emerald-50 rounded-lg text-sm px-4 font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-60 md:col-span-2"
-                        :disabled="exporting || loading"
-                        @click="exportCsv"
-                    >
-                        {{ exporting ? t('admin.exporting') : t('admin.exportCsv') }}
-                    </button>
-
                 </div>
 
                 <!-- TABLE -->
@@ -196,8 +187,6 @@ import StatusBadge from '@/components/shared/StatusBadge.vue'
 
 import { Eye, Pencil, Trash2 } from 'lucide-vue-next'
 import { DONATION_STATUSES } from '@/constants/statuses'
-import { formatMoneyAmount } from '@/utils/formatAmount'
-import { downloadExport, fetchAllPaginatedResults } from '@/utils/downloadExport'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -213,7 +202,6 @@ const {
 } = useDonations()
 
 const currentPage = ref(1)
-const exporting = ref(false)
 
 const current = ref(null)
 
@@ -272,43 +260,6 @@ const resetFilters = () => {
     filters.search = ''
     filters.status = ''
     fetchPage(1)
-}
-
-const buildExportParams = () => {
-    const params = { admin: true, per_page: 200 }
-    if (filters.search.trim()) params.search = filters.search.trim()
-    if (filters.status) params.status = filters.status
-    return params
-}
-
-const resolveDonationCell = (row, key) => {
-    if (key === 'amount') {
-        return formatMoneyAmount(row.amount, row.currency || 'UZS')
-    }
-    if (key === 'status') {
-        const meta = DONATION_STATUSES[row.status]
-        return meta?.labelKey ? t(meta.labelKey) : (row.status || '')
-    }
-    return row[key] ?? ''
-}
-
-const exportCsv = async () => {
-    exporting.value = true
-
-    try {
-        await downloadExport({
-            filename: `xayriyalar-${new Date().toISOString().slice(0, 10)}.csv`,
-            columns,
-            rows: donations.value,
-            getCellValue: resolveDonationCell,
-            fetchAllRows: () => fetchAllPaginatedResults(
-                (p) => donationService.fetchList(p),
-                buildExportParams(),
-            ),
-        })
-    } finally {
-        exporting.value = false
-    }
 }
 
 const save = async () => {

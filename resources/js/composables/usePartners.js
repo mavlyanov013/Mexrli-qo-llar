@@ -1,7 +1,7 @@
 import { onMounted, ref } from 'vue'
 import partnerService from '@/services/partnerService'
 
-export function usePartners() {
+export function usePartners({ autoFetch = true } = {}) {
     const partners = ref([])
     const meta = ref(null)
     const loading = ref(false)
@@ -26,7 +26,9 @@ export function usePartners() {
     const togglePartnerStatus = async (id, isActive) => partnerService.toggleStatus(id, isActive)
 
     onMounted(() => {
-        fetchPartners()
+        if (autoFetch) {
+            fetchPartners()
+        }
     })
 
     return {

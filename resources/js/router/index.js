@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import i18n from '../i18n'
 import HomePage from '../pages/HomePage.vue'
 import LoginPage from '../pages/LoginPage.vue'
-import RegisterPage from '../pages/RegisterPage.vue'
 import CasesPage from '../pages/CasesPage.vue'
 import CaseDetailPage from '../pages/CaseDetailPage.vue'
 import HelpRequestPage from '../pages/HelpRequestPage.vue'
@@ -12,6 +11,7 @@ import NewsDetailPage from '../pages/NewsDetailPage.vue'
 import DonatePage from '../pages/DonatePage.vue'
 import TransparencyPage from '../pages/TransparencyPage.vue'
 import { canAccessAdmin, canAccessAdminRoute, normalizeRole } from '@/admin/utils/permissions'
+import { readStoredUser } from '@/utils/storage'
 
 const routes = [
     {
@@ -412,7 +412,7 @@ const router = createRouter({
 })
 router.beforeEach((to, from, next) => {
     const token = localStorage.getItem('token')
-    const user = JSON.parse(localStorage.getItem('user') || 'null')
+    const user = readStoredUser()
 
     if (to.meta.requiresAuth && !token) {
         return next('/login')
@@ -429,10 +429,6 @@ router.beforeEach((to, from, next) => {
     }
 
     if (to.meta.superAdminOnly && normalizeRole(user) !== 'super_admin') {
-        return next({ name: 'admin-dashboard' })
-    }
-
-    if (/^\/admin\/(payments|donations|users)(\/|$)/.test(to.path) && normalizeRole(user) !== 'super_admin') {
         return next({ name: 'admin-dashboard' })
     }
 

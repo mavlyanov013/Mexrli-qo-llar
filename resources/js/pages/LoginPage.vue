@@ -4,8 +4,8 @@
         <div class="auth-card">
             <div class="auth-header">
                 <img
-                    src="/public/images/logo.png"
-                    alt="Mehrli Insonlar"
+                    :src="siteLogo"
+                    :alt="t('common.brandName')"
                     class="auth-logo"
                 />
 
@@ -41,7 +41,7 @@
                 </div>
 
                 <p v-if="route.query.session === 'expired'" class="error-message">
-                    Sessiya tugagan. Iltimos, qayta kiring.
+                    {{ t('auth.login.sessionExpired') }}
                 </p>
 
                 <p v-if="error" class="error-message">{{ error }}</p>
@@ -63,6 +63,7 @@
 import { reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { siteLogo } from '@/constants/branding'
 import { useAuth } from '../composables/useAuth'
 
 const { login } = useAuth()

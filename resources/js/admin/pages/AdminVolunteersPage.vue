@@ -1,6 +1,43 @@
 <template>
     <AdminCrudShell :title="title">
         <template v-if="isListMode">
+            <div class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-4">
+                <AdminSearchInput
+                    v-model="filters.q"
+                    placeholder="Ism, email yoki telefon bo‘yicha qidirish"
+                />
+
+                <select
+                    v-model="filters.status"
+                    class="h-10 rounded-lg border border-gray-300 px-3 text-sm"
+                >
+                    <option value="">Barcha holatlar</option>
+                    <option
+                        v-for="option in VOLUNTEER_STATUS_OPTIONS"
+                        :key="option.value"
+                        :value="option.value"
+                    >
+                        {{ option.label }}
+                    </option>
+                </select>
+
+                <button
+                    type="button"
+                    class="h-10 rounded-lg bg-[#2A7DE1] px-4 text-sm font-medium text-white"
+                    @click="applyFilters"
+                >
+                    Filtrlash
+                </button>
+
+                <button
+                    type="button"
+                    class="h-10 rounded-lg border border-gray-300 px-4 text-sm text-gray-700"
+                    @click="clearFilters"
+                >
+                    Tozalash
+                </button>
+            </div>
+
             <ListState
                 :loading="loading"
                 :error="error"
@@ -181,6 +218,7 @@ import {
 import AdminCrudShell from '@/admin/components/common/AdminCrudShell.vue'
 import AdminTable from '@/admin/components/common/AdminTable.vue'
 import AdminPagination from '@/admin/components/common/AdminPagination.vue'
+import AdminSearchInput from '@/admin/components/common/AdminSearchInput.vue'
 import ListState from '@/components/shared/ListState.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import { Eye, Pencil, Trash2 } from 'lucide-vue-next'
@@ -191,7 +229,40 @@ const router = useRouter()
 
 const { volunteers, meta, loading, error, fetchVolunteers, updateVolunteer, deleteVolunteer } = useVolunteers()
 
-const fetchPage = (page = 1) => fetchVolunteers({ page, per_page: 15 })
+const filters = reactive({
+    q: '',
+    status: '',
+})
+
+const appliedFilters = reactive({
+    q: '',
+    status: '',
+})
+
+const buildParams = (page = 1) => {
+    const params = { page, per_page: 15 }
+
+    if (appliedFilters.q) params.q = appliedFilters.q
+    if (appliedFilters.status) params.status = appliedFilters.status
+
+    return params
+}
+
+const fetchPage = (page = 1) => fetchVolunteers(buildParams(page))
+
+const applyFilters = () => {
+    appliedFilters.q = filters.q.trim()
+    appliedFilters.status = filters.status
+    fetchPage(1)
+}
+
+const clearFilters = () => {
+    filters.q = ''
+    filters.status = ''
+    appliedFilters.q = ''
+    appliedFilters.status = ''
+    fetchPage(1)
+}
 
 const current = ref(null)
 const phoneInputRef = ref(null)

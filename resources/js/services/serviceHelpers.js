@@ -4,6 +4,26 @@ export const normalizeItem = (response) => response?.data?.data ?? response?.dat
 
 export const normalizeMeta = (response) => response?.data?.meta ?? null
 
+export const normalizePaginationHeaders = (response) => {
+    const headers = response?.headers || {}
+
+    const currentPage = Number(headers['x-pagination-current-page'])
+    const lastPage = Number(headers['x-pagination-last-page'])
+    const perPage = Number(headers['x-pagination-per-page'])
+    const total = Number(headers['x-pagination-total'])
+
+    if (!currentPage && !lastPage && !total) {
+        return null
+    }
+
+    return {
+        current_page: currentPage || 1,
+        last_page: lastPage || 1,
+        per_page: perPage || 20,
+        total: total || 0,
+    }
+}
+
 export const toServiceError = (error, fallbackMessage = 'Unexpected API error') => {
     const message = error?.response?.data?.message || error?.message || fallbackMessage
     const status = error?.response?.status || 500

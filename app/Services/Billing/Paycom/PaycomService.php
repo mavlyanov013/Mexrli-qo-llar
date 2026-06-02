@@ -127,6 +127,17 @@ class PaycomService
         ];
     }
 
+    protected function findPaycomPayment(string $id): ?Payment
+    {
+        return Payment::query()
+            ->where('provider', 'paycom')
+            ->where(function ($query) use ($id) {
+                $query->where('transaction_id', $id)
+                    ->orWhere('id', $id);
+            })
+            ->first();
+    }
+
     protected function performTransaction(array $payload): array
     {
         $params = $payload['params'];
@@ -135,10 +146,7 @@ class PaycomService
             throw new HttpException(400, 'Transaction id required');
         }
 
-        $payment = Payment::query()
-            ->where('provider', 'paycom')
-            ->where('transaction_id', (string) $params['id'])
-            ->first();
+        $payment = $this->findPaycomPayment((string) $params['id']);
 
         if (!$payment) {
             throw new HttpException(404, 'Transaction not found');
@@ -171,10 +179,7 @@ class PaycomService
             throw new HttpException(400, 'Transaction id required');
         }
 
-        $payment = Payment::query()
-            ->where('provider', 'paycom')
-            ->where('transaction_id', (string) $params['id'])
-            ->first();
+        $payment = $this->findPaycomPayment((string) $params['id']);
 
         if (!$payment) {
             throw new HttpException(404, 'Transaction not found');
@@ -205,10 +210,7 @@ class PaycomService
             throw new HttpException(400, 'Transaction id required');
         }
 
-        $payment = Payment::query()
-            ->where('provider', 'paycom')
-            ->where('transaction_id', (string) $params['id'])
-            ->first();
+        $payment = $this->findPaycomPayment((string) $params['id']);
 
         if (!$payment) {
             throw new HttpException(404, 'Transaction not found');

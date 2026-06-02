@@ -90,49 +90,18 @@
                     </div>
                 </div>
 
-                <div
-                    v-if="totalPages > 1"
-                    class="px-6 py-4 border-t border-gray-100 flex items-center justify-between flex-wrap gap-3"
-                >
-                    <p class="text-sm text-gray-500">
-                        {{ t('common.pagination.range', { start: startItem, end: endItem, total: donations.length }) }}
-                    </p>
-
-                    <div class="flex items-center gap-2">
-                        <button
-                            type="button"
-                            class="rounded-xl px-4 py-2 text-sm border border-gray-300 bg-white text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                            :disabled="currentPage === 1"
-                            @click="prevPage"
-                        >
-                            {{ t('common.pagination.prev') }}
-                        </button>
-
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <button
-                                v-for="page in visiblePages"
-                                :key="page"
-                                type="button"
-                                class="min-w-10 h-10 rounded-xl text-sm border transition-all"
-                                :class="page === currentPage
-                                    ? 'bg-[#2A7DE1] text-white border-[#2A7DE1]'
-                                    : 'bg-white text-gray-700 border-gray-300'"
-                                @click="goToPage(page)"
-                            >
-                                {{ page }}
-                            </button>
-                        </div>
-
-                        <button
-                            type="button"
-                            class="rounded-xl px-4 py-2 text-sm border border-gray-300 bg-white text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                            :disabled="currentPage === totalPages"
-                            @click="nextPage"
-                        >
-                            {{ t('common.pagination.next') }}
-                        </button>
-                    </div>
-                </div>
+                <Pagination
+                    wrapper-class="px-6 py-4 border-t border-gray-100"
+                    :current-page="currentPage"
+                    :last-page="totalPages"
+                    :start-item="startItem"
+                    :end-item="endItem"
+                    :total-items="donations.length"
+                    :visible-pages="visiblePages"
+                    @change="goToPage"
+                    @prev="prevPage"
+                    @next="nextPage"
+                />
             </div>
         </div>
     </div>
@@ -143,16 +112,28 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Heart, HandHeart, Radio, Users, Wallet } from 'lucide-vue-next'
 import IconBadge from '@/components/shared/IconBadge.vue'
+import Pagination from '@/components/shared/Pagination.vue'
 import donationService from '../services/donationService'
 import { formatMoneyAmount } from '@/utils/formatAmount'
+import { useClientPagination } from '@/composables/useClientPagination'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const donations = ref([])
 const loading = ref(false)
-const currentPage = ref(1)
-const perPage = 10
 let intervalId = null
+
+const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedDonations,
+    startItem,
+    endItem,
+    visiblePages,
+    goToPage,
+    prevPage,
+    nextPage,
+} = useClientPagination(donations, 10)
 
 const fetchDonations = async () => {
     loading.value = true
@@ -198,58 +179,6 @@ const uniqueDonors = computed(() => {
         todayDonations.value.map((item) => item.donor_email).filter(Boolean)
     ).size
 })
-
-const totalPages = computed(() => {
-    return Math.max(1, Math.ceil(donations.value.length / perPage))
-})
-
-const paginatedDonations = computed(() => {
-    const start = (currentPage.value - 1) * perPage
-    const end = start + perPage
-    return donations.value.slice(start, end)
-})
-
-const startItem = computed(() => {
-    if (!donations.value.length) return 0
-    return (currentPage.value - 1) * perPage + 1
-})
-
-const endItem = computed(() => {
-    return Math.min(currentPage.value * perPage, donations.value.length)
-})
-
-const visiblePages = computed(() => {
-    const pages = []
-    const maxVisible = 5
-    let start = Math.max(1, currentPage.value - 2)
-    let end = Math.min(totalPages.value, start + maxVisible - 1)
-
-    if (end - start + 1 < maxVisible) {
-        start = Math.max(1, end - maxVisible + 1)
-    }
-
-    for (let i = start; i <= end; i++) {
-        pages.push(i)
-    }
-
-    return pages
-})
-
-const goToPage = (page) => {
-    currentPage.value = page
-}
-
-const prevPage = () => {
-    if (currentPage.value > 1) {
-        currentPage.value--
-    }
-}
-
-const nextPage = () => {
-    if (currentPage.value < totalPages.value) {
-        currentPage.value++
-    }
-}
 
 const formatMoney = (value) => formatMoneyAmount(value, t('common.currencyCode'))
 

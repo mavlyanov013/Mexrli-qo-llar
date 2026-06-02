@@ -74,21 +74,37 @@
 
             <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <CaseCard
-                    v-for="item in filteredCases"
+                    v-for="item in paginatedItems"
                     :key="item.id"
                     :case-data="item"
                 />
             </div>
+
+            <Pagination
+                v-if="totalPages > 1"
+                class="mt-10"
+                :current-page="currentPage"
+                :last-page="totalPages"
+                :start-item="startItem"
+                :end-item="endItem"
+                :total-items="totalItems"
+                :visible-pages="visiblePages"
+                @change="goToPage"
+                @prev="prevPage"
+                @next="nextPage"
+            />
         </div>
     </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import caseService from '../services/caseService'
 import CaseCard from '../components/shared/CaseCard.vue'
 import SectionHeader from '../components/shared/SectionHeader.vue'
+import Pagination from '../components/shared/Pagination.vue'
+import { useClientPagination } from '@/composables/useClientPagination'
 
 const { t } = useI18n()
 
@@ -126,6 +142,23 @@ const filteredCases = computed(() => {
 
         return matchSearch && matchUrgency && matchCategory
     })
+})
+
+const {
+    currentPage,
+    totalPages,
+    totalItems,
+    paginatedItems,
+    startItem,
+    endItem,
+    visiblePages,
+    goToPage,
+    prevPage,
+    nextPage,
+} = useClientPagination(filteredCases, 9)
+
+watch([search, urgency, category], () => {
+    currentPage.value = 1
 })
 
 onMounted(fetchCases)

@@ -138,6 +138,43 @@
                         </div>
                     </div>
 
+                    <div class="bg-white rounded-3xl p-6 md:p-7 border border-gray-100 shadow-sm space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ t('donatePage.fullName') }}
+                            </label>
+                            <input
+                                v-model="donorName"
+                                type="text"
+                                :disabled="isAnonymous"
+                                :placeholder="t('donatePage.fullName')"
+                                class="rounded-2xl h-12 bg-gray-50 border border-gray-300 w-full px-4 outline-none disabled:opacity-60"
+                            />
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ t('donatePage.phone') }}
+                            </label>
+                            <input
+                                v-model="donorPhone"
+                                type="tel"
+                                :disabled="isAnonymous"
+                                :placeholder="t('donatePage.phonePlaceholder')"
+                                class="rounded-2xl h-12 bg-gray-50 border border-gray-300 w-full px-4 outline-none disabled:opacity-60"
+                            />
+                        </div>
+
+                        <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                            <input
+                                v-model="isAnonymous"
+                                type="checkbox"
+                                class="rounded border-gray-300 text-[#2A7DE1] focus:ring-[#2A7DE1]"
+                            />
+                            {{ t('donatePage.anonymous') }}
+                        </label>
+                    </div>
+
                     <div class="bg-white rounded-3xl p-6 md:p-7 border border-gray-100 shadow-sm">
                         <label class="block text-sm font-medium text-gray-700 mb-3">
                             {{ t('donatePage.paymentMethod') }}
@@ -236,6 +273,9 @@ const step = ref('form')
 const amount = ref(10000)
 const customAmount = ref('')
 const paymentMethod = ref(PAYMENT_PROVIDERS.paycom)
+const donorName = ref('')
+const donorPhone = ref('')
+const isAnonymous = ref(false)
 const submitting = ref(false)
 const errorText = ref('')
 
@@ -333,12 +373,14 @@ const handleSubmit = async () => {
     try {
         const payload = {
             service_type: serviceType.value,
-            donor_name: 'Anonymous',
-            donor_phone: '-',
+            donor_name: isAnonymous.value
+                ? t('common.anonymous')
+                : (donorName.value.trim() || t('common.donor')),
+            donor_phone: isAnonymous.value ? '-' : (donorPhone.value.trim() || '-'),
             amount: Number(finalAmount.value),
             currency: 'UZS',
             type: 'one_time',
-            is_anonymous: true,
+            is_anonymous: isAnonymous.value,
             payment_method: paymentMethod.value,
         }
 

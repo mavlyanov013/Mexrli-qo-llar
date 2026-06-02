@@ -253,7 +253,7 @@ onMounted(async () => {
 
                 <div class="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                     <div>
-                        <p class="text-sm font-medium text-white/80">Mehrli Insonlar — boshqaruv paneli</p>
+                        <p class="text-sm font-medium text-white/80">Mexrli Insonlar — boshqaruv paneli</p>
                         <h1 class="mt-1 text-2xl font-bold md:text-3xl">{{ t('admin.dashboard') }}</h1>
                         <p class="mt-2 max-w-xl text-sm text-white/85">
                             Holatlar, xayriyalar va murojaatlarni bir joydan kuzating. Quyida eng muhim ko‘rsatkichlar.

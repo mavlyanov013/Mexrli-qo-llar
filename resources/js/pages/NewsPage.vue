@@ -106,16 +106,19 @@
                 </RouterLink>
             </div>
 
-            <div v-if="hasMore" class="mt-10 text-center">
-                <button
-                    type="button"
-                    class="inline-flex items-center gap-2 rounded-xl font-semibold border-2 border-gray-300 px-6 py-3 hover:border-[#2A7DE1] hover:text-[#2A7DE1] transition disabled:opacity-50"
-                    :disabled="loadingMore"
-                    @click="loadMore"
-                >
-                    {{ loadingMore ? t('newsPage.loadingMore') : t('newsPage.loadMore') }}
-                </button>
-            </div>
+            <Pagination
+                v-if="lastPage > 1"
+                class="mt-10"
+                :current-page="currentPage"
+                :last-page="lastPage"
+                :start-item="listStartItem"
+                :end-item="listEndItem"
+                :total-items="listTotal"
+                :visible-pages="visiblePages"
+                @change="goToPage"
+                @prev="prevPage"
+                @next="nextPage"
+            />
         </div>
     </div>
 </template>
@@ -126,6 +129,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import newsService from '../services/newsService'
 import { useLocalizedDisplay } from '@/composables/useLocalizedDisplay'
+import Pagination from '@/components/shared/Pagination.vue'
 
 const { t, locale } = useI18n()
 const { content } = useLocalizedDisplay()
@@ -134,10 +138,11 @@ const categories = ['all', 'news', 'success_story', 'announcement']
 
 const posts = ref([])
 const loading = ref(false)
-const loadingMore = ref(false)
 const activeType = ref('all')
 const currentPage = ref(1)
 const lastPage = ref(1)
+const listTotal = ref(0)
+const perPage = 9
 
 const listPosts = computed(() => {
     if (!featured.value) return posts.value
@@ -148,48 +153,73 @@ const featured = computed(() => {
     return posts.value.find((post) => post.is_featured) || posts.value[0] || null
 })
 
-const hasMore = computed(() => currentPage.value < lastPage.value)
+const listStartItem = computed(() => {
+    if (!listTotal.value) return 0
+    return (currentPage.value - 1) * perPage + 1
+})
 
-const fetchPosts = async ({ page = 1, append = false } = {}) => {
-    if (append) {
-        loadingMore.value = true
-    } else {
-        loading.value = true
+const listEndItem = computed(() => {
+    return Math.min(currentPage.value * perPage, listTotal.value)
+})
+
+const visiblePages = computed(() => {
+    const pages = []
+    const maxVisible = 5
+    let start = Math.max(1, currentPage.value - 2)
+    let end = Math.min(lastPage.value, start + maxVisible - 1)
+
+    if (end - start + 1 < maxVisible) {
+        start = Math.max(1, end - maxVisible + 1)
     }
 
+    for (let i = start; i <= end; i += 1) {
+        pages.push(i)
+    }
+
+    return pages
+})
+
+const fetchPosts = async (page = 1) => {
+    loading.value = true
+
     try {
-        const params = { page }
+        const params = { page, per_page: perPage }
 
         if (activeType.value !== 'all') {
             params.type = activeType.value
         }
 
         const res = await newsService.getLatest(params)
-
-        if (append) {
-            posts.value = [...posts.value, ...(res.data ?? [])]
-        } else {
-            posts.value = res.data ?? []
-        }
-
+        posts.value = res.data ?? []
         currentPage.value = res.meta?.current_page || page
         lastPage.value = res.meta?.last_page || 1
+        listTotal.value = res.meta?.total || posts.value.length
     } finally {
         loading.value = false
-        loadingMore.value = false
     }
 }
 
 const changeType = (type) => {
     if (activeType.value === type) return
     activeType.value = type
-    currentPage.value = 1
-    fetchPosts({ page: 1 })
+    fetchPosts(1)
 }
 
-const loadMore = () => {
-    if (!hasMore.value || loadingMore.value) return
-    fetchPosts({ page: currentPage.value + 1, append: true })
+const goToPage = (page) => {
+    fetchPosts(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const prevPage = () => {
+    if (currentPage.value > 1) {
+        goToPage(currentPage.value - 1)
+    }
+}
+
+const nextPage = () => {
+    if (currentPage.value < lastPage.value) {
+        goToPage(currentPage.value + 1)
+    }
 }
 
 const formatFilterCategory = (value) => {
@@ -217,5 +247,5 @@ const formatDate = (value) => {
     })
 }
 
-onMounted(() => fetchPosts())
+onMounted(() => fetchPosts(1))
 </script>

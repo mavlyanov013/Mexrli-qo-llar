@@ -1,6 +1,6 @@
 {
   "common": {
-    "brandName": "Mehrli Qo'llar",
+    "brandName": "Mexrli Insonlar",
     "or": "или",
     "unknown": "Неизвестно",
     "loading": "Загрузка...",
@@ -66,7 +66,8 @@
       "password": "Пароль",
       "passwordPlaceholder": "Введите пароль",
       "submit": "Войти",
-      "invalidCredentials": "Неверный email или пароль"
+      "invalidCredentials": "Неверный email или пароль",
+      "sessionExpired": "Сессия истекла. Пожалуйста, войдите снова."
     },
     "register": {
       "title": "Регистрация",
@@ -171,11 +172,18 @@
   "payStatus": {
     "paynetTitle": "Статус платежа Paynet",
     "uzumTitle": "Статус платежа Uzum Bank",
+    "successTitle": "Платёж успешен!",
+    "successText": "Ваше пожертвование принято. Спасибо!",
+    "cancelTitle": "Платёж отменён",
+    "cancelText": "Платёж не был завершён. Вы можете попробовать снова.",
+    "pendingText": "Платёж ещё не подтверждён. Обновите статус.",
     "paymentId": "ID платежа",
     "provider": "Провайдер",
     "transactionId": "ID транзакции",
     "amount": "Сумма",
     "payNow": "Оплатить",
+    "backHome": "На главную",
+    "tryAgain": "Пожертвовать снова",
     "notFound": "Платеж не найден"
   },
   "admin": {
@@ -213,6 +221,8 @@
     "save": "Сохранить",
     "cancel": "Отмена",
     "search": "Поиск",
+    "exportCsv": "Скачать Excel",
+    "exporting": "Загрузка...",
     "loading": "Загрузка...",
     "noData": "Данные не найдены",
     "actions": "Действия",

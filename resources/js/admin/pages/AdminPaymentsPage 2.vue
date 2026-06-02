@@ -73,15 +73,6 @@
                         >
                             {{ t('admin.reset') }}
                         </button>
-
-                        <button
-                            type="button"
-                            class="h-10 flex-1 rounded-lg border border-emerald-300 bg-emerald-50 px-4 text-sm font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
-                            :disabled="exporting || loading"
-                            @click="exportCsv"
-                        >
-                            {{ exporting ? t('admin.exporting') : t('admin.exportCsv') }}
-                        </button>
                     </div>
                 </div>
             </div>
@@ -151,8 +142,6 @@ import AdminSearchInput from '@/admin/components/common/AdminSearchInput.vue'
 import ListState from '@/components/shared/ListState.vue'
 import StatusBadge from '@/components/shared/StatusBadge.vue'
 import { formatMoneyAmount } from '@/utils/formatAmount'
-import paymentService from '@/services/paymentService'
-import { downloadExport, fetchAllPaginatedResults } from '@/utils/downloadExport'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -189,7 +178,6 @@ const appliedFilters = reactive({
 })
 
 const currentPage = ref(1)
-const exporting = ref(false)
 
 const buildParams = (page) => {
     const params = { page, per_page: 20 }
@@ -245,51 +233,6 @@ const formatDate = (value) => {
 
 const formatAmountDisplay = (amount, currency = 'UZS') => {
     return formatMoneyAmount(amount, currency || 'UZS')
-}
-
-const resolveDonorName = (row) => {
-    if (row.is_anonymous) return t('admin.anonymous')
-    return row.donor_name || row.payload?.donor_name || row.donation?.donor_name || ''
-}
-
-const resolvePaymentCell = (row, key) => {
-    if (key === 'provider') return providerLabel(row.provider)
-    if (key === 'amount') return formatAmountDisplay(row.amount, row.currency)
-    if (key === 'donor_name') return resolveDonorName(row)
-    if (key === 'created_at') return formatDate(row.created_at)
-    if (key === 'status') return PAYMENT_STATUSES[row.status]?.label || row.status || ''
-    return row[key] ?? ''
-}
-
-const buildExportParams = () => {
-    const params = { per_page: 200 }
-
-    if (appliedFilters.q) params.q = appliedFilters.q
-    if (appliedFilters.provider) params.provider = appliedFilters.provider
-    if (appliedFilters.status) params.status = appliedFilters.status
-    if (appliedFilters.date_from) params.date_from = appliedFilters.date_from
-    if (appliedFilters.date_to) params.date_to = appliedFilters.date_to
-
-    return params
-}
-
-const exportCsv = async () => {
-    exporting.value = true
-
-    try {
-        await downloadExport({
-            filename: `tolovlar-${new Date().toISOString().slice(0, 10)}.csv`,
-            columns: columns.value,
-            rows: payments.value,
-            getCellValue: resolvePaymentCell,
-            fetchAllRows: () => fetchAllPaginatedResults(
-                (p) => paymentService.fetchList(p),
-                buildExportParams(),
-            ),
-        })
-    } finally {
-        exporting.value = false
-    }
 }
 
 onMounted(() => {

@@ -29,7 +29,7 @@ return [
         'return_url' => env('CLICK_RETURN_URL', '/'),
         'min_amount' => 500,
         'max_amount' => 100000000,
-        'check_signature' => false,
+        'check_signature' => env('CLICK_CHECK_SIGNATURE', true),
     ],
 
     'paynet' => [

@@ -1,4 +1,5 @@
 import api from './api'
+import { normalizeList, normalizeMeta } from './serviceHelpers'
 
 const pageService = {
     getBySlug(slug) {
@@ -9,8 +10,12 @@ const pageService = {
         return api.get(`/admin/pages/${id}`)
     },
 
-    getAll() {
-        return api.get(`/admin/pages`)
+    async getAll(params = {}) {
+        const response = await api.get('/admin/pages', { params })
+        return {
+            data: normalizeList(response),
+            meta: normalizeMeta(response),
+        }
     },
 }
 

@@ -21,7 +21,7 @@ class BlogPostSeeder extends Seeder
                 'cover_image' => 'https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?q=80&w=1200&auto=format&fit=crop',
                 'category' => 'success_story',
                 'is_featured' => true,
-                'author' => 'Mexrli Qo‘llar jamoasi',
+                'author' => 'Mexrli Insonlar jamoasi',
                 'tags' => ['amina', 'donation', 'health'],
                 'fields' => [
                     'title' => $this->localizedRow('Amina uchun kerakli mablag‘ning bir qismi yig‘ildi'),
@@ -51,7 +51,7 @@ class BlogPostSeeder extends Seeder
                 'cover_image' => 'https://images.unsplash.com/photo-1509099863731-ef4bff19e808?q=80&w=1200&auto=format&fit=crop',
                 'category' => 'news',
                 'is_featured' => false,
-                'author' => 'Mexrli Qo‘llar',
+                'author' => 'Mexrli Insonlar',
                 'tags' => ['monthly', 'impact', 'children'],
                 'fields' => [
                     'title' => $this->localizedRow('Bu oyda 12 nafar bolaga yordam berildi'),

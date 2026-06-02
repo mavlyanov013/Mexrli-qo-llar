@@ -216,9 +216,9 @@ class DemoDataSeeder extends Seeder
         Setting::updateOrCreate(
             ['key' => AboutContentService::LEGAL_KEY],
             ['value' => json_encode([
-                'org_name_uz' => '«Mehrli Qo‘llar» xayriya jamg‘armasi',
+                'org_name_uz' => '«Mexrli Insonlar» xayriya jamg‘armasi',
                 'org_name_oz' => '«Меҳрли Қўллар» хайрия жамғармаси',
-                'org_name_ru' => 'Благотворительный фонд «Mehrli Qo‘llar»',
+                'org_name_ru' => 'Благотворительный фонд «Mexrli Insonlar»',
                 'legal_address_uz' => 'Toshkent sh., Yunusobod tumani',
                 'legal_address_oz' => 'Тошкент ш., Юнусобод тумани',
                 'legal_address_ru' => 'г. Ташкент, Юнусабадский район',

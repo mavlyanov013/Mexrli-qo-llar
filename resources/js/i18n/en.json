@@ -1,6 +1,6 @@
 {
   "common": {
-    "brandName": "Mehrli Qo'llar",
+    "brandName": "Mexrli Insonlar",
     "or": "or",
     "unknown": "Unknown",
     "loading": "Loading...",
@@ -135,6 +135,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "search": "Search",
+    "exportCsv": "Download Excel",
+    "exporting": "Exporting...",
     "loading": "Loading...",
     "noData": "No data found",
     "actions": "Actions",

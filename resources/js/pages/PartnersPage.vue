@@ -53,22 +53,76 @@
                         </ExternalLink>
                     </div>
                 </div>
+
+                <Pagination
+                    v-if="meta && meta.last_page > 1"
+                    class="mt-10"
+                    :current-page="meta.current_page || 1"
+                    :last-page="meta.last_page || 1"
+                    :start-item="startItem"
+                    :end-item="endItem"
+                    :total-items="meta.total || 0"
+                    :visible-pages="visiblePages"
+                    @change="fetchPage"
+                    @prev="fetchPage((meta.current_page || 1) - 1)"
+                    @next="fetchPage((meta.current_page || 1) + 1)"
+                />
             </ListState>
         </div>
     </div>
 </template>
 
 <script setup>
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useLocalizedDisplay } from '@/composables/useLocalizedDisplay'
 import ListState from '@/components/shared/ListState.vue'
 import ExternalLink from '@/components/shared/ExternalLink.vue'
+import Pagination from '@/components/shared/Pagination.vue'
 import { PARTNER_TYPE_LABELS } from '@/constants/partners'
 import { usePartners } from '@/composables/usePartners'
 
 const { t } = useI18n()
 const { content } = useLocalizedDisplay()
-const { partners, loading, error } = usePartners()
+const { partners, meta, loading, error, fetchPartners } = usePartners({ autoFetch: false })
+
+const perPage = 9
+
+const visiblePages = computed(() => {
+    const current = meta.value?.current_page || 1
+    const last = meta.value?.last_page || 1
+    const pages = []
+    const maxVisible = 5
+    let start = Math.max(1, current - 2)
+    let end = Math.min(last, start + maxVisible - 1)
+
+    if (end - start + 1 < maxVisible) {
+        start = Math.max(1, end - maxVisible + 1)
+    }
+
+    for (let i = start; i <= end; i += 1) {
+        pages.push(i)
+    }
+
+    return pages
+})
+
+const startItem = computed(() => {
+    if (!meta.value?.total) return 0
+    return ((meta.value.current_page || 1) - 1) * (meta.value.per_page || perPage) + 1
+})
+
+const endItem = computed(() => {
+    if (!meta.value?.total) return 0
+    return Math.min(
+        (meta.value.current_page || 1) * (meta.value.per_page || perPage),
+        meta.value.total,
+    )
+})
+
+const fetchPage = (page = 1) => {
+    fetchPartners({ page, per_page: perPage })
+}
 
 const formatType = (value) => {
     const key = value || 'corporate'
@@ -87,4 +141,6 @@ const typeClass = (type) => {
 
     return map[type] || 'bg-blue-50 text-[#2A7DE1]'
 }
+
+onMounted(() => fetchPage(1))
 </script>

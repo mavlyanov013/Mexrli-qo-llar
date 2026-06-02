@@ -1,6 +1,6 @@
 {
   "common": {
-    "brandName": "Mehrli Qo'llar",
+    "brandName": "Mexrli Insonlar",
     "or": "yoki",
     "unknown": "Noma'lum",
     "loading": "Yuklanmoqda...",
@@ -66,7 +66,8 @@
       "password": "Parol",
       "passwordPlaceholder": "Parol kiriting",
       "submit": "Kirish",
-      "invalidCredentials": "Email yoki parol noto'g'ri"
+      "invalidCredentials": "Email yoki parol noto'g'ri",
+      "sessionExpired": "Sessiya tugagan. Iltimos, qayta kiring."
     },
     "register": {
       "title": "Ro'yxatdan o'tish",
@@ -171,11 +172,18 @@
   "payStatus": {
     "paynetTitle": "Paynet to'lov holati",
     "uzumTitle": "Uzum Bank to'lov holati",
+    "successTitle": "To'lov muvaffaqiyatli!",
+    "successText": "Xayriyangiz qabul qilindi. Rahmat!",
+    "cancelTitle": "To'lov bekor qilindi",
+    "cancelText": "To'lov yakunlanmadi. Qayta urinib ko'rishingiz mumkin.",
+    "pendingText": "To'lov hali tasdiqlanmagan. Holatni yangilab turing.",
     "paymentId": "To'lov ID",
     "provider": "Provayder",
     "transactionId": "Tranzaksiya ID",
     "amount": "Summa",
     "payNow": "Hozir to'lash",
+    "backHome": "Bosh sahifaga",
+    "tryAgain": "Qayta xayriya qilish",
     "notFound": "To'lov topilmadi"
   },
   "admin": {
@@ -227,6 +235,8 @@
     "allStatuses": "Barcha holatlar",
     "allProviders": "Barcha to'lov tizimlari",
     "filter": "Filtrlash",
+    "exportCsv": "Excel yuklab olish",
+    "exporting": "Yuklanmoqda...",
     "reset": "Tozalash",
     "dateFrom": "Sanadan",
     "dateTo": "Sanagacha",
