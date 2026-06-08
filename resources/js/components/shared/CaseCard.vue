@@ -2,7 +2,7 @@
     <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group flex flex-col">
         <div class="relative overflow-hidden" style="aspect-ratio: 4/3">
             <img
-                :src="caseData.photo_url || fallbackImage"
+                :src="coverPhoto"
                 :alt="content(caseData, 'name')"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -113,6 +113,7 @@ import { Heart, MapPin } from 'lucide-vue-next'
 import IconBadge from './IconBadge.vue'
 import ProgressRing from './ProgressRing.vue'
 import { formatAmount } from '@/utils/formatAmount'
+import { getCaseCoverPhoto } from '@/utils/casePhotos'
 
 const { t } = useI18n()
 const { content } = useLocalizedDisplay()
@@ -126,6 +127,11 @@ const props = defineProps({
 
 const fallbackImage =
     'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&h=300&fit=crop'
+
+const coverPhoto = computed(() => {
+    const url = getCaseCoverPhoto(props.caseData)
+    return url || fallbackImage
+})
 
 const percentage = computed(() => {
     const goal = Number(props.caseData.goal_amount || 0)

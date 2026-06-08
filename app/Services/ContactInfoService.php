@@ -22,6 +22,7 @@ class ContactInfoService
         return array_merge([
             'address' => (string) ($data['address'] ?? ''),
             'phone' => (string) ($data['phone'] ?? ''),
+            'phone_2' => (string) ($data['phone_2'] ?? ''),
             'email' => (string) ($data['email'] ?? ''),
             'map_embed_url' => (string) ($data['map_embed_url'] ?? ''),
             'map_lat' => $data['map_lat'] ?? null,
@@ -37,6 +38,7 @@ class ContactInfoService
         $next = [
             'address' => trim((string) ($payload['address'] ?? $current['address'] ?? '')),
             'phone' => trim((string) ($payload['phone'] ?? $current['phone'] ?? '')),
+            'phone_2' => trim((string) ($payload['phone_2'] ?? $current['phone_2'] ?? '')),
             'email' => trim((string) ($payload['email'] ?? $current['email'] ?? '')),
             'map_embed_url' => trim((string) ($payload['map_embed_url'] ?? $current['map_embed_url'] ?? '')),
             'map_lat' => $this->nullableFloat($payload['map_lat'] ?? $current['map_lat'] ?? null),
@@ -86,6 +88,7 @@ class ContactInfoService
         return [
             'address' => '123 Charity Lane, Tashkent, Uzbekistan',
             'phone' => '+998711234567',
+            'phone_2' => '',
             'email' => 'info@mehrli.uz',
             'map_embed_url' => 'https://www.openstreetmap.org/export/embed.html?bbox=69.15%2C41.26%2C69.35%2C41.36&layer=mapnik',
             'map_lat' => 41.3111,

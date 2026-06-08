@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CaseResource;
 use App\Models\CaseItem;
 use App\Support\LocalizedContent;
+use App\Support\CasePhotos;
+use App\Support\MediaUrl;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -74,6 +76,9 @@ class CaseController extends Controller
                 'is_urgent' => 'sometimes|boolean',
                 'medical_documents.*.url' => 'required|string',
                 'medical_documents.*.name' => 'nullable|string',
+                'photos' => 'nullable|array',
+                'photos.*.url' => 'required_with:photos|string|max:2048',
+                'photos.*.name' => 'nullable|string|max:255',
                 'photo_url' => 'nullable|string|max:2048',
                 'age' => 'nullable|integer|min:0|max:120',
             ],
@@ -94,6 +99,7 @@ class CaseController extends Controller
 
         $validated['medical_documents'] = $validated['medical_documents'] ?? [];
         $validated['updates'] = $validated['updates'] ?? [];
+        $validated = $this->normalizeMediaFields($validated);
 
         $case = CaseItem::create($validated);
 
@@ -137,6 +143,9 @@ class CaseController extends Controller
                 'medical_documents' => 'nullable|array',
                 'medical_documents.*.url' => 'required_with:medical_documents|string|max:2048',
                 'medical_documents.*.name' => 'nullable|string|max:255',
+                'photos' => 'nullable|array',
+                'photos.*.url' => 'required_with:photos|string|max:2048',
+                'photos.*.name' => 'nullable|string|max:255',
                 'photo_url' => 'nullable|string|max:2048',
                 'age' => 'nullable|integer|min:0|max:120',
             ],
@@ -163,6 +172,8 @@ class CaseController extends Controller
             $validated['updates'] = $case->updates ?? [];
         }
 
+        $validated = $this->normalizeMediaFields($validated);
+
         $case->update($validated);
 
         return response()->json([
@@ -179,5 +190,29 @@ class CaseController extends Controller
         return response()->json([
             'message' => 'Case o‘chirildi',
         ]);
+    }
+
+    private function normalizeMediaFields(array $validated): array
+    {
+        if (!empty($validated['medical_documents'])) {
+            $validated['medical_documents'] = collect($validated['medical_documents'])
+                ->map(function ($doc) {
+                    if (is_array($doc)) {
+                        return [
+                            'url' => MediaUrl::publicUrl($doc['url'] ?? null) ?? ($doc['url'] ?? null),
+                            'name' => $doc['name'] ?? basename((string) ($doc['url'] ?? '')),
+                        ];
+                    }
+
+                    return [
+                        'url' => MediaUrl::publicUrl($doc) ?? $doc,
+                        'name' => basename((string) $doc),
+                    ];
+                })
+                ->values()
+                ->all();
+        }
+
+        return CasePhotos::syncValidated($validated);
     }
 }

@@ -155,20 +155,43 @@ const mapUrl = computed(() => info.value?.map_url || '')
 
 const contactInfo = computed(() => {
     const data = info.value || {}
-
-    return [
+    const items = [
         {
             icon: MapPin,
             label: t('contactPage.address'),
             value: data.address || '—',
             tone: 'blue',
         },
-        {
+    ]
+
+    if (data.phone) {
+        items.push({
             icon: Phone,
             label: t('contactPage.phone'),
             value: displayPhone(data.phone),
             tone: 'green',
-        },
+        })
+    }
+
+    if (data.phone_2) {
+        items.push({
+            icon: Phone,
+            label: t('contactPage.phone2'),
+            value: displayPhone(data.phone_2),
+            tone: 'green',
+        })
+    }
+
+    if (!data.phone && !data.phone_2) {
+        items.push({
+            icon: Phone,
+            label: t('contactPage.phone'),
+            value: '—',
+            tone: 'green',
+        })
+    }
+
+    items.push(
         {
             icon: Mail,
             label: t('contactPage.email'),
@@ -180,8 +203,10 @@ const contactInfo = computed(() => {
             label: t('contactPage.workingHours'),
             value: t('contactPage.workingHoursValue'),
             tone: 'gray',
-        },
-    ]
+        }
+    )
+
+    return items
 })
 
 const loadContactInfo = async () => {

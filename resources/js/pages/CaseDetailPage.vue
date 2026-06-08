@@ -17,12 +17,29 @@
             <template v-else-if="caseData">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2 space-y-6">
-                        <div class="rounded-2xl overflow-hidden">
+                        <div class="rounded-2xl overflow-hidden space-y-3">
                             <img
-                                :src="caseData.photo_url || '/placeholder.jpg'"
+                                :src="activePhoto"
                                 :alt="content(caseData, 'name')"
                                 class="w-full aspect-video object-cover"
                             />
+
+                            <div v-if="photoItems.length > 1" class="flex gap-2 overflow-x-auto pb-1">
+                                <button
+                                    v-for="(photo, i) in photoItems"
+                                    :key="i"
+                                    type="button"
+                                    class="shrink-0 rounded-lg overflow-hidden border-2 transition"
+                                    :class="i === activePhotoIndex ? 'border-[#2A7DE1]' : 'border-transparent opacity-70 hover:opacity-100'"
+                                    @click="activePhotoIndex = i"
+                                >
+                                    <img
+                                        :src="photo.url"
+                                        :alt="photo.name"
+                                        class="w-20 h-14 object-cover"
+                                    />
+                                </button>
+                            </div>
                         </div>
 
                         <div>
@@ -423,6 +440,7 @@ import { Download, FileText, Heart, MapPin, Share2, Wallet } from 'lucide-vue-ne
 import IconBadge from '../components/shared/IconBadge.vue'
 import ProgressRing from '../components/shared/ProgressRing.vue'
 import { formatAmount } from '@/utils/formatAmount'
+import { getCasePhotoItems } from '@/utils/casePhotos'
 
 const { t, locale } = useI18n()
 const { content } = useLocalizedDisplay()
@@ -433,6 +451,7 @@ const caseData = ref(null)
 const donations = ref([])
 const relatedNews = ref([])
 const treatmentProcesses = ref([])
+const activePhotoIndex = ref(0)
 
 const fetchCase = async () => {
     loading.value = true
@@ -440,6 +459,7 @@ const fetchCase = async () => {
     try {
         const result = await caseService.getCaseById(route.params.id, { admin: false })
         caseData.value = result.data || null
+        activePhotoIndex.value = 0
 
         if (caseData.value?.id) {
             await Promise.all([fetchDonations(), fetchRelatedNews(), fetchTreatmentProcesses()])
@@ -486,6 +506,12 @@ const fetchRelatedNews = async () => {
         relatedNews.value = []
     }
 }
+
+const photoItems = computed(() => getCasePhotoItems(caseData.value))
+
+const activePhoto = computed(() => {
+    return photoItems.value[activePhotoIndex.value]?.url || '/placeholder.jpg'
+})
 
 const percentage = computed(() => {
     const goal = Number(caseData.value?.goal_amount || 0)

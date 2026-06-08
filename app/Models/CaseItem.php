@@ -27,6 +27,7 @@ class CaseItem extends Model
         'name_ru',
         'age',
         'photo_url',
+        'photos',
         'location',
         'location_uz',
         'location_oz',
@@ -58,6 +59,7 @@ class CaseItem extends Model
     ];
 
     protected $casts = [
+        'photos' => 'array',
         'medical_documents' => 'array',
         'updates' => 'array',
         'is_featured' => 'boolean',

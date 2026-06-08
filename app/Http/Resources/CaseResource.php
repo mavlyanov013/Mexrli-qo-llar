@@ -3,6 +3,8 @@
 namespace App\Http\Resources;
 
 use App\Support\LocalizedContent;
+use App\Support\CasePhotos;
+use App\Support\MediaUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,7 +21,8 @@ class CaseResource extends JsonResource
         ], [
             'id' => $this->id,
             'age' => $this->age,
-            'photo_url' => $this->photo_url,
+            'photo_url' => MediaUrl::publicUrl($this->photo_url),
+            'photos' => CasePhotos::resolveForModel($this->photo_url, $this->photos),
             'phone' => $this->phone,
             'title' => $this->localized('name'),
             'description' => $this->localized('short_description') ?: $this->localized('story'),
@@ -31,10 +34,14 @@ class CaseResource extends JsonResource
             'created_from_request_id' => $this->created_from_request_id,
             'status' => $this->status,
             'medical_documents' => collect($this->medical_documents ?? [])
-                ->map(fn ($doc) => [
-                    'url' => $doc['url'] ?? $doc,
-                    'name' => $doc['name'] ?? basename($doc),
-                ])
+                ->map(function ($doc) {
+                    $rawUrl = is_array($doc) ? ($doc['url'] ?? null) : $doc;
+
+                    return [
+                        'url' => MediaUrl::publicUrl(is_string($rawUrl) ? $rawUrl : null) ?? $rawUrl,
+                        'name' => is_array($doc) ? ($doc['name'] ?? basename((string) $rawUrl)) : basename((string) $doc),
+                    ];
+                })
                 ->values(),
             'updates' => $this->updates ?? [],
             'is_featured' => (bool) $this->is_featured,

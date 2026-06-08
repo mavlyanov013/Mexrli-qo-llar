@@ -74,11 +74,16 @@
                     <!-- HERO CARD -->
                     <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
 
-                        <img
-                            v-if="current.photo_url"
-                            :src="current.photo_url"
-                            class="w-full h-64 object-cover"
-                        />
+                        <div v-if="viewPhotos.length" class="grid gap-1" :class="viewPhotos.length > 1 ? 'grid-cols-2' : 'grid-cols-1'">
+                            <img
+                                v-for="(photo, i) in viewPhotos"
+                                :key="i"
+                                :src="photo.url"
+                                :alt="photo.name"
+                                class="w-full h-48 object-cover"
+                                :class="viewPhotos.length === 1 ? 'h-64' : ''"
+                            />
+                        </div>
 
                         <div class="p-5">
 
@@ -142,7 +147,7 @@
                             <a
                                 v-for="(doc,i) in current.medical_documents"
                                 :key="i"
-                                :href="doc.url"
+                                :href="resolveMediaUrl(doc.url)"
                                 target="_blank"
                                 class="flex items-center justify-between p-3 rounded-xl border hover:bg-gray-50 transition"
                             >
@@ -223,6 +228,13 @@
 
         <!-- ================= FORM ================= -->
         <template v-else>
+            <p
+                v-if="formError"
+                class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
+                {{ formError }}
+            </p>
+
             <form @submit.prevent="save" class="space-y-6">
 
                 <!-- 🔹 1. ASOSIY MA'LUMOT -->
@@ -235,8 +247,9 @@
                     </div>
 
                     <LocalizedFieldTabs
-                        v-model="form"
+                        :model-value="form"
                         :fields="caseLocalizedFields"
+                        @update:model-value="mergeLocalizedForm"
                     />
                 </div>
 
@@ -314,18 +327,24 @@
                     </div>
                 </div>
 
-                <!-- 🔹 4. RASM -->
+                <!-- 🔹 4. RASMLAR -->
                 <div class="card">
-                    <h2 class="text-lg font-semibold mb-4">Rasm</h2>
+                    <h2 class="text-lg font-semibold mb-4">Rasmlar</h2>
 
                     <div class="upload-box" @click="$refs.imageInput.click()">
-                        <input ref="imageInput" type="file" class="hidden" @change="uploadImage" />
+                        <input ref="imageInput" type="file" accept="image/*" multiple class="hidden" @change="uploadImages" />
+                        📷 Rasm yuklash (bir nechta tanlash mumkin)
+                    </div>
 
-                        <div v-if="!previewUrl">
-                            📷 Rasm yuklash uchun bosing
+                    <p v-if="imageUploading" class="mt-2 text-sm text-gray-500">
+                        Rasm yuklanmoqda...
+                    </p>
+
+                    <div v-if="form.photos.length" class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        <div v-for="(photo, i) in form.photos" :key="i" class="photo-item">
+                            <img :src="resolveMediaUrl(photo.url)" :alt="photo.name" class="photo-thumb" />
+                            <button type="button" class="photo-remove" @click="removePhoto(i)" title="O‘chirish">❌</button>
                         </div>
-
-                        <img v-else :src="previewUrl" class="preview-img" />
                     </div>
                 </div>
 
@@ -349,7 +368,9 @@
                 <!-- 🔹 BUTTON -->
                 <div class="flex justify-end gap-3">
                     <router-link to="/admin/cases" class="btn-secondary">Bekor qilish</router-link>
-                    <button class="btn-primary">Saqlash</button>
+                    <button type="submit" class="btn-primary" :disabled="imageUploading > 0">
+                        {{ imageUploading > 0 ? 'Rasm yuklanmoqda...' : 'Saqlash' }}
+                    </button>
                 </div>
 
             </form>
@@ -378,6 +399,8 @@ import { watch } from 'vue'
 import { Eye, Pencil, Trash2 } from 'lucide-vue-next'
 import LocalizedFieldTabs from '@/admin/components/common/LocalizedFieldTabs.vue'
 import { emptyLocalizedFields, assignLocalizedFromRow, validateAdminLocalizedFields, buildAdminPayload } from '@/utils/localizedContent'
+import { resolveMediaUrl } from '@/utils/mediaUrl'
+import { getCasePhotoItems } from '@/utils/casePhotos'
 
 const caseLocalizedFields = [
     { name: 'name', label: 'Ism', type: 'input' },
@@ -395,13 +418,22 @@ const { cases, meta, loading, error, fetchCases, createCase, updateCase, deleteC
 const fetchPage = (page = 1) => fetchCases({ admin: true, page, per_page: 15 })
 
 const current = ref(null)
-const previewUrl = ref('')
+const formError = ref('')
+const imageUploading = ref(0)
+
+const mergeLocalizedForm = (value) => {
+    if (value && typeof value === 'object') {
+        Object.assign(form, value)
+    }
+}
 
 const isListMode = computed(() => route.name === 'admin-cases')
 const isEditMode = computed(() => route.name === 'admin-cases-edit')
 const isViewMode = computed(() => route.name === 'admin-cases-view')
 
 const title = computed(() => isListMode.value ? 'Cases' : isEditMode.value ? 'Tahrirlash' : 'Ko‘rish')
+
+const viewPhotos = computed(() => getCasePhotoItems(current.value))
 
 const form = reactive({
     ...emptyLocalizedFields(['name', 'location', 'condition', 'short_description']),
@@ -414,8 +446,7 @@ const form = reactive({
     is_featured: false,
     is_urgent: false,
 
-    // 🖼 1 TA RASM
-    photo_url: '',
+    photos: [],
 
     // 📎 MULTI HUJJAT
     medical_documents: []
@@ -448,32 +479,43 @@ const loadCurrent = async () => {
             status: res.data.status ?? 'faol',
             is_featured: Boolean(res.data.is_featured),
             is_urgent: Boolean(res.data.is_urgent),
-            photo_url: res.data.photo_url ?? '',
+            photos: getCasePhotoItems(res.data),
             medical_documents: res.data.medical_documents ?? [],
         })
-
-        previewUrl.value = form.photo_url
     }
 }
 
-const uploadImage = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+const uploadImages = async (e) => {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
 
-    previewUrl.value = URL.createObjectURL(file)
+    for (const file of files) {
+        imageUploading.value += 1
 
-    const { data, error } = await mediaService.upload(file, 'cases/images')
+        try {
+            const { data, error } = await mediaService.upload(file, 'cases/images')
 
-    if (error) {
-        window.alert(error.message)
-        previewUrl.value = form.photo_url || ''
-        return
+            if (error) {
+                window.alert(`${file.name}: ${error.message}`)
+                continue
+            }
+
+            if (data?.url) {
+                form.photos.push({
+                    url: resolveMediaUrl(data.url),
+                    name: file.name,
+                })
+            }
+        } finally {
+            imageUploading.value -= 1
+        }
     }
 
-    if (data?.url) {
-        form.photo_url = data.url
-        previewUrl.value = data.url
-    }
+    e.target.value = ''
+}
+
+const removePhoto = (index) => {
+    form.photos.splice(index, 1)
 }
 
 const uploadDocs = async (e) => {
@@ -489,7 +531,7 @@ const uploadDocs = async (e) => {
 
         if (data?.url) {
             form.medical_documents.push({
-                url: data.url,
+                url: resolveMediaUrl(data.url),
                 name: file.name,
             })
         }
@@ -512,24 +554,39 @@ const removeDoc = (i) => {
 }
 
 const save = async () => {
+    formError.value = ''
+
+    if (imageUploading.value > 0) {
+        formError.value = 'Rasm yuklanishi tugashini kuting'
+        return
+    }
+
     const fields = ['name', 'location', 'condition', 'short_description']
     const missing = validateAdminLocalizedFields(form, fields)
+
     if (missing.length) {
-        alert(`To‘ldiring: ${missing.join(', ')}`)
+        formError.value = `O‘zbek (lotin) maydonlarini to‘ldiring: ${missing.join(', ')}`
         return
     }
 
     const payload = buildAdminPayload(form, fields, {
         medical_documents: form.medical_documents,
+        photos: form.photos,
     })
 
     const res = isEditMode.value
         ? await updateCase(route.params.id, payload)
         : await createCase(payload)
 
-    if (res?.error) return
+    if (res?.error) {
+        formError.value = res.error.message || 'Saqlashda xatolik yuz berdi'
+        return
+    }
 
-    router.push('/admin/cases')
+    router.push({
+        path: '/admin/cases',
+        query: { success: isEditMode.value ? 'Holat yangilandi' : 'Yangi holat yaratildi' },
+    })
 }
 
 const remove = async (id) => {
@@ -565,6 +622,11 @@ onMounted(async () => {
     padding: 10px 18px;
     border-radius: 12px;
     font-weight: 500;
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .btn-secondary {
@@ -603,6 +665,32 @@ onMounted(async () => {
     height: 120px;
     margin: auto;
     border-radius: 10px;
+}
+
+.photo-item {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+.photo-thumb {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+}
+
+.photo-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 6px;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-size: 12px;
 }
 
 .doc-item {

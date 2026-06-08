@@ -66,6 +66,13 @@
                             </a>
                         </li>
 
+                        <li v-if="displayPhone2" class="flex items-center gap-2.5 text-sm text-gray-300">
+                            <Phone class="w-4 h-4 text-gray-400 shrink-0" />
+                            <a :href="`tel:${displayPhone2}`" class="hover:text-white transition-colors">
+                                {{ displayPhone2 }}
+                            </a>
+                        </li>
+
                         <li v-if="displayEmail" class="flex items-center gap-2.5 text-sm text-gray-300">
                             <Mail class="w-4 h-4 text-gray-400 shrink-0" />
                             <a :href="`mailto:${displayEmail}`" class="hover:text-white transition-colors">
@@ -137,6 +144,7 @@ const quickLinks = computed(() => [
 
 const displayAddress = computed(() => contactInfo.value?.address || t('footer.location'))
 const displayPhone = computed(() => contactInfo.value?.phone || '')
+const displayPhone2 = computed(() => contactInfo.value?.phone_2 || '')
 const displayEmail = computed(() => contactInfo.value?.email || '')
 
 const socialLinks = computed(() => {

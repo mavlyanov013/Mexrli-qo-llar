@@ -4,7 +4,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Aloqa ma’lumotlari</h1>
                 <p class="mt-1 text-sm text-gray-500 max-w-2xl">
-                    Manzil, telefon, email va xarita
+                    Manzil, telefonlar, email va xarita
                     <a href="/contact" target="_blank" class="text-[#2A7DE1] hover:underline">/contact</a>
                     sahifasida ko‘rsatiladi.
                 </p>
@@ -39,6 +39,12 @@
             <div>
                 <label class="label">Telefon raqam</label>
                 <PhoneInput ref="phoneInputRef" v-model="form.phone" input-class="input" />
+            </div>
+
+            <div>
+                <label class="label">Qo‘shimcha telefon raqam</label>
+                <PhoneInput ref="phone2InputRef" v-model="form.phone_2" input-class="input" />
+                <p class="hint">Ixtiyoriy. Ikkinchi aloqa raqami.</p>
             </div>
 
             <div>
@@ -145,6 +151,7 @@ import contactInfoService from '@/services/contactInfoService'
 import PhoneInput from '@/components/shared/PhoneInput.vue'
 
 const phoneInputRef = ref(null)
+const phone2InputRef = ref(null)
 const saving = ref(false)
 const message = ref('')
 const messageType = ref('success')
@@ -152,6 +159,7 @@ const messageType = ref('success')
 const form = reactive({
     address: '',
     phone: '',
+    phone_2: '',
     email: '',
     map_embed_url: '',
     map_lat: '',
@@ -167,6 +175,7 @@ const load = async () => {
 
     form.address = data?.address || ''
     form.phone = data?.phone || ''
+    form.phone_2 = data?.phone_2 || ''
     form.email = data?.email || ''
     form.map_embed_url = data?.map_embed_url || ''
     form.map_lat = data?.map_lat ?? ''
@@ -184,6 +193,12 @@ const save = async () => {
         return
     }
 
+    if (form.phone_2 && !phone2InputRef.value?.validate()) {
+        messageType.value = 'error'
+        message.value = phone2InputRef.value?.getError?.() || "Qo‘shimcha telefon raqam +998 formatida bo'lishi kerak"
+        return
+    }
+
     saving.value = true
     message.value = ''
 
@@ -191,6 +206,7 @@ const save = async () => {
         const response = await contactInfoService.update({
             address: form.address,
             phone: form.phone || null,
+            phone_2: form.phone_2 || null,
             email: form.email || null,
             map_embed_url: form.map_embed_url || null,
             map_lat: form.map_lat === '' ? null : Number(form.map_lat),
@@ -204,6 +220,7 @@ const save = async () => {
         const data = response?.data ?? response
         form.address = data?.address || form.address
         form.phone = data?.phone || form.phone
+        form.phone_2 = data?.phone_2 || form.phone_2
         form.email = data?.email || form.email
         form.map_embed_url = data?.map_embed_url || form.map_embed_url
         form.map_lat = data?.map_lat ?? form.map_lat

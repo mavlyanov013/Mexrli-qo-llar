@@ -116,6 +116,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
+const applyPatch = (patch) => {
+    Object.assign(props.modelValue, patch)
+    emit('update:modelValue', props.modelValue)
+}
+
 /** Kirill qo‘lda tahrirlangan — lotin o‘zgarganda avtomatik ustiga yozilmaydi */
 const ozManual = ref({})
 
@@ -151,10 +156,7 @@ const updateUz = (name, value) => {
         patch[`${name}_oz`] = transliterateLatinToCyrillic(value)
     }
 
-    emit('update:modelValue', {
-        ...props.modelValue,
-        ...patch,
-    })
+    applyPatch(patch)
 }
 
 const updateOz = (name, value) => {
@@ -163,8 +165,7 @@ const updateOz = (name, value) => {
         [name]: true,
     }
 
-    emit('update:modelValue', {
-        ...props.modelValue,
+    applyPatch({
         [`${name}_oz`]: value,
     })
 }
@@ -177,15 +178,13 @@ const fillOzFromUz = (name) => {
         [name]: false,
     }
 
-    emit('update:modelValue', {
-        ...props.modelValue,
+    applyPatch({
         [`${name}_oz`]: transliterateLatinToCyrillic(uz),
     })
 }
 
 const updateRu = (name, value) => {
-    emit('update:modelValue', {
-        ...props.modelValue,
+    applyPatch({
         [`${name}_ru`]: value,
     })
 }
