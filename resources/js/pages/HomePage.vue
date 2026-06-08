@@ -33,6 +33,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { getHomeData } from '../services/homeService'
+import { resolveMediaUrl } from '@/utils/mediaUrl'
 
 import HeroSection from '../components/home/HeroSection.vue'
 import StatsSection from '../components/home/StatsSection.vue'
@@ -53,8 +54,26 @@ const featuredCase = ref(null)
 const heroImage =
     'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69b16688c1d72c0a0a9771b2/561d3d966_generated_674ff45e.png'
 
-const successImage =
+const DEFAULT_SUCCESS_IMAGE =
     'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69b16688c1d72c0a0a9771b2/f3e35eaac_generated_d3b5f459.png'
+
+const successStories = computed(() =>
+    posts.value.filter(
+        (item) => item.category === 'success_story' && item.status === 'published'
+    )
+)
+
+const successImage = computed(() => {
+    const first = successStories.value[0]
+    if (!first) {
+        return DEFAULT_SUCCESS_IMAGE
+    }
+
+    const raw = first.image || first.cover_image
+    const url = resolveMediaUrl(raw)
+
+    return url || DEFAULT_SUCCESS_IMAGE
+})
 
 const isActiveCase = (item) => {
     const status = String(item?.status || '').toLowerCase()
